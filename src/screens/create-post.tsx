@@ -15,6 +15,16 @@ import {
   Switch,
 } from 'react-native';
 import { launchImageLibrary, Asset } from 'react-native-image-picker';
+import { createThumbnail } from 'react-native-create-thumbnail';
+
+export interface AppMedia {
+  asset: Asset;
+  displayUri: string;
+  isUploading: boolean;
+  progress: number;
+  s3Url?: string;
+  hasError: boolean;
+}
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   Bell,
@@ -70,8 +80,7 @@ const APP_COLORS = {
 
 export default function CreatePostScreen() {
   const [caption, setCaption] = useState('');
-  const [mediaAssets, setMediaAssets] = useState<Asset[]>([]);
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [mediaItems, setMediaItems] = useState<AppMedia[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<
     Set<Platform_Type>
   >(new Set());
@@ -98,8 +107,8 @@ export default function CreatePostScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Loading states
-  const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isUploadingAny = mediaItems.some(m => m.isUploading);
 
   const { items: accounts } = useSelector((state: RootState) => state.accounts);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -116,13 +125,61 @@ export default function CreatePostScreen() {
     });
 
     if (result.assets) {
-      setMediaAssets([...mediaAssets, ...result.assets]);
+      const newItems: AppMedia[] = result.assets.map((asset) => ({
+        asset,
+        displayUri: asset.uri || '',
+        isUploading: true,
+        progress: 0,
+        hasError: false,
+      }));
+      setMediaItems((prev) => [...prev, ...newItems]);
+
+      newItems.forEach(async (item) => {
+        let displayUri = item.asset.uri || '';
+        if (item.asset.type?.startsWith('video/')) {
+          try {
+            const thumb = await createThumbnail({ url: displayUri, timeStamp: 1000 });
+            displayUri = thumb.path;
+          } catch (e) {
+            console.log('Thumbnail error', e);
+          }
+        }
+
+        setMediaItems((current) =>
+          current.map((m) =>
+            m.asset.uri === item.asset.uri ? { ...m, displayUri } : m
+          )
+        );
+
+        try {
+          const media = await mediaService.upload(item.asset, (progressEvent) => {
+            if (progressEvent.total) {
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setMediaItems((current) =>
+                current.map((m) =>
+                  m.asset.uri === item.asset.uri ? { ...m, progress } : m
+                )
+              );
+            }
+          });
+          setMediaItems((current) =>
+            current.map((m) =>
+              m.asset.uri === item.asset.uri ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url } : m
+            )
+          );
+        } catch (e) {
+          setMediaItems((current) =>
+            current.map((m) =>
+              m.asset.uri === item.asset.uri ? { ...m, isUploading: false, hasError: true } : m
+            )
+          );
+        }
+      });
     }
   };
 
   const removeMedia = (index: number) => {
-    setMediaAssets(mediaAssets.filter((_, i) => i !== index));
-    setUploadedUrls(uploadedUrls.filter((_, i) => i !== index));
+    setMediaItems(items => items.filter((_, i) => i !== index));
   };
 
   const togglePlatform = (platform: Platform_Type) => {
@@ -159,25 +216,23 @@ export default function CreatePostScreen() {
       return;
     }
 
-    if (!caption.trim() && mediaAssets.length === 0) {
+    if (!caption.trim() && mediaItems.length === 0) {
       Alert.alert('Error', 'Please add a caption or media');
+      return;
+    }
+    if (mediaItems.some(m => m.isUploading)) {
+      Alert.alert('Error', 'Please wait for media to finish uploading');
+      return;
+    }
+    if (mediaItems.some(m => m.hasError)) {
+      Alert.alert('Error', 'Some media failed to upload. Please remove them and try again.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Upload media files
-      let urls = [...uploadedUrls];
-      if (mediaAssets.length > urls.length) {
-        setIsUploading(true);
-        for (let i = urls.length; i < mediaAssets.length; i++) {
-          const media = await mediaService.upload(mediaAssets[i]);
-          urls.push(media.s3Url);
-        }
-        setUploadedUrls(urls);
-        setIsUploading(false);
-      }
+      const urls = mediaItems.map(m => m.s3Url).filter(Boolean) as string[];
 
       await dispatch(
         createNewPost({
@@ -200,8 +255,7 @@ export default function CreatePostScreen() {
 
       // Reset form
       setCaption('');
-      setMediaAssets([]);
-      setUploadedUrls([]);
+      setMediaItems([]);
       setSelectedPlatforms(new Set());
     } catch (error: any) {
       Alert.alert(
@@ -210,7 +264,6 @@ export default function CreatePostScreen() {
       );
     } finally {
       setIsSubmitting(false);
-      setIsUploading(false);
     }
   };
 
@@ -373,13 +426,22 @@ export default function CreatePostScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionLabel}>MEDIA PREVIEW</Text>
-              <TouchableOpacity onPress={pickMedia}>
-                <Text style={styles.addMoreText}>Add more</Text>
+              <TouchableOpacity onPress={pickMedia} disabled={isUploadingAny}>
+                <Text
+                  style={[
+                    styles.addMoreText,
+                    isUploadingAny && { opacity: 0.5 },
+                  ]}>
+                  Add more
+                </Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.uploadInfoText}>
+              Video of upto 2 GB can be uploaded here.
+            </Text>
 
             <View style={styles.mediaGrid}>
-              {mediaAssets.length > 0 ? (
+              {mediaItems.length > 0 ? (
                 <>
                   {/* Main Preview (first asset) */}
                   <TouchableOpacity
@@ -387,12 +449,18 @@ export default function CreatePostScreen() {
                     onPress={pickMedia}
                     activeOpacity={0.9}>
                     <Image
-                      source={{ uri: mediaAssets[0].uri }}
+                      source={{ uri: mediaItems[0].displayUri }}
                       style={styles.mainMedia}
                     />
                     <View style={styles.mediaOverlay}>
                       <Edit2 size={32} color={APP_COLORS.onPrimary} />
                     </View>
+                    {mediaItems[0].isUploading && (
+                      <View style={[styles.mediaOverlay, { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+                        <ActivityIndicator color={APP_COLORS.primary} size="large" />
+                        <Text style={{ color: 'white', marginTop: 8, fontWeight: 'bold' }}>{mediaItems[0].progress}%</Text>
+                      </View>
+                    )}
                     <TouchableOpacity
                       style={styles.removeMediaFab}
                       onPress={() => removeMedia(0)}>
@@ -402,12 +470,18 @@ export default function CreatePostScreen() {
 
                   {/* Thumbnails (remaining assets) */}
                   <View style={styles.sideMediaContainer}>
-                    {mediaAssets.slice(1, 3).map((asset, index) => (
+                    {mediaItems.slice(1, 3).map((item, index) => (
                       <View key={index + 1} style={styles.sideThumbWrapper}>
                         <Image
-                          source={{ uri: asset.uri }}
+                          source={{ uri: item.displayUri }}
                           style={styles.sideMedia}
                         />
+                        {item.isUploading && (
+                          <View style={[styles.mediaOverlay, { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+                            <ActivityIndicator color={APP_COLORS.primary} size="small" />
+                            <Text style={{ color: 'white', marginTop: 4, fontSize: 10, fontWeight: 'bold' }}>{item.progress}%</Text>
+                          </View>
+                        )}
                         <TouchableOpacity
                           style={styles.removeMediaSmall}
                           onPress={() => removeMedia(index + 1)}>
@@ -416,15 +490,18 @@ export default function CreatePostScreen() {
                       </View>
                     ))}
                     {/* Add More Button if we have media but < 3 */}
-                    {mediaAssets.length < 3 && (
+                    {mediaItems.length < 3 && (
                       <TouchableOpacity
                         style={styles.uploadBoxSmall}
-                        onPress={pickMedia}>
-                        <ImagePlus
-                          size={24}
-                          color={APP_COLORS.onSurfaceVariant}
-                        />
-                        <Text style={styles.uploadTextSmall}>Upload</Text>
+                        onPress={pickMedia}
+                        disabled={isUploadingAny}>
+                        <>
+                            <ImagePlus
+                              size={24}
+                              color={APP_COLORS.onSurfaceVariant}
+                            />
+                            <Text style={styles.uploadTextSmall}>Upload</Text>
+                          </>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -440,12 +517,15 @@ export default function CreatePostScreen() {
                   <View style={styles.sideMediaContainer}>
                     <TouchableOpacity
                       style={styles.uploadBoxSmall}
-                      onPress={pickMedia}>
-                      <ImagePlus
-                        size={24}
-                        color={APP_COLORS.onSurfaceVariant}
-                      />
-                      <Text style={styles.uploadTextSmall}>Upload</Text>
+                      onPress={pickMedia}
+                      disabled={isUploadingAny}>
+                      <>
+                            <ImagePlus
+                              size={24}
+                              color={APP_COLORS.onSurfaceVariant}
+                            />
+                            <Text style={styles.uploadTextSmall}>Upload</Text>
+                          </>
                     </TouchableOpacity>
                     <View style={styles.emptyBoxSmall}>
                       <ImageIcon size={24} color="rgba(71, 69, 84, 0.2)" />
@@ -745,9 +825,7 @@ export default function CreatePostScreen() {
           <View style={styles.loadingFooter}>
             <ActivityIndicator color={APP_COLORS.primary} size="large" />
             <Text style={styles.loadingText}>
-              {isUploading
-                ? 'Uploading media...'
-                : 'Publishing your editorial...'}
+              'Publishing your editorial...'
             </Text>
           </View>
         ) : (
@@ -916,6 +994,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: APP_COLORS.onSurfaceVariant,
     letterSpacing: 0.5,
+  },
+  uploadInfoText: {
+    fontSize: 12,
+    color: APP_COLORS.outline,
+    marginBottom: 8,
+    marginTop: -4,
   },
   addMoreText: {
     fontSize: 14,

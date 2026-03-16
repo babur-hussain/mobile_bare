@@ -10,7 +10,10 @@ export interface MediaItem {
 }
 
 export const mediaService = {
-  async upload(asset: Asset): Promise<MediaItem> {
+  async upload(
+    asset: Asset,
+    onUploadProgress?: (progressEvent: any) => void,
+  ): Promise<MediaItem> {
     const formData = new FormData();
 
     const uri = asset.uri || '';
@@ -27,6 +30,7 @@ export const mediaService = {
       const response = await api.post('/api/v1/media/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 120000, // 2 min for large files
+        onUploadProgress,
       });
       return response.data.data;
     } catch (e: any) {

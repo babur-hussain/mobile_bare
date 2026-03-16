@@ -10,6 +10,9 @@ import {
   Platform,
   Linking,
   RefreshControl,
+  Modal,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import {
@@ -32,10 +35,10 @@ import {
   Tag,
   Sliders,
   Calendar,
-  Send,
   Check,
   Instagram,
   Youtube,
+  Twitter,
 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -58,11 +61,12 @@ const APP_COLORS = {
   surfaceContainerHighest: '#e5e2e1',
   surfaceContainer: '#f0edec',
   outlineVariant: '#c8c4d7',
-  onPrimary: '#ffffff',
   secondaryContainer: '#1470e8',
   primaryContainer: '#6c5ce7',
   onPrimaryContainer: '#faf6ff',
+  onPrimary: '#ffffff',
   error: '#ba1a1a',
+  twitter: '#1DA1F2',
 };
 
 export default function AccountsScreen() {
@@ -72,6 +76,12 @@ export default function AccountsScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const insets = useSafeAreaInsets();
+
+  // X Connection State
+  const [isXModalVisible, setIsXModalVisible] = React.useState(false);
+  const [xAccessToken, setXAccessToken] = React.useState('');
+  const [xAccessSecret, setXAccessSecret] = React.useState('');
+  const [isXConnecting, setIsXConnecting] = React.useState(false);
 
   useEffect(() => {
     dispatch(fetchAllAccounts());
@@ -144,13 +154,16 @@ export default function AccountsScreen() {
         handleDeepLink({ url });
       }
     });
-
     return () => {
       subscription.remove();
     };
   }, [handleDeepLink]);
+  const handleConnect = async (platform: 'instagram' | 'facebook' | 'youtube' | 'x') => {
+    if (platform === 'x') {
+      setIsXModalVisible(true);
+      return;
+    }
 
-  const handleConnect = async (platform: 'instagram' | 'facebook' | 'youtube') => {
     try {
       // Fetch the OAuth URL from the backend (authenticated request)
       const url = await socialService.getConnectUrl(platform);
@@ -215,11 +228,39 @@ export default function AccountsScreen() {
     );
   };
 
+  const submitXConnection = async () => {
+    if (!xAccessToken || !xAccessSecret) {
+      Alert.alert('Validation Error', 'Please enter both the Access Token and Access Secret.');
+      return;
+    }
+
+    setIsXConnecting(true);
+    try {
+      const result = await socialService.connectWithToken('x', xAccessToken, xAccessSecret);
+      
+      Alert.alert('Account Connected', `Successfully connected ${result.accountName} on X.`);
+      
+      setIsXModalVisible(false);
+      setXAccessToken('');
+      setXAccessSecret('');
+      dispatch(fetchAllAccounts());
+    } catch (error: any) {
+      console.error('[XConnect] Error:', error?.response?.data || error?.message || error);
+      Alert.alert(
+        'Connection Failed',
+        error?.response?.data?.message || error?.message || 'Failed to connect X account. Please try again.',
+      );
+    } finally {
+      setIsXConnecting(false);
+    }
+  };
+
   const instagramAccount = accounts.find(
     (a: any) => a.platform === 'instagram',
   );
   const facebookAccounts = accounts.filter((a: any) => a.platform === 'facebook');
   const youtubeAccounts = accounts.filter((a: any) => a.platform === 'youtube');
+  const xAccount = accounts.find((a: any) => a.platform === 'x' || a.platform === 'twitter');
 
   return (
     <View style={styles.container}>
@@ -576,17 +617,186 @@ export default function AccountsScreen() {
             )}
           </View>
 
-          {/* Placeholders */}
-          <View style={styles.placeholderRow}>
-            <View style={styles.placeholderBox}>
-              <Share2 size={24} color="rgba(71, 69, 84, 0.4)" />
-              <Text style={styles.placeholderText}>X (Twitter)</Text>
+          {/* X (Twitter) Card */}
+          <View
+            style={[
+              styles.card,
+              xAccount ? styles.connectedCard : styles.disconnectedCard,
+            ]}>
+            <View style={styles.cardHeader}>
+              <View>
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: xAccount
+                        ? APP_COLORS.surfaceContainerLowest
+                        : APP_COLORS.surfaceContainer,
+                    },
+                  ]}>
+                  <Twitter size={28} color={APP_COLORS.twitter} />
+                </View>
+                <Text style={styles.platformName}>X (Twitter)</Text>
+                <Text style={styles.platformMeta}>UPDATE & TREND</Text>
+              </View>
+
+              {xAccount ? (
+                <View style={styles.connectedBadge}>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: APP_COLORS.twitter },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.connectedBadgeText,
+                      { color: APP_COLORS.twitter },
+                    ]}>
+                    CONNECTED
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.disconnectedBadge}>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: APP_COLORS.error },
+                    ]}
+                  />
+                  <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
+                </View>
+              )}
             </View>
+
+            {xAccount ? (
+              <View style={styles.cardFooterConnectedWrap}>
+                <View style={styles.connectedProfileBox}>
+                  <Image
+                    source={{
+                      uri:
+                        xAccount.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${xAccount.accountName}`,
+                    }}
+                    style={styles.pageProfileImage}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.pageName} numberOfLines={1} ellipsizeMode="tail">
+                      @{xAccount.accountName}
+                    </Text>
+                    <Text style={styles.pageRole}>Twitter Account</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.disconnectButtonFull}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    handleDisconnect(
+                      xAccount._id,
+                      xAccount.accountName,
+                    )
+                  }>
+                  <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.cardFooterDisconnect}>
+                <Text style={styles.disconnectDesc}>
+                  Share thoughts and media instantly to your followers on X.
+                </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.connectButton,
+                    { backgroundColor: APP_COLORS.twitter },
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => handleConnect('x')}>
+                  <Text style={styles.connectButtonText}>Connect</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!xAccount && (
+              <View
+                style={[
+                  styles.blurBubble,
+                  { backgroundColor: 'rgba(29, 161, 242, 0.05)' },
+                ]}
+              />
+            )}
           </View>
         </View>
 
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* X Manual Connection Modal */}
+      <Modal
+        visible={isXModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsXModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(29, 161, 242, 0.1)' }]}>
+                <Twitter size={24} color={APP_COLORS.twitter} />
+              </View>
+              <Text style={styles.modalTitle}>Connect X Account</Text>
+            </View>
+
+            <Text style={styles.modalDesc}>
+              Enter your OAuth 1.0a Access Token and Secret to connect this account.
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Access Token</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Ex: 20333339103...-..."
+                placeholderTextColor={APP_COLORS.outlineVariant}
+                value={xAccessToken}
+                onChangeText={setXAccessToken}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Access Token Secret</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Ex: 9YWQqWhaDZL..."
+                placeholderTextColor={APP_COLORS.outlineVariant}
+                value={xAccessSecret}
+                onChangeText={setXAccessSecret}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                disabled={isXConnecting}
+                onPress={() => setIsXModalVisible(false)}>
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalSubmitBtn, { backgroundColor: APP_COLORS.twitter }]}
+                disabled={isXConnecting}
+                onPress={submitXConnection}>
+                {isXConnecting ? (
+                  <ActivityIndicator color={APP_COLORS.onPrimary} size="small" />
+                ) : (
+                  <Text style={styles.modalSubmitBtnText}>Connect</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Floating Action Button */}
       <TouchableOpacity
@@ -879,5 +1089,89 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
     zIndex: 100,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  modalDesc: {
+    fontSize: 14,
+    color: APP_COLORS.onSurfaceVariant,
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: APP_COLORS.onSurfaceVariant,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  textInput: {
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: APP_COLORS.onSurface,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.2)',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  modalSubmitBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: APP_COLORS.twitter,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalSubmitBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: APP_COLORS.onPrimary,
   },
 });

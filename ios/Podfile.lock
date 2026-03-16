@@ -976,6 +976,8 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
+  - react-native-create-thumbnail (2.2.0):
+    - React-Core
   - react-native-image-picker (8.2.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1213,6 +1215,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector-modern`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - react-native-create-thumbnail (from `../node_modules/react-native-create-thumbnail`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1326,6 +1329,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-create-thumbnail:
+    :path: "../node_modules/react-native-create-thumbnail"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-safe-area-context:
@@ -1433,6 +1438,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 55764cd993880c6f887505854581c9faf68feff2
   React-Mapbuffer: 0cc88310e28eba4f864893221b238ea3bdfd8a43
+  react-native-create-thumbnail: c15cedc37f3822777d44e6035be041f7961341ea
   react-native-image-picker: 8f8584698b9908c76f3d30463a969432bdc7f634
   react-native-safe-area-context: bf9d9d58f0f6726d4a6257088044c2595017579d
   React-nativeconfig: e700ac3ec3d66329076bd2c2787a204411815d43
