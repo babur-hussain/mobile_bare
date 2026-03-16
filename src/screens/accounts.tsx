@@ -10,9 +10,6 @@ import {
   Platform,
   Linking,
   RefreshControl,
-  Modal,
-  TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import {
@@ -65,6 +62,7 @@ const APP_COLORS = {
   primaryContainer: '#6c5ce7',
   onPrimaryContainer: '#faf6ff',
   onPrimary: '#ffffff',
+  success: '#10B981', // Emerald green for connected states
   error: '#ba1a1a',
   twitter: '#1DA1F2',
 };
@@ -76,12 +74,6 @@ export default function AccountsScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const insets = useSafeAreaInsets();
-
-  // X Connection State
-  const [isXModalVisible, setIsXModalVisible] = React.useState(false);
-  const [xAccessToken, setXAccessToken] = React.useState('');
-  const [xAccessSecret, setXAccessSecret] = React.useState('');
-  const [isXConnecting, setIsXConnecting] = React.useState(false);
 
   useEffect(() => {
     dispatch(fetchAllAccounts());
@@ -158,12 +150,7 @@ export default function AccountsScreen() {
       subscription.remove();
     };
   }, [handleDeepLink]);
-  const handleConnect = async (platform: 'instagram' | 'facebook' | 'youtube' | 'x') => {
-    if (platform === 'x') {
-      setIsXModalVisible(true);
-      return;
-    }
-
+  const handleConnect = async (platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads') => {
     try {
       // Fetch the OAuth URL from the backend (authenticated request)
       const url = await socialService.getConnectUrl(platform);
@@ -228,39 +215,13 @@ export default function AccountsScreen() {
     );
   };
 
-  const submitXConnection = async () => {
-    if (!xAccessToken || !xAccessSecret) {
-      Alert.alert('Validation Error', 'Please enter both the Access Token and Access Secret.');
-      return;
-    }
-
-    setIsXConnecting(true);
-    try {
-      const result = await socialService.connectWithToken('x', xAccessToken, xAccessSecret);
-      
-      Alert.alert('Account Connected', `Successfully connected ${result.accountName} on X.`);
-      
-      setIsXModalVisible(false);
-      setXAccessToken('');
-      setXAccessSecret('');
-      dispatch(fetchAllAccounts());
-    } catch (error: any) {
-      console.error('[XConnect] Error:', error?.response?.data || error?.message || error);
-      Alert.alert(
-        'Connection Failed',
-        error?.response?.data?.message || error?.message || 'Failed to connect X account. Please try again.',
-      );
-    } finally {
-      setIsXConnecting(false);
-    }
-  };
-
   const instagramAccount = accounts.find(
     (a: any) => a.platform === 'instagram',
   );
   const facebookAccounts = accounts.filter((a: any) => a.platform === 'facebook');
   const youtubeAccounts = accounts.filter((a: any) => a.platform === 'youtube');
   const xAccount = accounts.find((a: any) => a.platform === 'x' || a.platform === 'twitter');
+  const threadsAccount = accounts.find((a: any) => a.platform === 'threads');
 
   return (
     <View style={styles.container}>
@@ -329,13 +290,13 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.primary },
+                      { backgroundColor: APP_COLORS.success },
                     ]}
                   />
                   <Text
                     style={[
                       styles.connectedBadgeText,
-                      { color: APP_COLORS.primary },
+                      { color: APP_COLORS.success },
                     ]}>
                     CONNECTED
                   </Text>
@@ -405,6 +366,115 @@ export default function AccountsScreen() {
             {!instagramAccount && <View style={styles.blurBubble} />}
           </View>
 
+          {/* Threads Card */}
+          <View
+            style={[
+              styles.card,
+              threadsAccount ? styles.connectedCard : styles.disconnectedCard,
+            ]}>
+            <View style={styles.cardHeader}>
+              <View>
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: threadsAccount
+                        ? APP_COLORS.surfaceContainerLowest
+                        : APP_COLORS.surfaceContainer,
+                    },
+                  ]}>
+                  <AtSign size={28} color={APP_COLORS.onSurface} />
+                </View>
+                <Text style={styles.platformName}>Threads</Text>
+                <Text style={styles.platformMeta}>TEXT CONVERSATIONS</Text>
+              </View>
+
+              {threadsAccount ? (
+                <View style={styles.connectedBadge}>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: APP_COLORS.success },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.connectedBadgeText,
+                      { color: APP_COLORS.success },
+                    ]}>
+                    CONNECTED
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.disconnectedBadge}>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: APP_COLORS.error },
+                    ]}
+                  />
+                  <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
+                </View>
+              )}
+            </View>
+
+            {threadsAccount ? (
+              <View style={styles.cardFooterConnectedWrap}>
+                <View style={styles.connectedProfileBox}>
+                  <Image
+                    source={{
+                      uri:
+                        threadsAccount.profilePicture ||
+                        `https://ui-avatars.com/api/?name=${threadsAccount.accountName}`,
+                    }}
+                    style={styles.pageProfileImage}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.pageName} numberOfLines={1} ellipsizeMode="tail">
+                      @{threadsAccount.accountName}
+                    </Text>
+                    <Text style={styles.pageRole}>Threads Profile</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.disconnectButtonFull}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    handleDisconnect(
+                      threadsAccount._id,
+                      threadsAccount.accountName,
+                    )
+                  }>
+                  <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.cardFooterDisconnect}>
+                <Text style={styles.disconnectDesc}>
+                  Share text updates and join public conversations on Threads.
+                </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.connectButton,
+                    { backgroundColor: APP_COLORS.onSurface },
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => handleConnect('threads')}>
+                  <Text style={styles.connectButtonText}>Connect</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!threadsAccount && (
+              <View
+                style={[
+                  styles.blurBubble,
+                  { backgroundColor: 'rgba(0, 0, 0, 0.05)' },
+                ]}
+              />
+            )}
+          </View>
+
           {/* Facebook Card */}
           <View
             style={[
@@ -433,10 +503,10 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.secondary },
+                      { backgroundColor: APP_COLORS.success },
                     ]}
                   />
-                  <Text style={styles.connectedBadgeText}>CONNECTED</Text>
+                  <Text style={[styles.connectedBadgeText, { color: APP_COLORS.success }]}>CONNECTED</Text>
                 </View>
               ) : (
                 <View style={styles.disconnectedBadge}>
@@ -454,8 +524,8 @@ export default function AccountsScreen() {
             {facebookAccounts.length > 0 ? (
               <View style={{ gap: 12, marginTop: 16 }}>
                 {facebookAccounts.map((account: any) => (
-                  <View key={account._id} style={styles.cardFooterConnected}>
-                    <View style={styles.connectedProfileRow}>
+                  <View key={account._id} style={styles.cardFooterConnectedWrap}>
+                    <View style={styles.connectedProfileBox}>
                       <Image
                         source={{
                           uri:
@@ -472,15 +542,15 @@ export default function AccountsScreen() {
                       </View>
                     </View>
                     <TouchableOpacity
-                      style={styles.disconnectButton}
-                      activeOpacity={0.8}
+                      style={styles.disconnectButtonFull}
+                      activeOpacity={0.7}
                       onPress={() =>
                         handleDisconnect(
                           account._id,
                           account.accountName,
                         )
                       }>
-                      <Text style={styles.disconnectButtonText}>Disconnect</Text>
+                      <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -539,10 +609,10 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.tertiary },
+                      { backgroundColor: APP_COLORS.success },
                     ]}
                   />
-                  <Text style={[styles.connectedBadgeText, { color: APP_COLORS.tertiary }]}>CONNECTED</Text>
+                  <Text style={[styles.connectedBadgeText, { color: APP_COLORS.success }]}>CONNECTED</Text>
                 </View>
               ) : (
                 <View style={styles.disconnectedBadge}>
@@ -560,8 +630,8 @@ export default function AccountsScreen() {
             {youtubeAccounts.length > 0 ? (
               <View style={{ gap: 12, marginTop: 16 }}>
                 {youtubeAccounts.map((account: any) => (
-                  <View key={account._id} style={styles.cardFooterConnected}>
-                    <View style={styles.connectedProfileRow}>
+                  <View key={account._id} style={styles.cardFooterConnectedWrap}>
+                    <View style={styles.connectedProfileBox}>
                       <Image
                         source={{
                           uri:
@@ -578,15 +648,15 @@ export default function AccountsScreen() {
                       </View>
                     </View>
                     <TouchableOpacity
-                      style={styles.disconnectButton}
-                      activeOpacity={0.8}
+                      style={styles.disconnectButtonFull}
+                      activeOpacity={0.7}
                       onPress={() =>
                         handleDisconnect(
                           account._id,
                           account.accountName,
                         )
                       }>
-                      <Text style={styles.disconnectButtonText}>Disconnect</Text>
+                      <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -645,13 +715,13 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.twitter },
+                      { backgroundColor: APP_COLORS.success },
                     ]}
                   />
                   <Text
                     style={[
                       styles.connectedBadgeText,
-                      { color: APP_COLORS.twitter },
+                      { color: APP_COLORS.success },
                     ]}>
                     CONNECTED
                   </Text>
@@ -729,74 +799,6 @@ export default function AccountsScreen() {
 
         <View style={{ height: 120 }} />
       </ScrollView>
-
-      {/* X Manual Connection Modal */}
-      <Modal
-        visible={isXModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsXModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(29, 161, 242, 0.1)' }]}>
-                <Twitter size={24} color={APP_COLORS.twitter} />
-              </View>
-              <Text style={styles.modalTitle}>Connect X Account</Text>
-            </View>
-
-            <Text style={styles.modalDesc}>
-              Enter your OAuth 1.0a Access Token and Secret to connect this account.
-            </Text>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Access Token</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Ex: 20333339103...-..."
-                placeholderTextColor={APP_COLORS.outlineVariant}
-                value={xAccessToken}
-                onChangeText={setXAccessToken}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Access Token Secret</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Ex: 9YWQqWhaDZL..."
-                placeholderTextColor={APP_COLORS.outlineVariant}
-                value={xAccessSecret}
-                onChangeText={setXAccessSecret}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
-                disabled={isXConnecting}
-                onPress={() => setIsXModalVisible(false)}>
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSubmitBtn, { backgroundColor: APP_COLORS.twitter }]}
-                disabled={isXConnecting}
-                onPress={submitXConnection}>
-                {isXConnecting ? (
-                  <ActivityIndicator color={APP_COLORS.onPrimary} size="small" />
-                ) : (
-                  <Text style={styles.modalSubmitBtnText}>Connect</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       {/* Floating Action Button */}
       <TouchableOpacity
@@ -889,7 +891,12 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   connectedCard: {
-    backgroundColor: APP_COLORS.surfaceContainerLow,
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    shadowColor: '#1c1b1b',
+    shadowOpacity: 0.04,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 24 },
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -935,7 +942,7 @@ const styles = StyleSheet.create({
   connectedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(20, 112, 232, 0.1)', // secondaryContainer/10
+    backgroundColor: 'rgba(16, 185, 129, 0.1)', // success with 10% opacity
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -944,7 +951,7 @@ const styles = StyleSheet.create({
   connectedBadgeText: {
     fontSize: 10,
     fontWeight: '600',
-    color: APP_COLORS.secondary,
+    color: APP_COLORS.success,
   },
   statusDot: {
     width: 6,
@@ -1089,89 +1096,5 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
     zIndex: 100,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: APP_COLORS.surfaceContainerLowest,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: 48,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: APP_COLORS.onSurface,
-  },
-  modalDesc: {
-    fontSize: 14,
-    color: APP_COLORS.onSurfaceVariant,
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: APP_COLORS.onSurfaceVariant,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  textInput: {
-    backgroundColor: APP_COLORS.surfaceContainerLow,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: APP_COLORS.onSurface,
-    borderWidth: 1,
-    borderColor: 'rgba(200, 196, 215, 0.2)',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 12,
-  },
-  modalCancelBtn: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: APP_COLORS.surfaceContainerLow,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalCancelBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: APP_COLORS.onSurfaceVariant,
-  },
-  modalSubmitBtn: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: APP_COLORS.twitter,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-  },
-  modalSubmitBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: APP_COLORS.onPrimary,
   },
 });

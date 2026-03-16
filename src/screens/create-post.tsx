@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -44,6 +44,7 @@ import {
   Send,
   Check,
   Youtube,
+  Twitter,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,7 +53,7 @@ import { RootState, AppDispatch } from '../store';
 import { createNewPost } from '../store/actions/posts.actions';
 import { mediaService } from '../services/media.service';
 
-type Platform_Type = 'instagram' | 'facebook' | 'youtube';
+type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -76,6 +77,8 @@ const APP_COLORS = {
   instagram: '#E1306C',
   facebook: '#1877F2',
   youtube: '#FF0000',
+  twitter: '#1DA1F2',
+  threads: '#000000',
 };
 
 export default function CreatePostScreen() {
@@ -84,6 +87,8 @@ export default function CreatePostScreen() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<
     Set<Platform_Type>
   >(new Set());
+  const [platformSelectionError, setPlatformSelectionError] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Timing state
   const [isScheduled, setIsScheduled] = useState(false);
@@ -183,6 +188,7 @@ export default function CreatePostScreen() {
   };
 
   const togglePlatform = (platform: Platform_Type) => {
+    setPlatformSelectionError(false);
     const next = new Set(selectedPlatforms);
     if (next.has(platform)) {
       next.delete(platform);
@@ -212,7 +218,8 @@ export default function CreatePostScreen() {
 
   const handleSubmit = async (submitAsScheduled: boolean) => {
     if (selectedPlatforms.size === 0) {
-      Alert.alert('Error', 'Please select at least one platform');
+      setPlatformSelectionError(true);
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
       return;
     }
 
@@ -249,7 +256,7 @@ export default function CreatePostScreen() {
         'Success',
         submitAsScheduled
           ? 'Post scheduled successfully!'
-          : 'Post sent for publishing!',
+          : 'Posted directly!',
         [{ text: 'OK', onPress: () => navigation.navigate('Home') }],
       );
 
@@ -299,6 +306,7 @@ export default function CreatePostScreen() {
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
@@ -310,13 +318,21 @@ export default function CreatePostScreen() {
 
         <View style={styles.formContainer}>
           {/* Platform Selection Bento */}
-          <View style={styles.platformSection}>
+          <View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              contentContainerStyle={[
+                styles.platformSection,
+                platformSelectionError && styles.platformSectionError
+              ]}>
             <TouchableOpacity
               style={[
                 styles.platformCard,
                 selectedPlatforms.has('instagram') &&
                 styles.platformCardSelected,
                 !hasPlatformAccount('instagram') && styles.platformCardDisabled,
+                platformSelectionError && styles.platformCardErrorHighlight,
               ]}
               disabled={!hasPlatformAccount('instagram')}
               onPress={() => togglePlatform('instagram')}
@@ -344,7 +360,45 @@ export default function CreatePostScreen() {
               <Text style={styles.platformName}>Instagram</Text>
               {!hasPlatformAccount('instagram') && (
                 <Text style={styles.notConnectedText}>
-                  Connect Account First
+                  Connect Account
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.platformCard,
+                selectedPlatforms.has('threads') &&
+                styles.platformCardSelected,
+                !hasPlatformAccount('threads') && styles.platformCardDisabled,
+                platformSelectionError && styles.platformCardErrorHighlight,
+              ]}
+              disabled={!hasPlatformAccount('threads')}
+              onPress={() => togglePlatform('threads')}
+              activeOpacity={0.8}>
+              <View style={styles.platformCardHeader}>
+                <View
+                  style={[
+                    styles.platformIconBox,
+                    { backgroundColor: `${APP_COLORS.threads}15` },
+                  ]}>
+                  <AtSign size={24} color={APP_COLORS.threads} />
+                </View>
+                <View
+                  style={[
+                    styles.checkbox,
+                    selectedPlatforms.has('threads') &&
+                    styles.checkboxSelected,
+                  ]}>
+                  {selectedPlatforms.has('threads') && (
+                    <Check size={14} color={APP_COLORS.onPrimary} />
+                  )}
+                </View>
+              </View>
+              <Text style={styles.platformName}>Threads</Text>
+              {!hasPlatformAccount('threads') && (
+                <Text style={styles.notConnectedText}>
+                  Connect Account
                 </Text>
               )}
             </TouchableOpacity>
@@ -355,6 +409,7 @@ export default function CreatePostScreen() {
                 selectedPlatforms.has('facebook') &&
                 styles.platformCardSelected,
                 !hasPlatformAccount('facebook') && styles.platformCardDisabled,
+                platformSelectionError && styles.platformCardErrorHighlight,
               ]}
               disabled={!hasPlatformAccount('facebook')}
               onPress={() => togglePlatform('facebook')}
@@ -381,7 +436,7 @@ export default function CreatePostScreen() {
               <Text style={styles.platformName}>Facebook</Text>
               {!hasPlatformAccount('facebook') && (
                 <Text style={styles.notConnectedText}>
-                  Connect Account First
+                  Connect Account
                 </Text>
               )}
             </TouchableOpacity>
@@ -391,6 +446,7 @@ export default function CreatePostScreen() {
                 styles.platformCard,
                 selectedPlatforms.has('youtube') && styles.platformCardSelected,
                 !hasPlatformAccount('youtube') && styles.platformCardDisabled,
+                platformSelectionError && styles.platformCardErrorHighlight,
               ]}
               disabled={!hasPlatformAccount('youtube')}
               onPress={() => togglePlatform('youtube')}
@@ -416,10 +472,53 @@ export default function CreatePostScreen() {
               <Text style={styles.platformName}>YouTube</Text>
               {!hasPlatformAccount('youtube') && (
                 <Text style={styles.notConnectedText}>
-                  Connect Account First
+                  Connect Account
                 </Text>
               )}
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.platformCard,
+                selectedPlatforms.has('x') && styles.platformCardSelected,
+                !hasPlatformAccount('x') && styles.platformCardDisabled,
+                platformSelectionError && styles.platformCardErrorHighlight,
+              ]}
+              disabled={!hasPlatformAccount('x')}
+              onPress={() => togglePlatform('x')}
+              activeOpacity={0.8}>
+              <View style={styles.platformCardHeader}>
+                <View
+                  style={[
+                    styles.platformIconBox,
+                    { backgroundColor: `${APP_COLORS.twitter}15` },
+                  ]}>
+                  <Twitter size={24} color={APP_COLORS.twitter} />
+                </View>
+                <View
+                  style={[
+                    styles.checkbox,
+                    selectedPlatforms.has('x') && styles.checkboxSelected,
+                  ]}>
+                  {selectedPlatforms.has('x') && (
+                    <Check size={14} color={APP_COLORS.onPrimary} />
+                  )}
+                </View>
+              </View>
+              <Text style={styles.platformName}>X (Twitter)</Text>
+              {!hasPlatformAccount('x') && (
+                <Text style={styles.notConnectedText}>
+                  Connect Account
+                </Text>
+              )}
+            </TouchableOpacity>
+
+          </ScrollView>
+          {platformSelectionError && (
+            <Text style={styles.platformErrorText}>
+              Please select at least one platform to publish.
+            </Text>
+          )}
           </View>
 
           {/* Media Upload Area */}
@@ -833,8 +932,7 @@ export default function CreatePostScreen() {
             <TouchableOpacity
               style={styles.scheduleButton}
               activeOpacity={0.8}
-              onPress={handleSchedulePost}
-              disabled={selectedPlatforms.size === 0}>
+              onPress={handleSchedulePost}>
               <Calendar
                 size={20}
                 color={APP_COLORS.onSurface}
@@ -846,8 +944,7 @@ export default function CreatePostScreen() {
             <TouchableOpacity
               style={styles.postNowButton}
               activeOpacity={0.8}
-              onPress={handlePostNow}
-              disabled={selectedPlatforms.size === 0}>
+              onPress={handlePostNow}>
               <Send size={20} color={APP_COLORS.onPrimary} strokeWidth={2.5} />
               <Text style={styles.postNowButtonText}>Post Now</Text>
             </TouchableOpacity>
@@ -921,9 +1018,21 @@ const styles = StyleSheet.create({
   platformSection: {
     flexDirection: 'row',
     gap: 16,
+    paddingRight: 24, // extra padding at the end of scroll
+    paddingVertical: 4,
+  },
+  platformSectionError: {
+    // optional: highlighting container logic
+  },
+  platformErrorText: {
+    color: APP_COLORS.error,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 8,
+    marginLeft: 4,
   },
   platformCard: {
-    flex: 1,
+    width: 130, // Fixed width prevents wrapping
     backgroundColor: APP_COLORS.surfaceContainerLowest,
     padding: 20,
     borderRadius: 24,
@@ -943,6 +1052,9 @@ const styles = StyleSheet.create({
   platformCardDisabled: {
     opacity: 0.5,
     backgroundColor: APP_COLORS.surfaceContainerLow,
+  },
+  platformCardErrorHighlight: {
+    borderColor: APP_COLORS.error,
   },
   platformCardHeader: {
     flexDirection: 'row',
