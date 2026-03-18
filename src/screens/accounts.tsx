@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Linking,
   RefreshControl,
 } from 'react-native';
-import { InAppBrowser } from 'react-native-inappbrowser-reborn';
+import {InAppBrowser} from 'react-native-inappbrowser-reborn';
 import {
   Home,
   LayoutDashboard,
@@ -37,14 +37,14 @@ import {
   Youtube,
   Twitter,
 } from 'lucide-react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RootState, AppDispatch } from '../store';
+import {useDispatch, useSelector} from 'react-redux';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {RootState, AppDispatch} from '../store';
 import {
   fetchAllAccounts,
   disconnectSocialAccount,
 } from '../store/actions/accounts.actions';
-import { socialService } from '../services/social.service';
+import {socialService} from '../services/social.service';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -68,10 +68,10 @@ const APP_COLORS = {
 };
 
 export default function AccountsScreen() {
-  const { items: accounts, isLoading } = useSelector(
+  const {items: accounts, isLoading} = useSelector(
     (state: RootState) => state.accounts,
   );
-  const { user } = useSelector((state: RootState) => state.auth);
+  const {user} = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const insets = useSafeAreaInsets();
 
@@ -96,7 +96,7 @@ export default function AccountsScreen() {
 
   // Handle deep link callback from Meta OAuth
   const handleDeepLink = useCallback(
-    (event: { url: string }) => {
+    (event: {url: string}) => {
       const url = event.url;
       if (url.startsWith('postingautomation://social-auth-callback')) {
         // Parse query params manually (Hermes doesn't support URLSearchParams.get)
@@ -143,14 +143,16 @@ export default function AccountsScreen() {
     // Check if app was opened via deep link
     Linking.getInitialURL().then(url => {
       if (url) {
-        handleDeepLink({ url });
+        handleDeepLink({url});
       }
     });
     return () => {
       subscription.remove();
     };
   }, [handleDeepLink]);
-  const handleConnect = async (platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads') => {
+  const handleConnect = async (
+    platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads',
+  ) => {
     try {
       // Fetch the OAuth URL from the backend (authenticated request)
       const url = await socialService.getConnectUrl(platform);
@@ -179,7 +181,7 @@ export default function AccountsScreen() {
         );
 
         if (result.type === 'success' && result.url) {
-          handleDeepLink({ url: result.url });
+          handleDeepLink({url: result.url});
         } else if (result.type === 'cancel') {
           console.log('[SocialConnect] User cancelled OAuth flow');
         }
@@ -194,8 +196,8 @@ export default function AccountsScreen() {
       Alert.alert(
         'Connection Error',
         error?.response?.data?.message ||
-        error?.message ||
-        'Failed to start connection. Please try again.',
+          error?.message ||
+          'Failed to start connection. Please try again.',
       );
     }
   };
@@ -205,7 +207,7 @@ export default function AccountsScreen() {
       'Disconnect Account',
       `Are you sure you want to disconnect "${accountName}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        {text: 'Cancel', style: 'cancel'},
         {
           text: 'Disconnect',
           style: 'destructive',
@@ -218,9 +220,13 @@ export default function AccountsScreen() {
   const instagramAccount = accounts.find(
     (a: any) => a.platform === 'instagram',
   );
-  const facebookAccounts = accounts.filter((a: any) => a.platform === 'facebook');
+  const facebookAccounts = accounts.filter(
+    (a: any) => a.platform === 'facebook',
+  );
   const youtubeAccounts = accounts.filter((a: any) => a.platform === 'youtube');
-  const xAccount = accounts.find((a: any) => a.platform === 'x' || a.platform === 'twitter');
+  const xAccount = accounts.find(
+    (a: any) => a.platform === 'x' || a.platform === 'twitter',
+  );
   const threadsAccount = accounts.find((a: any) => a.platform === 'threads');
 
   return (
@@ -229,7 +235,7 @@ export default function AccountsScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top, height: 64 + insets.top },
+          {paddingTop: insets.top, height: 64 + insets.top},
         ]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatarCircle}>
@@ -290,13 +296,13 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.success },
+                      {backgroundColor: APP_COLORS.success},
                     ]}
                   />
                   <Text
                     style={[
                       styles.connectedBadgeText,
-                      { color: APP_COLORS.success },
+                      {color: APP_COLORS.success},
                     ]}>
                     CONNECTED
                   </Text>
@@ -306,7 +312,7 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.error },
+                      {backgroundColor: APP_COLORS.error},
                     ]}
                   />
                   <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
@@ -325,8 +331,11 @@ export default function AccountsScreen() {
                     }}
                     style={styles.pageProfileImage}
                   />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.pageName} numberOfLines={1} ellipsizeMode="tail">
+                  <View style={{flex: 1}}>
+                    <Text
+                      style={styles.pageName}
+                      numberOfLines={1}
+                      ellipsizeMode="tail">
                       @{instagramAccount.accountName}
                     </Text>
                     <Text style={styles.pageRole}>Business Account</Text>
@@ -341,7 +350,9 @@ export default function AccountsScreen() {
                       instagramAccount.accountName,
                     )
                   }>
-                  <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                  <Text style={styles.disconnectButtonText}>
+                    Disconnect Account
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -353,7 +364,7 @@ export default function AccountsScreen() {
                 <TouchableOpacity
                   style={[
                     styles.connectButton,
-                    { backgroundColor: APP_COLORS.primary },
+                    {backgroundColor: APP_COLORS.primary},
                   ]}
                   activeOpacity={0.8}
                   onPress={() => handleConnect('instagram')}>
@@ -394,13 +405,13 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.success },
+                      {backgroundColor: APP_COLORS.success},
                     ]}
                   />
                   <Text
                     style={[
                       styles.connectedBadgeText,
-                      { color: APP_COLORS.success },
+                      {color: APP_COLORS.success},
                     ]}>
                     CONNECTED
                   </Text>
@@ -410,7 +421,7 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.error },
+                      {backgroundColor: APP_COLORS.error},
                     ]}
                   />
                   <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
@@ -429,8 +440,11 @@ export default function AccountsScreen() {
                     }}
                     style={styles.pageProfileImage}
                   />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.pageName} numberOfLines={1} ellipsizeMode="tail">
+                  <View style={{flex: 1}}>
+                    <Text
+                      style={styles.pageName}
+                      numberOfLines={1}
+                      ellipsizeMode="tail">
                       @{threadsAccount.accountName}
                     </Text>
                     <Text style={styles.pageRole}>Threads Profile</Text>
@@ -445,7 +459,9 @@ export default function AccountsScreen() {
                       threadsAccount.accountName,
                     )
                   }>
-                  <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                  <Text style={styles.disconnectButtonText}>
+                    Disconnect Account
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -456,7 +472,7 @@ export default function AccountsScreen() {
                 <TouchableOpacity
                   style={[
                     styles.connectButton,
-                    { backgroundColor: APP_COLORS.onSurface },
+                    {backgroundColor: APP_COLORS.onSurface},
                   ]}
                   activeOpacity={0.8}
                   onPress={() => handleConnect('threads')}>
@@ -469,7 +485,7 @@ export default function AccountsScreen() {
               <View
                 style={[
                   styles.blurBubble,
-                  { backgroundColor: 'rgba(0, 0, 0, 0.05)' },
+                  {backgroundColor: 'rgba(0, 0, 0, 0.05)'},
                 ]}
               />
             )}
@@ -479,7 +495,9 @@ export default function AccountsScreen() {
           <View
             style={[
               styles.card,
-              facebookAccounts.length > 0 ? styles.connectedCard : styles.disconnectedCard,
+              facebookAccounts.length > 0
+                ? styles.connectedCard
+                : styles.disconnectedCard,
             ]}>
             <View style={styles.cardHeader}>
               <View>
@@ -487,9 +505,10 @@ export default function AccountsScreen() {
                   style={[
                     styles.iconBox,
                     {
-                      backgroundColor: facebookAccounts.length > 0
-                        ? APP_COLORS.surfaceContainerLowest
-                        : APP_COLORS.surfaceContainer,
+                      backgroundColor:
+                        facebookAccounts.length > 0
+                          ? APP_COLORS.surfaceContainerLowest
+                          : APP_COLORS.surfaceContainer,
                     },
                   ]}>
                   <BarChart2 size={28} color={APP_COLORS.secondary} />
@@ -503,17 +522,23 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.success },
+                      {backgroundColor: APP_COLORS.success},
                     ]}
                   />
-                  <Text style={[styles.connectedBadgeText, { color: APP_COLORS.success }]}>CONNECTED</Text>
+                  <Text
+                    style={[
+                      styles.connectedBadgeText,
+                      {color: APP_COLORS.success},
+                    ]}>
+                    CONNECTED
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.disconnectedBadge}>
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.error },
+                      {backgroundColor: APP_COLORS.error},
                     ]}
                   />
                   <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
@@ -522,9 +547,11 @@ export default function AccountsScreen() {
             </View>
 
             {facebookAccounts.length > 0 ? (
-              <View style={{ gap: 12, marginTop: 16 }}>
+              <View style={{gap: 12, marginTop: 16}}>
                 {facebookAccounts.map((account: any) => (
-                  <View key={account._id} style={styles.cardFooterConnectedWrap}>
+                  <View
+                    key={account._id}
+                    style={styles.cardFooterConnectedWrap}>
                     <View style={styles.connectedProfileBox}>
                       <Image
                         source={{
@@ -534,7 +561,7 @@ export default function AccountsScreen() {
                         }}
                         style={styles.pageProfileImage}
                       />
-                      <View style={{ flex: 1 }}>
+                      <View style={{flex: 1}}>
                         <Text style={styles.pageName} numberOfLines={1}>
                           {account.accountName}
                         </Text>
@@ -545,12 +572,11 @@ export default function AccountsScreen() {
                       style={styles.disconnectButtonFull}
                       activeOpacity={0.7}
                       onPress={() =>
-                        handleDisconnect(
-                          account._id,
-                          account.accountName,
-                        )
+                        handleDisconnect(account._id, account.accountName)
                       }>
-                      <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                      <Text style={styles.disconnectButtonText}>
+                        Disconnect Account
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -563,7 +589,7 @@ export default function AccountsScreen() {
                 <TouchableOpacity
                   style={[
                     styles.connectButton,
-                    { backgroundColor: APP_COLORS.secondary },
+                    {backgroundColor: APP_COLORS.secondary},
                   ]}
                   activeOpacity={0.8}
                   onPress={() => handleConnect('facebook')}>
@@ -575,7 +601,7 @@ export default function AccountsScreen() {
               <View
                 style={[
                   styles.blurBubble,
-                  { backgroundColor: 'rgba(0, 88, 189, 0.05)' },
+                  {backgroundColor: 'rgba(0, 88, 189, 0.05)'},
                 ]}
               />
             )}
@@ -585,7 +611,9 @@ export default function AccountsScreen() {
           <View
             style={[
               styles.card,
-              youtubeAccounts.length > 0 ? styles.connectedCard : styles.disconnectedCard,
+              youtubeAccounts.length > 0
+                ? styles.connectedCard
+                : styles.disconnectedCard,
             ]}>
             <View style={styles.cardHeader}>
               <View>
@@ -593,9 +621,10 @@ export default function AccountsScreen() {
                   style={[
                     styles.iconBox,
                     {
-                      backgroundColor: youtubeAccounts.length > 0
-                        ? APP_COLORS.surfaceContainerLowest
-                        : APP_COLORS.surfaceContainer,
+                      backgroundColor:
+                        youtubeAccounts.length > 0
+                          ? APP_COLORS.surfaceContainerLowest
+                          : APP_COLORS.surfaceContainer,
                     },
                   ]}>
                   <Youtube size={28} color={APP_COLORS.tertiary} />
@@ -609,17 +638,23 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.success },
+                      {backgroundColor: APP_COLORS.success},
                     ]}
                   />
-                  <Text style={[styles.connectedBadgeText, { color: APP_COLORS.success }]}>CONNECTED</Text>
+                  <Text
+                    style={[
+                      styles.connectedBadgeText,
+                      {color: APP_COLORS.success},
+                    ]}>
+                    CONNECTED
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.disconnectedBadge}>
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.error },
+                      {backgroundColor: APP_COLORS.error},
                     ]}
                   />
                   <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
@@ -628,9 +663,11 @@ export default function AccountsScreen() {
             </View>
 
             {youtubeAccounts.length > 0 ? (
-              <View style={{ gap: 12, marginTop: 16 }}>
+              <View style={{gap: 12, marginTop: 16}}>
                 {youtubeAccounts.map((account: any) => (
-                  <View key={account._id} style={styles.cardFooterConnectedWrap}>
+                  <View
+                    key={account._id}
+                    style={styles.cardFooterConnectedWrap}>
                     <View style={styles.connectedProfileBox}>
                       <Image
                         source={{
@@ -640,7 +677,7 @@ export default function AccountsScreen() {
                         }}
                         style={styles.pageProfileImage}
                       />
-                      <View style={{ flex: 1 }}>
+                      <View style={{flex: 1}}>
                         <Text style={styles.pageName} numberOfLines={1}>
                           {account.accountName}
                         </Text>
@@ -651,12 +688,11 @@ export default function AccountsScreen() {
                       style={styles.disconnectButtonFull}
                       activeOpacity={0.7}
                       onPress={() =>
-                        handleDisconnect(
-                          account._id,
-                          account.accountName,
-                        )
+                        handleDisconnect(account._id, account.accountName)
                       }>
-                      <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                      <Text style={styles.disconnectButtonText}>
+                        Disconnect Account
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -669,7 +705,7 @@ export default function AccountsScreen() {
                 <TouchableOpacity
                   style={[
                     styles.connectButton,
-                    { backgroundColor: APP_COLORS.tertiary },
+                    {backgroundColor: APP_COLORS.tertiary},
                   ]}
                   activeOpacity={0.8}
                   onPress={() => handleConnect('youtube')}>
@@ -681,7 +717,7 @@ export default function AccountsScreen() {
               <View
                 style={[
                   styles.blurBubble,
-                  { backgroundColor: 'rgba(178, 0, 75, 0.05)' },
+                  {backgroundColor: 'rgba(178, 0, 75, 0.05)'},
                 ]}
               />
             )}
@@ -715,13 +751,13 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.success },
+                      {backgroundColor: APP_COLORS.success},
                     ]}
                   />
                   <Text
                     style={[
                       styles.connectedBadgeText,
-                      { color: APP_COLORS.success },
+                      {color: APP_COLORS.success},
                     ]}>
                     CONNECTED
                   </Text>
@@ -731,7 +767,7 @@ export default function AccountsScreen() {
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: APP_COLORS.error },
+                      {backgroundColor: APP_COLORS.error},
                     ]}
                   />
                   <Text style={styles.disconnectedBadgeText}>DISCONNECTED</Text>
@@ -750,8 +786,11 @@ export default function AccountsScreen() {
                     }}
                     style={styles.pageProfileImage}
                   />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.pageName} numberOfLines={1} ellipsizeMode="tail">
+                  <View style={{flex: 1}}>
+                    <Text
+                      style={styles.pageName}
+                      numberOfLines={1}
+                      ellipsizeMode="tail">
                       @{xAccount.accountName}
                     </Text>
                     <Text style={styles.pageRole}>Twitter Account</Text>
@@ -761,12 +800,11 @@ export default function AccountsScreen() {
                   style={styles.disconnectButtonFull}
                   activeOpacity={0.7}
                   onPress={() =>
-                    handleDisconnect(
-                      xAccount._id,
-                      xAccount.accountName,
-                    )
+                    handleDisconnect(xAccount._id, xAccount.accountName)
                   }>
-                  <Text style={styles.disconnectButtonText}>Disconnect Account</Text>
+                  <Text style={styles.disconnectButtonText}>
+                    Disconnect Account
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -777,7 +815,7 @@ export default function AccountsScreen() {
                 <TouchableOpacity
                   style={[
                     styles.connectButton,
-                    { backgroundColor: APP_COLORS.twitter },
+                    {backgroundColor: APP_COLORS.twitter},
                   ]}
                   activeOpacity={0.8}
                   onPress={() => handleConnect('x')}>
@@ -790,19 +828,19 @@ export default function AccountsScreen() {
               <View
                 style={[
                   styles.blurBubble,
-                  { backgroundColor: 'rgba(29, 161, 242, 0.05)' },
+                  {backgroundColor: 'rgba(29, 161, 242, 0.05)'},
                 ]}
               />
             )}
           </View>
         </View>
 
-        <View style={{ height: 120 }} />
+        <View style={{height: 120}} />
       </ScrollView>
 
       {/* Floating Action Button */}
       <TouchableOpacity
-        style={[styles.fab, { bottom: Platform.OS === 'ios' ? 100 : 96 }]}
+        style={[styles.fab, {bottom: Platform.OS === 'ios' ? 100 : 96}]}
         activeOpacity={0.8}>
         <Plus size={32} color={APP_COLORS.onPrimary} />
       </TouchableOpacity>
@@ -887,7 +925,7 @@ const styles = StyleSheet.create({
     shadowColor: '#1c1b1b',
     shadowOpacity: 0.04,
     shadowRadius: 40,
-    shadowOffset: { width: 0, height: 24 },
+    shadowOffset: {width: 0, height: 24},
     elevation: 4,
   },
   connectedCard: {
@@ -895,7 +933,7 @@ const styles = StyleSheet.create({
     shadowColor: '#1c1b1b',
     shadowOpacity: 0.04,
     shadowRadius: 40,
-    shadowOffset: { width: 0, height: 24 },
+    shadowOffset: {width: 0, height: 24},
     elevation: 4,
   },
   cardHeader: {
@@ -978,7 +1016,7 @@ const styles = StyleSheet.create({
     shadowColor: APP_COLORS.primary,
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
   },
   connectButtonText: {
     color: APP_COLORS.onPrimary,
@@ -1091,7 +1129,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: APP_COLORS.primary,
-    shadowOffset: { width: 0, height: 12 },
+    shadowOffset: {width: 0, height: 12},
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 10,

@@ -10,7 +10,7 @@ export const fetchAllPosts = createAsyncThunk(
       const response = await postsService.getAll(page);
       const formattedPosts = response.posts.map((p: any) => ({
         ...p,
-        mediaUrl: p.mediaUrls?.[0] || null,
+        mediaUrl: p.mediaUrl || null,
         scheduledTime: p.scheduledTime || p.scheduledAt || null,
       }));
       dispatch(setPosts(formattedPosts));

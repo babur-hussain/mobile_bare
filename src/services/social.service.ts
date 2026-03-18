@@ -20,8 +20,12 @@ export const socialService = {
    * The backend endpoint is auth-protected, so the Axios interceptor
    * automatically attaches the Firebase Bearer token.
    */
-  async getConnectUrl(platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads'): Promise<string> {
-    const response = await api.get(`/api/v1/social-accounts/${platform}/auth-url`);
+  async getConnectUrl(
+    platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads',
+  ): Promise<string> {
+    const response = await api.get(
+      `/api/v1/social-accounts/${platform}/auth-url`,
+    );
     // Backend wraps responses via TransformInterceptor: { success, data: { url }, timestamp }
     const url = response.data?.data?.url;
     if (!url || typeof url !== 'string') {
@@ -42,7 +46,7 @@ export const socialService = {
     platform: 'instagram' | 'facebook' | 'youtube' | 'x' | 'threads',
     accessToken: string,
     accessSecret?: string,
-  ): Promise<{ platform: string; accountName: string }> {
+  ): Promise<{platform: string; accountName: string}> {
     const response = await api.post('/api/v1/social-accounts/connect-token', {
       platform,
       accessToken,

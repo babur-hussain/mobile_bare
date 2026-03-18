@@ -11,9 +11,8 @@ import RegisterScreen from '../screens/register';
 import TabNavigator from './TabNavigator';
 import SplashScreen from '../screens/splash';
 import PostDetails from '../screens/post-details';
-import Onboarding1 from '../screens/onboarding/Onboarding1';
-import Onboarding2 from '../screens/onboarding/Onboarding2';
-import Onboarding3 from '../screens/onboarding/Onboarding3';
+import PostSuccessScreen from '../screens/post-success';
+import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,12 +53,11 @@ export default function RootNavigator() {
           <>
             <Stack.Screen name="AppTabs" component={TabNavigator} />
             <Stack.Screen name="PostDetails" component={PostDetails} />
+            <Stack.Screen name="PostSuccess" component={PostSuccessScreen} />
           </>
         ) : (
           <>
-            <Stack.Screen name="Onboarding1" component={Onboarding1} />
-            <Stack.Screen name="Onboarding2" component={Onboarding2} />
-            <Stack.Screen name="Onboarding3" component={Onboarding3} />
+            <Stack.Screen name="Onboarding" component={OnboardingFlow} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </>

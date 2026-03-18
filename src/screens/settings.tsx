@@ -6,18 +6,27 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Sparkles, User, ChevronRight, Bell, Shield, HelpCircle, MessageCircle, LogOut } from 'lucide-react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../store';
-import { logoutUser } from '../store/actions/auth.actions';
-import { Colors } from '../constants/colors';
+import {
+  Sparkles,
+  User,
+  ChevronRight,
+  Bell,
+  Shield,
+  HelpCircle,
+  MessageCircle,
+  LogOut,
+} from 'lucide-react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState, AppDispatch} from '../store';
+import {logoutUser} from '../store/actions/auth.actions';
+import {Colors} from '../constants/colors';
 
 export default function SettingsScreen() {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const {user} = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
+      {text: 'Cancel', style: 'cancel'},
       {
         text: 'Logout',
         style: 'destructive',
@@ -59,7 +68,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View
-            style={[styles.menuIcon, { backgroundColor: `${Colors.primary}15` }]}>
+            style={[styles.menuIcon, {backgroundColor: `${Colors.primary}15`}]}>
             <User size={20} color={Colors.primary} />
           </View>
           <Text style={styles.menuText}>Edit Profile</Text>
@@ -68,11 +77,8 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View
-            style={[styles.menuIcon, { backgroundColor: `${Colors.accent}15` }]}>
-            <Bell
-              size={20}
-              color={Colors.accent}
-            />
+            style={[styles.menuIcon, {backgroundColor: `${Colors.accent}15`}]}>
+            <Bell size={20} color={Colors.accent} />
           </View>
           <Text style={styles.menuText}>Notifications</Text>
           <ChevronRight size={20} color={Colors.textMuted} />
@@ -80,7 +86,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View
-            style={[styles.menuIcon, { backgroundColor: `${Colors.warning}15` }]}>
+            style={[styles.menuIcon, {backgroundColor: `${Colors.warning}15`}]}>
             <Shield size={20} color={Colors.warning} />
           </View>
           <Text style={styles.menuText}>Privacy & Security</Text>
@@ -93,7 +99,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View
-            style={[styles.menuIcon, { backgroundColor: `${Colors.info}15` }]}>
+            style={[styles.menuIcon, {backgroundColor: `${Colors.info}15`}]}>
             <HelpCircle size={20} color={Colors.info} />
           </View>
           <Text style={styles.menuText}>Help Center</Text>
@@ -102,7 +108,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View
-            style={[styles.menuIcon, { backgroundColor: `${Colors.success}15` }]}>
+            style={[styles.menuIcon, {backgroundColor: `${Colors.success}15`}]}>
             <MessageCircle size={20} color={Colors.success} />
           </View>
           <Text style={styles.menuText}>Contact Us</Text>
@@ -137,7 +143,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,

@@ -1,427 +1,409 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
+const BRAND_ACCENT = '#00b4d8';
+
 const Onboarding3 = () => {
-    const navigation = useNavigation<any>();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
 
-    return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                    <LinearGradient
-                        colors={['#5341cd', '#6c5ce7']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.logoIconBox}
-                    >
-                        <Icon name="creation" size={16} color="#ffffff" />
-                    </LinearGradient>
-                    <Text style={styles.headerTitle}>PostOnce</Text>
-                </View>
-                <Text style={styles.stepText}>STEP 03/03</Text>
+  return (
+    <LinearGradient
+      colors={['#00b4d8', '#0096b4', '#0077b6']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={styles.root}>
+
+      {/* Ambient white glow blob in center */}
+      <View style={styles.glowBlob} />
+
+      <View style={[styles.safeWrapper, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.logoRow}>
+            <Text style={styles.logoEmoji}>🚀</Text>
+            <Text style={styles.brandText}>PostOnce</Text>
+          </View>
+          {/* Page dots - right side, 3rd active */}
+          <View style={styles.dotsRow}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={[styles.dot, styles.dotActive]} />
+          </View>
+        </View>
+
+        {/* ── Visual illustration area ── */}
+        <View style={styles.illustrationArea}>
+
+          {/* Floating "Scheduled" success chip — top-right */}
+          <View style={styles.scheduledChip}>
+            <View style={styles.scheduledChipIcon}>
+              <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '900' }}>✓✓</Text>
+            </View>
+            <View>
+              <Text style={styles.scheduledChipLabel}>SCHEDULED</Text>
+              <Text style={styles.scheduledChipTime}>12:00 PM</Text>
+            </View>
+          </View>
+
+          {/* Main glass schedule card */}
+          <View style={styles.mainCard}>
+            {/* Card top: calendar icon + lines + circle */}
+            <View style={styles.cardTopRow}>
+              <View style={styles.cardIconWrap}>
+                <Text style={{ fontSize: 18 }}>📅</Text>
+              </View>
+              <View style={styles.cardTopLines}>
+                <View style={[styles.shimmerLine, { width: 64, opacity: 0.4 }]} />
+                <View style={[styles.shimmerLine, { width: 40, opacity: 0.2, marginTop: 5 }]} />
+              </View>
+              <View style={styles.cardCircleBtn} />
             </View>
 
-            <View style={styles.content}>
-                {/* Visual Canvas */}
-                <View style={styles.visualContainer}>
-                    {/* Background Layers */}
-                    <View style={[styles.bgLayer, styles.bgLayer1]} />
-                    <View style={[styles.bgLayer, styles.bgLayer2]} />
-
-                    {/* Main Content Card */}
-                    <View style={styles.mainCard}>
-                        {/* Fake Window Controls */}
-                        <View style={styles.windowHeader}>
-                            <View style={styles.windowDots}>
-                                <View style={[styles.dot, { backgroundColor: 'rgba(186, 26, 26, 0.2)' }]} />
-                                <View style={[styles.dot, { backgroundColor: 'rgba(224, 0, 96, 0.2)' }]} />
-                                <View style={[styles.dot, { backgroundColor: 'rgba(0, 88, 189, 0.2)' }]} />
-                            </View>
-                            <Icon name="dots-horizontal" size={20} color="#c8c4d7" />
-                        </View>
-
-                        {/* Bento Items */}
-                        <View style={styles.bentoItems}>
-                            <View style={styles.bentoItemRegular}>
-                                <View style={[styles.bentoIconBox, { backgroundColor: 'rgba(108, 92, 231, 0.1)' }]}>
-                                    <Icon name="calendar-month" size={20} color="#5341cd" />
-                                </View>
-                                <View style={styles.bentoLines}>
-                                    <View style={[styles.bentoLine, { width: 60, backgroundColor: '#e5e2e1' }]} />
-                                    <View style={[styles.bentoLine, { width: 40, backgroundColor: 'rgba(200, 196, 215, 0.3)' }]} />
-                                </View>
-                            </View>
-
-                            <LinearGradient
-                                colors={['#5341cd', '#6c5ce7']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.bentoItemGradient}
-                            >
-                                <View style={[styles.bentoIconBox, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
-                                    <Icon name="clock-time-three" size={20} color="#ffffff" />
-                                </View>
-                                <View style={styles.bentoLines}>
-                                    <View style={[styles.bentoLine, { width: 70, backgroundColor: 'rgba(255, 255, 255, 0.4)' }]} />
-                                    <View style={[styles.bentoLine, { width: 50, backgroundColor: 'rgba(255, 255, 255, 0.2)' }]} />
-                                </View>
-                                <Icon name="check-circle" size={16} color="#ffffff" />
-                            </LinearGradient>
-
-                            <View style={[styles.bentoItemRegular, { opacity: 0.6 }]}>
-                                <View style={[styles.bentoIconBox, { backgroundColor: 'rgba(224, 0, 96, 0.1)' }]}>
-                                    <Icon name="history" size={20} color="#b2004b" />
-                                </View>
-                                <View style={styles.bentoLines}>
-                                    <View style={[styles.bentoLine, { width: 50, backgroundColor: '#e5e2e1' }]} />
-                                    <View style={[styles.bentoLine, { width: 30, backgroundColor: 'rgba(200, 196, 215, 0.3)' }]} />
-                                </View>
-                            </View>
-                        </View>
-
-                        {/* Floating User Node */}
-                        <View style={styles.floatingUser}>
-                            <Image
-                                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9cWy4B_suVsMbF9P_hDh5xz_f8GyVV8Y77uenh813glGXAYOUS233p8sPVuNC02aH-9gm4MnjIOLqa3DsvMij49ILzHID7HIsu4up_HfU5WHHXFUq0vlkzR0dwRnqWr7AGtDoDqtNvwl9eNyOxjiphD8GVf5fXNeskHEDJI59YjbgHjChQuZnBnBC8Ef1TE7i99NCvOnncMReOTfQZnYiDht4R8I-jik-axEmJpBld8Jr2U3tXWK0eDJHkZkCKdmRWbnEX5BZ3XYv' }}
-                                style={styles.userImage}
-                            />
-                        </View>
-                    </View>
-
-                    {/* Accent Icons */}
-                    <View style={styles.accentSend}>
-                        <Icon name="send" size={24} color="#0058bd" />
-                    </View>
-                    <View style={styles.accentBolt}>
-                        <Icon name="lightning-bolt" size={28} color="#b2004b" />
-                    </View>
-                </View>
-
-                {/* Text Content */}
-                <View style={styles.textSection}>
-                    <Text style={styles.heroTitle}>
-                        Schedule posts{'\n'}
-                        <Text style={styles.heroTitleItalic}>save time</Text>
-                    </Text>
-                    <Text style={styles.heroSubtitle}>
-                        Batch your creative work and let our engine handle the publishing across all platforms.
-                    </Text>
-
-                    {/* Progress Indicator */}
-                    <View style={styles.progressContainer}>
-                        <View style={styles.progressInactive} />
-                        <View style={styles.progressInactive} />
-                        <View style={styles.progressActive} />
-                    </View>
-                </View>
-
-                {/* Actions */}
-                <View style={styles.actionsContainer}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                        <LinearGradient
-                            colors={['#5341cd', '#6c5ce7']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.startButton}
-                        >
-                            <Text style={styles.startButtonText}>Get Started</Text>
-                            <Icon name="arrow-right" size={20} color="#ffffff" style={{ marginLeft: 8 }} />
-                        </LinearGradient>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginButton}>
-                        <Text style={styles.loginButtonText}>LOG IN TO EXISTING ACCOUNT</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* Schedule row 1 — highlighted */}
+            <View style={styles.scheduleRowActive}>
+              <View style={styles.scheduleRowIconWrap}>
+                <Text style={{ fontSize: 15 }}>🕐</Text>
+              </View>
+              <View style={[styles.shimmerLine, { flex: 1, height: 10, opacity: 0.6 }]} />
             </View>
-        </SafeAreaView>
-    );
+
+            {/* Schedule row 2 — dimmed */}
+            <View style={[styles.scheduleRowDim]}>
+              <View style={styles.scheduleRowIconWrapDim}>
+                <Text style={{ fontSize: 15 }}>📆</Text>
+              </View>
+              <View style={[styles.shimmerLine, { flex: 1, height: 8, opacity: 0.3 }]} />
+            </View>
+          </View>
+
+          {/* Back decorative card — bottom-left, rotated */}
+          <View style={styles.backCard}>
+            <View style={styles.backCardTop}>
+              <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>📊</Text>
+              <View style={[styles.shimmerLine, { width: 48, opacity: 0.2 }]} />
+            </View>
+            <View style={styles.backCardBar} />
+          </View>
+        </View>
+
+        {/* ── Text copy ── */}
+        <View style={styles.copySection}>
+          <Text style={styles.heroTitle}>Schedule posts and{'\n'}save time</Text>
+          <Text style={styles.heroSubtitle}>
+            Set your content calendar once and focus on what really matters.
+          </Text>
+        </View>
+
+        {/* ── Footer CTA ── */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() => navigation.navigate('Login')}
+            activeOpacity={0.88}>
+            <Text style={styles.ctaText}>Get Started</Text>
+            <Text style={styles.ctaArrow}> →</Text>
+          </TouchableOpacity>
+          <Text style={styles.footerLabel}>FINAL STEP OF YOUR JOURNEY</Text>
+        </View>
+      </View>
+    </LinearGradient>
+  );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fcf9f8',
-    },
-    header: {
-        height: 64,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 24,
-        zIndex: 50,
-    },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    logoIconBox: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#1c1b1b',
-        letterSpacing: -0.5,
-    },
-    stepText: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: '#474554',
-        letterSpacing: 1.5,
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 32,
-        paddingBottom: 48,
-        maxWidth: 500,
-        alignSelf: 'center',
-        width: '100%',
-    },
-    visualContainer: {
-        width: '100%',
-        aspectRatio: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 32,
-        marginTop: 16,
-    },
-    bgLayer: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        borderRadius: 48,
-    },
-    bgLayer1: {
-        backgroundColor: 'rgba(83, 65, 205, 0.05)',
-        transform: [{ rotate: '3deg' }, { translateX: 16 }],
-    },
-    bgLayer2: {
-        backgroundColor: 'rgba(0, 88, 189, 0.05)',
-        borderRadius: 24,
-        transform: [{ rotate: '-6deg' }, { translateX: -8 }],
-    },
-    mainCard: {
-        width: 250,
-        height: 320,
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 24,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#1c1b1b',
-                shadowOffset: { width: 0, height: 24 },
-                shadowOpacity: 0.06,
-                shadowRadius: 40,
-            },
-            android: {
-                elevation: 12,
-            },
-        }),
-    },
-    windowHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    windowDots: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    bentoItems: {
-        gap: 12,
-    },
-    bentoItemRegular: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-        padding: 12,
-        backgroundColor: '#f6f3f2',
-        borderRadius: 12,
-    },
-    bentoItemGradient: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-        padding: 12,
-        borderRadius: 12,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 8,
-            },
-            android: {
-                elevation: 4,
-            },
-        }),
-    },
-    bentoIconBox: {
-        width: 40,
-        height: 40,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    bentoLines: {
-        flex: 1,
-        gap: 6,
-    },
-    bentoLine: {
-        height: 6,
-        borderRadius: 3,
-    },
-    floatingUser: {
-        position: 'absolute',
-        bottom: -16,
-        right: -16,
-        width: 96,
-        height: 96,
-        backgroundColor: '#ffffff',
-        borderRadius: 48,
-        padding: 8,
-        borderWidth: 4,
-        borderColor: '#fcf9f8',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#1c1b1b',
-                shadowOffset: { width: 0, height: 24 },
-                shadowOpacity: 0.06,
-                shadowRadius: 40,
-            },
-            android: {
-                elevation: 10,
-            },
-        }),
-    },
-    userImage: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 48,
-    },
-    accentSend: {
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        width: 48,
-        height: 48,
-        backgroundColor: 'rgba(0, 88, 189, 0.1)',
-        borderRadius: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    accentBolt: {
-        position: 'absolute',
-        bottom: 48,
-        left: 0,
-        width: 56,
-        height: 56,
-        backgroundColor: 'rgba(178, 0, 75, 0.1)',
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        transform: [{ rotate: '12deg' }],
-    },
-    textSection: {
-        alignItems: 'center',
-        marginTop: 'auto',
-    },
-    heroTitle: {
-        fontSize: 40,
-        fontWeight: '800',
-        lineHeight: 44,
-        letterSpacing: -1,
-        color: '#1c1b1b',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-    heroTitleItalic: {
-        color: '#5341cd',
-        fontStyle: 'italic',
-        fontWeight: '900',
-    },
-    heroSubtitle: {
-        fontSize: 16,
-        lineHeight: 24,
-        color: '#474554',
-        textAlign: 'center',
-        maxWidth: 280,
-    },
-    progressContainer: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 40,
-        justifyContent: 'center',
-    },
-    progressActive: {
-        height: 6,
-        width: 32,
-        borderRadius: 3,
-        backgroundColor: '#5341cd',
-    },
-    progressInactive: {
-        height: 6,
-        width: 6,
-        borderRadius: 3,
-        backgroundColor: '#c8c4d7',
-    },
-    actionsContainer: {
-        marginTop: 32,
-        gap: 16,
-    },
-    startButton: {
-        height: 64,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 8,
-            },
-            android: {
-                elevation: 4,
-            },
-        }),
-    },
-    startButtonText: {
-        color: '#ffffff',
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    loginButton: {
-        height: 48,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    loginButtonText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#474554',
-        letterSpacing: 1.5,
-    },
-});
-
 export default Onboarding3;
+
+// ─────────────────────────────────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  glowBlob: {
+    position: 'absolute',
+    top: '20%',
+    left: '20%',
+    width: width * 0.6,
+    height: width * 0.6,
+    borderRadius: width * 0.3,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    // No blur in RN bare, approximate with large soft circle
+  },
+
+  safeWrapper: {
+    flex: 1,
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 16,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logoEmoji: {
+    fontSize: 22,
+  },
+  brandText: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: -0.5,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 16,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.30)',
+  },
+  dotActive: {
+    width: 32,
+    backgroundColor: '#ffffff',
+  },
+
+  // Illustration
+  illustrationArea: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    paddingHorizontal: 32,
+  },
+
+  // Floating scheduled chip
+  scheduledChip: {
+    position: 'absolute',
+    top: 12,
+    right: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+    zIndex: 20,
+  },
+  scheduledChipIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: BRAND_ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scheduledChipLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#292f35',
+    letterSpacing: 1,
+  },
+  scheduledChipTime: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: BRAND_ACCENT,
+    marginTop: 1,
+  },
+
+  // Main glass card
+  mainCard: {
+    width: '80%',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    padding: 20,
+    gap: 14,
+    zIndex: 10,
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    elevation: 12,
+  },
+  cardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  cardIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.30)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTopLines: {
+    flex: 1,
+  },
+  cardCircleBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.20)',
+  },
+  shimmerLine: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+
+  // Active schedule row
+  scheduleRowActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 14,
+    padding: 12,
+  },
+  scheduleRowIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Dim schedule row
+  scheduleRowDim: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    padding: 12,
+    opacity: 0.6,
+  },
+  scheduleRowIconWrapDim: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.20)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Back decorative card
+  backCard: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    width: '45%',
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    padding: 14,
+    transform: [{ rotate: '-4deg' }],
+    opacity: 0.8,
+    zIndex: 5,
+  },
+  backCardTop: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  backCardBar: {
+    width: '100%',
+    height: 48,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+
+  // Copy section
+  copySection: {
+    paddingHorizontal: 28,
+    paddingBottom: 24,
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: -1.2,
+    lineHeight: 46,
+    textAlign: 'center',
+    marginBottom: 14,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.80)',
+    lineHeight: 24,
+    textAlign: 'center',
+    fontWeight: '400',
+    maxWidth: 280,
+  },
+
+  // Footer
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+    gap: 14,
+  },
+  ctaButton: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    paddingVertical: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(0,0,0,0.18)',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  ctaText: {
+    color: '#292f35',
+    fontWeight: '800',
+    fontSize: 18,
+    letterSpacing: -0.3,
+  },
+  ctaArrow: {
+    color: '#292f35',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  footerLabel: {
+    color: 'rgba(255,255,255,0.50)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.8,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+});

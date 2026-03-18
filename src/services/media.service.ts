@@ -1,5 +1,5 @@
 import api from './api';
-import { Asset } from 'react-native-image-picker';
+import {Asset} from 'react-native-image-picker';
 
 export interface MediaItem {
   _id: string;
@@ -28,7 +28,7 @@ export const mediaService = {
 
     try {
       const response = await api.post('/api/v1/media/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {'Content-Type': 'multipart/form-data'},
         timeout: 120000, // 2 min for large files
         onUploadProgress,
       });

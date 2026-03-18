@@ -13,6 +13,8 @@ import {
   KeyboardAvoidingView,
   Modal,
   Switch,
+  Animated,
+  Easing,
 } from 'react-native';
 import { launchImageLibrary, Asset } from 'react-native-image-picker';
 import { createThumbnail } from 'react-native-create-thumbnail';
@@ -44,7 +46,10 @@ import {
   Send,
   Check,
   Youtube,
-  Twitter,
+  UploadCloud,
+  CheckCircle2,
+  Sparkles,
+  Share2,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -56,24 +61,24 @@ import { mediaService } from '../services/media.service';
 type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
 const APP_COLORS = {
-  primary: '#5341cd',
-  secondary: '#0058bd',
-  tertiary: '#b2004b',
-  surface: '#fcf9f8',
-  onSurface: '#1c1b1b',
-  onSurfaceVariant: '#474554',
-  surfaceContainerLow: '#f6f3f2',
+  primary: '#ea4353',
+  secondary: '#026381',
+  tertiary: '#006947',
+  surface: '#f6f8fb',
+  onSurface: '#1f2937',
+  onSurfaceVariant: '#4b5563',
+  surfaceContainerLow: '#ebf1fa',
   surfaceContainerLowest: '#ffffff',
-  surfaceContainerHighest: '#e5e2e1',
-  surfaceContainer: '#f0edec',
-  outlineVariant: '#c8c4d7',
+  surfaceContainerHighest: '#dbe3ed',
+  outlineVariant: '#a8aeb5',
   outline: '#787586',
-  surfaceDim: '#dcd9d9',
   onPrimary: '#ffffff',
-  secondaryContainer: '#1470e8',
-  primaryContainer: '#6c5ce7',
-  onPrimaryContainer: '#faf6ff',
-  error: '#ba1a1a',
+  primaryContainer: '#ff7576',
+  onPrimaryContainer: '#4e000a',
+  secondaryContainer: '#94dbfe',
+  onSecondaryContainer: '#004e66',
+  error: '#b02500',
+  onBackground: '#2a3136',
   instagram: '#E1306C',
   facebook: '#1877F2',
   youtube: '#FF0000',
@@ -111,9 +116,34 @@ export default function CreatePostScreen() {
   const [turnOffComments, setTurnOffComments] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // Loading states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingAny = mediaItems.some(m => m.isUploading);
+
+  // Animation state for loading screen
+  const [pulseValue] = useState(new Animated.Value(1));
+
+  useEffect(() => {
+    if (isSubmitting) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseValue, {
+            toValue: 1.2,
+            duration: 800,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease)
+          }),
+          Animated.timing(pulseValue, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease)
+          })
+        ])
+      ).start();
+    } else {
+      pulseValue.setValue(1);
+    }
+  }, [isSubmitting, pulseValue]);
 
   const { items: accounts } = useSelector((state: RootState) => state.accounts);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -130,53 +160,62 @@ export default function CreatePostScreen() {
     });
 
     if (result.assets) {
-      const newItems: AppMedia[] = result.assets.map((asset) => ({
+      const newItems: AppMedia[] = result.assets.map(asset => ({
         asset,
         displayUri: asset.uri || '',
         isUploading: true,
         progress: 0,
         hasError: false,
       }));
-      setMediaItems((prev) => [...prev, ...newItems]);
+      setMediaItems(prev => [...prev, ...newItems]);
 
-      newItems.forEach(async (item) => {
+      newItems.forEach(async item => {
         let displayUri = item.asset.uri || '';
         if (item.asset.type?.startsWith('video/')) {
           try {
-            const thumb = await createThumbnail({ url: displayUri, timeStamp: 1000 });
+            const thumb = await createThumbnail({
+              url: displayUri,
+              timeStamp: 1000,
+            });
             displayUri = thumb.path;
           } catch (e) {
             console.log('Thumbnail error', e);
           }
         }
 
-        setMediaItems((current) =>
-          current.map((m) =>
-            m.asset.uri === item.asset.uri ? { ...m, displayUri } : m
-          )
+        setMediaItems(current =>
+          current.map(m =>
+            m.asset.uri === item.asset.uri ? { ...m, displayUri } : m,
+          ),
         );
 
         try {
-          const media = await mediaService.upload(item.asset, (progressEvent) => {
+          const media = await mediaService.upload(item.asset, progressEvent => {
             if (progressEvent.total) {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setMediaItems((current) =>
-                current.map((m) =>
-                  m.asset.uri === item.asset.uri ? { ...m, progress } : m
-                )
+              const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total,
+              );
+              setMediaItems(current =>
+                current.map(m =>
+                  m.asset.uri === item.asset.uri ? { ...m, progress } : m,
+                ),
               );
             }
           });
-          setMediaItems((current) =>
-            current.map((m) =>
-              m.asset.uri === item.asset.uri ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url } : m
-            )
+          setMediaItems(current =>
+            current.map(m =>
+              m.asset.uri === item.asset.uri
+                ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url }
+                : m,
+            ),
           );
         } catch (e) {
-          setMediaItems((current) =>
-            current.map((m) =>
-              m.asset.uri === item.asset.uri ? { ...m, isUploading: false, hasError: true } : m
-            )
+          setMediaItems(current =>
+            current.map(m =>
+              m.asset.uri === item.asset.uri
+                ? { ...m, isUploading: false, hasError: true }
+                : m,
+            ),
           );
         }
       });
@@ -232,7 +271,10 @@ export default function CreatePostScreen() {
       return;
     }
     if (mediaItems.some(m => m.hasError)) {
-      Alert.alert('Error', 'Some media failed to upload. Please remove them and try again.');
+      Alert.alert(
+        'Error',
+        'Some media failed to upload. Please remove them and try again.',
+      );
       return;
     }
 
@@ -241,7 +283,7 @@ export default function CreatePostScreen() {
     try {
       const urls = mediaItems.map(m => m.s3Url).filter(Boolean) as string[];
 
-      await dispatch(
+      const newPost = await dispatch(
         createNewPost({
           mediaUrls: urls,
           caption: caption.trim(),
@@ -252,18 +294,13 @@ export default function CreatePostScreen() {
         }),
       ).unwrap();
 
-      Alert.alert(
-        'Success',
-        submitAsScheduled
-          ? 'Post scheduled successfully!'
-          : 'Posted directly!',
-        [{ text: 'OK', onPress: () => navigation.navigate('Home') }],
-      );
-
-      // Reset form
+      // Reset form silently before navigating
       setCaption('');
       setMediaItems([]);
       setSelectedPlatforms(new Set());
+
+      // Navigate to success screen
+      navigation.navigate('PostSuccess', { post: newPost });
     } catch (error: any) {
       Alert.alert(
         'Error',
@@ -294,15 +331,20 @@ export default function CreatePostScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top, height: 64 + insets.top },
+          { paddingTop: insets.top, height: 60 + insets.top }, // matched home.tsx
         ]}>
         <View style={styles.headerLeft}>
-          <Image source={{ uri: getAvatarUrl() }} style={styles.avatarCircle} />
+          <Share2 size={24} color={APP_COLORS.primary} />
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
-        <TouchableOpacity style={styles.iconButton}>
-          <Bell size={24} color={APP_COLORS.onSurfaceVariant} />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Bell size={24} color={APP_COLORS.onSurfaceVariant} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.profileButton}>
+            <Image source={{ uri: getAvatarUrl() }} style={styles.avatarCircle} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -310,236 +352,141 @@ export default function CreatePostScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
-        {/* Context / Breadcrumb */}
+        {/* Context / Breadcrumb & Title */}
         <View style={styles.heroSection}>
-          <Text style={styles.breadcrumb}>NEW EDITORIAL</Text>
-          <Text style={styles.title}>Create Post</Text>
+          <Text style={styles.breadcrumb}>CONTENT STUDIO</Text>
+          <View style={styles.heroTitleRow}>
+            <Text style={styles.title}>Compose</Text>
+
+            {/* Replace floating Draft Auto-saved with an absolute positioning if tricky later, doing inline for now */}
+            <View style={styles.draftBadge}>
+              <CheckCircle2 size={16} color={APP_COLORS.primary} />
+              <View>
+                <Text style={styles.draftBadgeTitle}>Draft Auto-saved</Text>
+                <Text style={styles.draftBadgeSub}>Last saved at 10:42 AM</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Action Row right below title */}
+          <View style={styles.heroActionsRow}>
+            <TouchableOpacity style={styles.btnSecondary} onPress={() => { }}>
+              <Text style={styles.btnSecondaryText}>Save Draft</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnPrimary}
+              onPress={handlePostNow}
+              disabled={isSubmitting}>
+              <Text style={styles.btnPrimaryText}>Publish Now</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.formContainer}>
-          {/* Platform Selection Bento */}
-          <View>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
-              contentContainerStyle={[
-                styles.platformSection,
-                platformSelectionError && styles.platformSectionError
-              ]}>
-            <TouchableOpacity
-              style={[
-                styles.platformCard,
-                selectedPlatforms.has('instagram') &&
-                styles.platformCardSelected,
-                !hasPlatformAccount('instagram') && styles.platformCardDisabled,
-                platformSelectionError && styles.platformCardErrorHighlight,
-              ]}
-              disabled={!hasPlatformAccount('instagram')}
-              onPress={() => togglePlatform('instagram')}
-              activeOpacity={0.8}>
-              <View style={styles.platformCardHeader}>
-                <View
-                  style={[
-                    styles.platformIconBox,
-                    { backgroundColor: `${APP_COLORS.instagram}15` },
-                  ]}>
-                  <Camera size={24} color={APP_COLORS.instagram} />
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ backgroundColor: APP_COLORS.primary, padding: 4, borderRadius: 6 }}>
+                  <Share2 size={14} color={APP_COLORS.onPrimary} />
                 </View>
-                {/* Custom Checkbox visual */}
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedPlatforms.has('instagram') &&
-                    styles.checkboxSelected,
-                  ]}>
-                  {selectedPlatforms.has('instagram') && (
-                    <Check size={14} color={APP_COLORS.onPrimary} />
-                  )}
-                </View>
+                <Text style={[styles.sectionLabel, { fontSize: 14, color: APP_COLORS.onSurface }]}>Target Platforms</Text>
               </View>
-              <Text style={styles.platformName}>Instagram</Text>
-              {!hasPlatformAccount('instagram') && (
-                <Text style={styles.notConnectedText}>
-                  Connect Account
-                </Text>
-              )}
-            </TouchableOpacity>
+            </View>
+            <View style={styles.platformVerticalContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.platformRow,
+                  !hasPlatformAccount('instagram') && styles.platformRowDisabled,
+                ]}
+                disabled={!hasPlatformAccount('instagram')}
+                onPress={() => togglePlatform('instagram')}
+                activeOpacity={0.8}>
+                <View style={styles.platformRowLeft}>
+                  <View style={[styles.platformIconBox, { backgroundColor: APP_COLORS.instagram }]}>
+                    <Camera size={20} color={APP_COLORS.onPrimary} />
+                  </View>
+                  <View>
+                    <Text style={styles.platformRowName}>Instagram</Text>
+                    {!hasPlatformAccount('instagram') && (
+                      <Text style={styles.notConnectedTextInline}>Connect Account</Text>
+                    )}
+                  </View>
+                </View>
+                <Switch
+                  value={selectedPlatforms.has('instagram')}
+                  onValueChange={() => togglePlatform('instagram')}
+                  disabled={!hasPlatformAccount('instagram')}
+                  trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
+                  thumbColor="#ffffff"
+                />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.platformCard,
-                selectedPlatforms.has('threads') &&
-                styles.platformCardSelected,
-                !hasPlatformAccount('threads') && styles.platformCardDisabled,
-                platformSelectionError && styles.platformCardErrorHighlight,
-              ]}
-              disabled={!hasPlatformAccount('threads')}
-              onPress={() => togglePlatform('threads')}
-              activeOpacity={0.8}>
-              <View style={styles.platformCardHeader}>
-                <View
-                  style={[
-                    styles.platformIconBox,
-                    { backgroundColor: `${APP_COLORS.threads}15` },
-                  ]}>
-                  <AtSign size={24} color={APP_COLORS.threads} />
+              <TouchableOpacity
+                style={[
+                  styles.platformRow,
+                  !hasPlatformAccount('facebook') && styles.platformRowDisabled,
+                ]}
+                disabled={!hasPlatformAccount('facebook')}
+                onPress={() => togglePlatform('facebook')}
+                activeOpacity={0.8}>
+                <View style={styles.platformRowLeft}>
+                  <View style={[styles.platformIconBox, { backgroundColor: APP_COLORS.secondary }]}>
+                    <Users size={20} color={APP_COLORS.onPrimary} />
+                  </View>
+                  <View>
+                    <Text style={styles.platformRowName}>Facebook</Text>
+                    {!hasPlatformAccount('facebook') && (
+                      <Text style={styles.notConnectedTextInline}>Connect Account</Text>
+                    )}
+                  </View>
                 </View>
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedPlatforms.has('threads') &&
-                    styles.checkboxSelected,
-                  ]}>
-                  {selectedPlatforms.has('threads') && (
-                    <Check size={14} color={APP_COLORS.onPrimary} />
-                  )}
-                </View>
-              </View>
-              <Text style={styles.platformName}>Threads</Text>
-              {!hasPlatformAccount('threads') && (
-                <Text style={styles.notConnectedText}>
-                  Connect Account
-                </Text>
-              )}
-            </TouchableOpacity>
+                <Switch
+                  value={selectedPlatforms.has('facebook')}
+                  onValueChange={() => togglePlatform('facebook')}
+                  disabled={!hasPlatformAccount('facebook')}
+                  trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
+                  thumbColor="#ffffff"
+                />
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.platformCard,
-                selectedPlatforms.has('facebook') &&
-                styles.platformCardSelected,
-                !hasPlatformAccount('facebook') && styles.platformCardDisabled,
-                platformSelectionError && styles.platformCardErrorHighlight,
-              ]}
-              disabled={!hasPlatformAccount('facebook')}
-              onPress={() => togglePlatform('facebook')}
-              activeOpacity={0.8}>
-              <View style={styles.platformCardHeader}>
-                <View
-                  style={[
-                    styles.platformIconBox,
-                    { backgroundColor: `${APP_COLORS.facebook}15` },
-                  ]}>
-                  <Users size={24} color={APP_COLORS.facebook} />
+              <TouchableOpacity
+                style={[
+                  styles.platformRow,
+                  !hasPlatformAccount('x') && styles.platformRowDisabled,
+                ]}
+                disabled={!hasPlatformAccount('x')}
+                onPress={() => togglePlatform('x')}
+                activeOpacity={0.8}>
+                <View style={styles.platformRowLeft}>
+                  <View style={[styles.platformIconBox, { backgroundColor: '#000000' }]}>
+                    <Text style={{ fontSize: 14, fontWeight: '900', color: APP_COLORS.onPrimary }}>X</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.platformRowName}>X / Twitter</Text>
+                    {!hasPlatformAccount('x') && (
+                      <Text style={styles.notConnectedTextInline}>Connect Account</Text>
+                    )}
+                  </View>
                 </View>
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedPlatforms.has('facebook') &&
-                    styles.checkboxSelected,
-                  ]}>
-                  {selectedPlatforms.has('facebook') && (
-                    <Check size={14} color={APP_COLORS.onPrimary} />
-                  )}
-                </View>
-              </View>
-              <Text style={styles.platformName}>Facebook</Text>
-              {!hasPlatformAccount('facebook') && (
-                <Text style={styles.notConnectedText}>
-                  Connect Account
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.platformCard,
-                selectedPlatforms.has('youtube') && styles.platformCardSelected,
-                !hasPlatformAccount('youtube') && styles.platformCardDisabled,
-                platformSelectionError && styles.platformCardErrorHighlight,
-              ]}
-              disabled={!hasPlatformAccount('youtube')}
-              onPress={() => togglePlatform('youtube')}
-              activeOpacity={0.8}>
-              <View style={styles.platformCardHeader}>
-                <View
-                  style={[
-                    styles.platformIconBox,
-                    { backgroundColor: `${APP_COLORS.youtube}15` },
-                  ]}>
-                  <Youtube size={24} color={APP_COLORS.youtube} />
-                </View>
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedPlatforms.has('youtube') && styles.checkboxSelected,
-                  ]}>
-                  {selectedPlatforms.has('youtube') && (
-                    <Check size={14} color={APP_COLORS.onPrimary} />
-                  )}
-                </View>
-              </View>
-              <Text style={styles.platformName}>YouTube</Text>
-              {!hasPlatformAccount('youtube') && (
-                <Text style={styles.notConnectedText}>
-                  Connect Account
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.platformCard,
-                selectedPlatforms.has('x') && styles.platformCardSelected,
-                !hasPlatformAccount('x') && styles.platformCardDisabled,
-                platformSelectionError && styles.platformCardErrorHighlight,
-              ]}
-              disabled={!hasPlatformAccount('x')}
-              onPress={() => togglePlatform('x')}
-              activeOpacity={0.8}>
-              <View style={styles.platformCardHeader}>
-                <View
-                  style={[
-                    styles.platformIconBox,
-                    { backgroundColor: `${APP_COLORS.twitter}15` },
-                  ]}>
-                  <Twitter size={24} color={APP_COLORS.twitter} />
-                </View>
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedPlatforms.has('x') && styles.checkboxSelected,
-                  ]}>
-                  {selectedPlatforms.has('x') && (
-                    <Check size={14} color={APP_COLORS.onPrimary} />
-                  )}
-                </View>
-              </View>
-              <Text style={styles.platformName}>X (Twitter)</Text>
-              {!hasPlatformAccount('x') && (
-                <Text style={styles.notConnectedText}>
-                  Connect Account
-                </Text>
-              )}
-            </TouchableOpacity>
-
-          </ScrollView>
-          {platformSelectionError && (
-            <Text style={styles.platformErrorText}>
-              Please select at least one platform to publish.
-            </Text>
-          )}
+                <Switch
+                  value={selectedPlatforms.has('x')}
+                  onValueChange={() => togglePlatform('x')}
+                  disabled={!hasPlatformAccount('x')}
+                  trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
+                  thumbColor="#ffffff"
+                />
+              </TouchableOpacity>
+            </View>
+            {platformSelectionError && (
+              <Text style={styles.platformErrorText}>
+                Please select at least one platform to publish.
+              </Text>
+            )}
           </View>
 
           {/* Media Upload Area */}
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionLabel}>MEDIA PREVIEW</Text>
-              <TouchableOpacity onPress={pickMedia} disabled={isUploadingAny}>
-                <Text
-                  style={[
-                    styles.addMoreText,
-                    isUploadingAny && { opacity: 0.5 },
-                  ]}>
-                  Add more
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.uploadInfoText}>
-              Video of upto 2 GB can be uploaded here.
-            </Text>
-
-            <View style={styles.mediaGrid}>
+            <View style={[styles.mediaGrid, { height: 260 }]}>
               {mediaItems.length > 0 ? (
                 <>
                   {/* Main Preview (first asset) */}
@@ -555,9 +502,23 @@ export default function CreatePostScreen() {
                       <Edit2 size={32} color={APP_COLORS.onPrimary} />
                     </View>
                     {mediaItems[0].isUploading && (
-                      <View style={[styles.mediaOverlay, { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-                        <ActivityIndicator color={APP_COLORS.primary} size="large" />
-                        <Text style={{ color: 'white', marginTop: 8, fontWeight: 'bold' }}>{mediaItems[0].progress}%</Text>
+                      <View
+                        style={[
+                          styles.mediaOverlay,
+                          { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+                        ]}>
+                        <ActivityIndicator
+                          color={APP_COLORS.primary}
+                          size="large"
+                        />
+                        <Text
+                          style={{
+                            color: 'white',
+                            marginTop: 8,
+                            fontWeight: 'bold',
+                          }}>
+                          {mediaItems[0].progress}%
+                        </Text>
                       </View>
                     )}
                     <TouchableOpacity
@@ -576,9 +537,24 @@ export default function CreatePostScreen() {
                           style={styles.sideMedia}
                         />
                         {item.isUploading && (
-                          <View style={[styles.mediaOverlay, { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-                            <ActivityIndicator color={APP_COLORS.primary} size="small" />
-                            <Text style={{ color: 'white', marginTop: 4, fontSize: 10, fontWeight: 'bold' }}>{item.progress}%</Text>
+                          <View
+                            style={[
+                              styles.mediaOverlay,
+                              { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+                            ]}>
+                            <ActivityIndicator
+                              color={APP_COLORS.primary}
+                              size="small"
+                            />
+                            <Text
+                              style={{
+                                color: 'white',
+                                marginTop: 4,
+                                fontSize: 10,
+                                fontWeight: 'bold',
+                              }}>
+                              {item.progress}%
+                            </Text>
                           </View>
                         )}
                         <TouchableOpacity
@@ -595,283 +571,193 @@ export default function CreatePostScreen() {
                         onPress={pickMedia}
                         disabled={isUploadingAny}>
                         <>
-                            <ImagePlus
-                              size={24}
-                              color={APP_COLORS.onSurfaceVariant}
-                            />
-                            <Text style={styles.uploadTextSmall}>Upload</Text>
-                          </>
+                          <ImagePlus
+                            size={24}
+                            color={APP_COLORS.onSurfaceVariant}
+                          />
+                          <Text style={styles.uploadTextSmall}>Upload</Text>
+                        </>
                       </TouchableOpacity>
                     )}
                   </View>
                 </>
               ) : (
-                /* Empty State */
-                <>
-                  <TouchableOpacity
-                    style={styles.mainEmptyBox}
-                    onPress={pickMedia}>
-                    <ImageIcon size={48} color="rgba(71, 69, 84, 0.2)" />
-                  </TouchableOpacity>
-                  <View style={styles.sideMediaContainer}>
-                    <TouchableOpacity
-                      style={styles.uploadBoxSmall}
-                      onPress={pickMedia}
-                      disabled={isUploadingAny}>
-                      <>
-                            <ImagePlus
-                              size={24}
-                              color={APP_COLORS.onSurfaceVariant}
-                            />
-                            <Text style={styles.uploadTextSmall}>Upload</Text>
-                          </>
-                    </TouchableOpacity>
-                    <View style={styles.emptyBoxSmall}>
-                      <ImageIcon size={24} color="rgba(71, 69, 84, 0.2)" />
-                    </View>
+                /* Empty Dropzone State */
+                <TouchableOpacity
+                  style={styles.dropZoneEmptyBox}
+                  onPress={pickMedia}>
+                  <UploadCloud size={48} color={APP_COLORS.outlineVariant} />
+                  <Text style={styles.dropZoneTitle}>Drag and drop assets here</Text>
+                  <Text style={styles.dropZoneSub}>Supports High-Res JPG, PNG, or MP4 up to 100MB</Text>
+                  <View style={styles.browseButton}>
+                    <Text style={styles.browseButtonText}>Browse Files</Text>
                   </View>
-                </>
+                </TouchableOpacity>
               )}
             </View>
           </View>
 
           {/* Caption Editor */}
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionLabel}>CAPTION</Text>
-              <Text style={styles.charCount}>{caption.length} / 2200</Text>
-            </View>
             <View style={styles.captionContainer}>
               <TextInput
                 style={styles.captionInput}
-                placeholder="What's the story behind this post?"
-                placeholderTextColor={APP_COLORS.outline}
+                placeholder="What's on your mind?&#10;Capture your audience's attention..."
+                placeholderTextColor={APP_COLORS.outlineVariant}
                 multiline
                 numberOfLines={8}
                 maxLength={2200}
                 value={caption}
                 onChangeText={setCaption}
               />
-              <View style={styles.captionTools}>
-                <TouchableOpacity style={styles.toolBtn}>
-                  <Smile size={24} color={APP_COLORS.onSurfaceVariant} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.toolBtn}>
-                  <AtSign size={24} color={APP_COLORS.onSurfaceVariant} />
-                </TouchableOpacity>
+              <View style={styles.captionFooter}>
+                <View style={styles.captionTools}>
+                  <TouchableOpacity style={styles.toolBtn}>
+                    <Smile size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.toolBtn}>
+                    <MapPin size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.toolBtn}>
+                    <Text style={styles.boldIconText}>B</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.charCount}>
+                  {caption.length} / 2200
+                </Text>
               </View>
             </View>
           </View>
 
-          {/* Advanced Settings */}
-          <View style={styles.advancedSection}>
-            <TouchableOpacity
-              style={styles.advancedRow}
-              activeOpacity={0.7}
-              onPress={() => setLocationModalVisible(true)}>
-              <View style={styles.advancedLeft}>
-                <MapPin size={24} color={APP_COLORS.onSurfaceVariant} />
-                <Text style={styles.advancedText}>Add Location</Text>
+          {/* Scheduling Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitleWithIcon}>
+                <Calendar size={18} color="#f97316" />
+                <Text style={styles.sectionTitleText}>Scheduling</Text>
+              </Text>
+            </View>
+            <View style={styles.schedulingContainer}>
+              <TouchableOpacity
+                style={styles.scheduleInputCard}
+                onPress={() => {
+                  setIsScheduled(true);
+                  setShowDatePicker(true);
+                }}>
+                <View>
+                  <Text style={styles.scheduleInputLabel}>PUBLISH DATE</Text>
+                  <Text style={styles.scheduleInputValue}>
+                    {scheduledDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </Text>
+                </View>
+                <Calendar size={20} color={APP_COLORS.onSurfaceVariant} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.scheduleInputCard}
+                onPress={() => {
+                  setIsScheduled(true);
+                  setShowTimePicker(true);
+                }}>
+                <View>
+                  <Text style={styles.scheduleInputLabel}>OPTIMIZED TIME</Text>
+                  <Text style={styles.scheduleInputValue}>
+                    {scheduledDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+                <Sparkles size={20} color={APP_COLORS.onSurfaceVariant} />
+              </TouchableOpacity>
+
+              <View style={styles.scheduleInfoBanner}>
+                <View style={styles.bannerIconBox}>
+                  <Text style={{ fontSize: 10, fontWeight: '800', color: '#ea580c' }}>i</Text>
+                </View>
+                <Text style={styles.infoBannerText}>Peak engagement predicted for LinkedIn</Text>
               </View>
-              <ChevronRight size={24} color={APP_COLORS.outline} />
-            </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Categories Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitleWithIcon}>
+              <Tag size={18} color={APP_COLORS.onSurfaceVariant} />
+              <Text style={styles.sectionTitleText}>Categories</Text>
+            </Text>
+          </View>
+          <View style={styles.categoriesContainer}>
+            {tags.length > 0 ? (
+              tags.map((tag, idx) => (
+                <View key={idx} style={styles.categoryChip}>
+                  <Text style={styles.categoryChipText}>{tag}</Text>
+                  <TouchableOpacity
+                    onPress={() => setTags(tags.filter((_, i) => i !== idx))}>
+                    <X size={14} color="#64748b" style={{ marginLeft: 4 }} />
+                  </TouchableOpacity>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyCategoriesText}>No categories added yet.</Text>
+            )}
 
             <TouchableOpacity
-              style={styles.advancedRow}
-              activeOpacity={0.7}
+              style={styles.addCategoryBtn}
               onPress={() => setTagsModalVisible(true)}>
-              <View style={styles.advancedLeft}>
-                <Tag size={24} color={APP_COLORS.onSurfaceVariant} />
-                <Text style={styles.advancedText}>Tag People</Text>
-              </View>
-              <ChevronRight size={24} color={APP_COLORS.outline} />
+              <Text style={styles.addCategoryBtnText}>+ New</Text>
             </TouchableOpacity>
+          </View>
 
-            <TouchableOpacity
-              style={styles.advancedRow}
-              activeOpacity={0.7}
-              onPress={() => {
-                setAdvancedModalVisible(true);
-              }}>
-              <View style={styles.advancedLeft}>
-                <Sliders size={24} color={APP_COLORS.onSurfaceVariant} />
-                <Text style={styles.advancedText}>Advanced Settings</Text>
-              </View>
-              <ChevronRight size={24} color={APP_COLORS.outline} />
-            </TouchableOpacity>
-            {/* Modal Components */}
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={locationModalVisible}
-              onRequestClose={() => setLocationModalVisible(false)}>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Add Location</Text>
-                    <TouchableOpacity
-                      onPress={() => setLocationModalVisible(false)}>
-                      <X size={24} color={APP_COLORS.onSurface} />
-                    </TouchableOpacity>
-                  </View>
+          {/* Re-use tags modal for adding categories */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={tagsModalVisible}
+            onRequestClose={() => setTagsModalVisible(false)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Add Category</Text>
+                  <TouchableOpacity
+                    onPress={() => setTagsModalVisible(false)}>
+                    <X size={24} color={APP_COLORS.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.tagInputContainer}>
                   <TextInput
-                    style={styles.modalInput}
-                    placeholder="Search locations..."
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    placeholder="e.g. Marketing, Tech..."
                     placeholderTextColor={APP_COLORS.onSurfaceVariant}
-                    value={location}
-                    onChangeText={setLocation}
-                    autoFocus
+                    value={currentTagInput}
+                    onChangeText={setCurrentTagInput}
+                    onSubmitEditing={() => {
+                      if (currentTagInput.trim()) {
+                        setTags([...tags, currentTagInput.trim()]);
+                        setCurrentTagInput('');
+                      }
+                    }}
                   />
                   <TouchableOpacity
-                    style={styles.modalSaveButton}
-                    onPress={() => setLocationModalVisible(false)}>
-                    <Text style={styles.modalSaveButtonText}>
-                      Save Location
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </KeyboardAvoidingView>
-            </Modal>
-
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={tagsModalVisible}
-              onRequestClose={() => setTagsModalVisible(false)}>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Tag People</Text>
-                    <TouchableOpacity
-                      onPress={() => setTagsModalVisible(false)}>
-                      <X size={24} color={APP_COLORS.onSurface} />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.tagInputContainer}>
-                    <TextInput
-                      style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
-                      placeholder="Type username..."
-                      placeholderTextColor={APP_COLORS.onSurfaceVariant}
-                      value={currentTagInput}
-                      onChangeText={setCurrentTagInput}
-                      onSubmitEditing={() => {
-                        if (currentTagInput.trim()) {
-                          setTags([...tags, currentTagInput.trim()]);
-                          setCurrentTagInput('');
-                        }
-                      }}
-                    />
-                    <TouchableOpacity
-                      style={styles.addTagButton}
-                      onPress={() => {
-                        if (currentTagInput.trim()) {
-                          setTags([...tags, currentTagInput.trim()]);
-                          setCurrentTagInput('');
-                        }
-                      }}>
-                      <Text style={styles.addTagButtonText}>Add</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.tagsList}>
-                    {tags.map((tag, idx) => (
-                      <View key={idx} style={styles.tagChip}>
-                        <Text style={styles.tagChipText}>@{tag}</Text>
-                        <TouchableOpacity
-                          onPress={() =>
-                            setTags(tags.filter((_, i) => i !== idx))
-                          }>
-                          <X
-                            size={14}
-                            color={APP_COLORS.primary}
-                            style={{ marginLeft: 4 }}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.modalSaveButton}
-                    onPress={() => setTagsModalVisible(false)}>
-                    <Text style={styles.modalSaveButtonText}>Done</Text>
-                  </TouchableOpacity>
-                </View>
-              </KeyboardAvoidingView>
-            </Modal>
-
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={advancedModalVisible}
-              onRequestClose={() => setAdvancedModalVisible(false)}>
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Advanced Settings</Text>
-                    <TouchableOpacity
-                      onPress={() => setAdvancedModalVisible(false)}>
-                      <X size={24} color={APP_COLORS.onSurface} />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.settingRow}>
-                    <View>
-                      <Text style={styles.settingTitle}>Hide Like Count</Text>
-                      <Text style={styles.settingSubtitle}>
-                        Only you will see the total number of likes on this
-                        post.
-                      </Text>
-                    </View>
-                    <Switch
-                      value={hideLikes}
-                      onValueChange={setHideLikes}
-                      trackColor={{ true: APP_COLORS.primary }}
-                    />
-                  </View>
-
-                  <View style={styles.settingRow}>
-                    <View>
-                      <Text style={styles.settingTitle}>
-                        Turn Off Commenting
-                      </Text>
-                      <Text style={styles.settingSubtitle}>
-                        You can change this later from the post menu.
-                      </Text>
-                    </View>
-                    <Switch
-                      value={turnOffComments}
-                      onValueChange={setTurnOffComments}
-                      trackColor={{ true: APP_COLORS.primary }}
-                    />
-                  </View>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.advancedRow,
-                      { paddingHorizontal: 0, marginTop: 16 },
-                    ]}
-                    activeOpacity={0.7}
+                    style={styles.addTagButton}
                     onPress={() => {
-                      setAdvancedModalVisible(false);
-                      setTimeout(() => setShowDatePicker(true), 300);
+                      if (currentTagInput.trim()) {
+                        setTags([...tags, currentTagInput.trim()]);
+                        setCurrentTagInput('');
+                      }
                     }}>
-                    <View style={styles.advancedLeft}>
-                      <Calendar size={24} color={APP_COLORS.onSurfaceVariant} />
-                      <Text style={styles.advancedText}>
-                        Adjust Schedule Time
-                      </Text>
-                    </View>
-                    <ChevronRight size={24} color={APP_COLORS.outline} />
+                    <Text style={styles.addTagButtonText}>Add</Text>
                   </TouchableOpacity>
                 </View>
+                <TouchableOpacity
+                  style={styles.modalSaveButton}
+                  onPress={() => setTagsModalVisible(false)}>
+                  <Text style={styles.modalSaveButtonText}>Done</Text>
+                </TouchableOpacity>
               </View>
-            </Modal>
-          </View>
+            </KeyboardAvoidingView>
+          </Modal>
         </View>
 
         {/* Date/Time Pickers */}
@@ -886,7 +772,6 @@ export default function CreatePostScreen() {
                 setScheduledDate(date);
                 setShowTimePicker(true);
               } else if (isScheduled) {
-                // Cancelled flow
                 setIsScheduled(false);
               }
             }}
@@ -904,7 +789,6 @@ export default function CreatePostScreen() {
                   finalizeSchedule();
                 }
               } else if (isScheduled) {
-                // Cancelled flow
                 setIsScheduled(false);
               }
             }}
@@ -914,44 +798,17 @@ export default function CreatePostScreen() {
         <View style={{ height: 160 }} />
       </ScrollView>
 
-      {/* Floating Action Footer (Post/Schedule) */}
-      <View
-        style={[
-          styles.footerNav,
-          { paddingBottom: Platform.OS === 'ios' ? 104 : 86 },
-        ]}>
-        {isSubmitting ? (
-          <View style={styles.loadingFooter}>
-            <ActivityIndicator color={APP_COLORS.primary} size="large" />
-            <Text style={styles.loadingText}>
-              'Publishing your editorial...'
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.footerButtons}>
-            <TouchableOpacity
-              style={styles.scheduleButton}
-              activeOpacity={0.8}
-              onPress={handleSchedulePost}>
-              <Calendar
-                size={20}
-                color={APP_COLORS.onSurface}
-                strokeWidth={2.5}
-              />
-              <Text style={styles.scheduleButtonText}>Schedule Post</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.postNowButton}
-              activeOpacity={0.8}
-              onPress={handlePostNow}>
-              <Send size={20} color={APP_COLORS.onPrimary} strokeWidth={2.5} />
-              <Text style={styles.postNowButtonText}>Post Now</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </KeyboardAvoidingView >
+      {/* Beautiful Loading Overlay */}
+      {isSubmitting && (
+        <View style={styles.loadingOverlay}>
+          <Animated.View style={[styles.loadingPulseCircle, { transform: [{ scale: pulseValue }] }]}>
+            <Send size={48} color={APP_COLORS.onPrimary} />
+          </Animated.View>
+          <Text style={styles.loadingOverlayText}>Publishing your post...</Text>
+          <Text style={styles.loadingOverlaySubText}>Please wait while we send it across to your requested platforms.</Text>
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 }
 
@@ -985,11 +842,33 @@ const styles = StyleSheet.create({
     color: APP_COLORS.onSurface,
     letterSpacing: -0.5,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   iconButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+  },
+  profileButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  headerIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -1005,12 +884,73 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 4,
   },
+  heroTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '800',
     color: APP_COLORS.onSurface,
     letterSpacing: -1,
     lineHeight: 40,
+  },
+  draftBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 12,
+    shadowColor: '#1c1b1b',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+    marginTop: -20, // To pull it up slightly as per design absolute positioning
+  },
+  draftBadgeTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#000000',
+  },
+  draftBadgeSub: {
+    fontSize: 11,
+    color: '#8A8D9F',
+    marginTop: 2,
+  },
+  heroActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  btnSecondary: {
+    flex: 1,
+    backgroundColor: '#E2E8F0', // slate-200
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnSecondaryText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#334155', // slate-700
+  },
+  btnPrimary: {
+    flex: 1,
+    backgroundColor: APP_COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnPrimaryText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: APP_COLORS.onPrimary,
   },
   formContainer: {
     gap: 40,
@@ -1020,6 +960,45 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingRight: 24, // extra padding at the end of scroll
     paddingVertical: 4,
+  },
+  platformVerticalContainer: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.15)',
+    shadowColor: '#1c1b1b',
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+    gap: 8,
+  },
+  platformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  platformRowDisabled: {
+    opacity: 0.5,
+  },
+  platformRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  platformRowName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#334155', // slate-700
+  },
+  notConnectedTextInline: {
+    fontSize: 11,
+    color: APP_COLORS.error,
+    fontWeight: '600',
+    marginTop: 2,
   },
   platformSectionError: {
     // optional: highlighting container logic
@@ -1031,60 +1010,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginLeft: 4,
   },
-  platformCard: {
-    width: 130, // Fixed width prevents wrapping
-    backgroundColor: APP_COLORS.surfaceContainerLowest,
-    padding: 20,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(200, 196, 215, 0.15)', // ghost-border
-    shadowColor: '#1c1b1b',
-    shadowOpacity: 0.02,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-    gap: 16,
-  },
-  platformCardSelected: {
-    borderColor: APP_COLORS.primary,
-    backgroundColor: '#FAF9FF',
-  },
-  platformCardDisabled: {
-    opacity: 0.5,
-    backgroundColor: APP_COLORS.surfaceContainerLow,
-  },
-  platformCardErrorHighlight: {
-    borderColor: APP_COLORS.error,
-  },
-  platformCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   platformIconBox: {
     width: 40,
     height: 40,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: APP_COLORS.outlineVariant,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: APP_COLORS.primary,
-    borderColor: APP_COLORS.primary,
-  },
-  platformName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: APP_COLORS.onSurface,
   },
   notConnectedText: {
     fontSize: 10,
@@ -1135,12 +1066,41 @@ const styles = StyleSheet.create({
     backgroundColor: APP_COLORS.surfaceContainerLowest,
     position: 'relative',
   },
-  mainEmptyBox: {
-    flex: 2,
-    borderRadius: 24,
-    backgroundColor: 'rgba(229, 226, 225, 0.3)', // surface-container-highest/30
+  dropZoneEmptyBox: {
+    flex: 1, // take the full height of mediaGrid
+    borderRadius: 16,
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderWidth: 2,
+    borderColor: '#e2e8f0', // slate-200 dashed
+    borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
+  },
+  dropZoneTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  dropZoneSub: {
+    fontSize: 12,
+    color: '#8A8D9F',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  browseButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: APP_COLORS.primary,
+  },
+  browseButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: APP_COLORS.primary,
   },
   mainMedia: {
     width: '100%',
@@ -1215,29 +1175,107 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   captionContainer: {
-    position: 'relative',
-  },
-  captionInput: {
-    backgroundColor: APP_COLORS.surfaceContainerLow,
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
     borderRadius: 24,
     padding: 24,
-    paddingBottom: 60, // space for icons
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.15)', // invisible border to match others
+    shadowColor: '#1c1b1b',
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  captionInput: {
     fontSize: 18,
     color: APP_COLORS.onSurface,
-    minHeight: 200,
+    minHeight: 180, // slightly less since tools are inline now
     textAlignVertical: 'top',
+    padding: 0,
+    marginBottom: 20,
+  },
+  captionFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: APP_COLORS.surfaceContainerHighest, // thin divider line based on design
   },
   captionTools: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
     flexDirection: 'row',
     gap: 8,
   },
   toolBtn: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: 'transparent', // hover:bg-surface-container-high isn't great in RN, keep transparent
+    backgroundColor: 'transparent',
+  },
+  boldIconText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  sectionTitleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionTitleText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+    marginLeft: 8,
+  },
+  schedulingContainer: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.15)',
+    gap: 12,
+  },
+  scheduleInputCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    borderRadius: 16,
+    padding: 16,
+  },
+  scheduleInputLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: APP_COLORS.outline,
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  scheduleInputValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: APP_COLORS.onSurface,
+  },
+  scheduleInfoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff7ed', // orange-50
+    borderRadius: 12,
+    padding: 12,
+    gap: 12,
+  },
+  bannerIconBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ffedd5', // orange-100
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fed7aa', // orange-200
+  },
+  infoBannerText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#ea580c', // orange-600
   },
   advancedSection: {
     gap: 8,
@@ -1382,16 +1420,48 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 24,
   },
-  tagChip: {
+  categoriesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    padding: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.15)',
+  },
+  categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(83, 65, 205, 0.1)', // primary 10%
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    backgroundColor: 'rgba(234, 67, 83, 0.1)', // primary 10%
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
   },
-  tagChipText: {
+  categoryChipText: {
     color: APP_COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  emptyCategoriesText: {
+    fontSize: 14,
+    color: APP_COLORS.outline,
+    fontStyle: 'italic',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+  addCategoryBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: APP_COLORS.outlineVariant,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addCategoryBtnText: {
+    color: '#64748b',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -1424,5 +1494,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: APP_COLORS.primary,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(252, 249, 248, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  loadingPulseCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: APP_COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: APP_COLORS.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  loadingOverlayText: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#1f2937',
+    marginBottom: 8,
+  },
+  loadingOverlaySubText: {
+    fontSize: 14,
+    color: '#4b5563',
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
 });

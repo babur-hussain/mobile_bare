@@ -64,6 +64,11 @@ export const postsService = {
     return response.data.data;
   },
 
+  async getPostAnalytics(postId: string): Promise<any> {
+    const response = await api.get(`/api/v1/posts/${postId}/analytics`);
+    return response.data.data || response.data; // Depending on interceptor structure
+  },
+
   async update(
     postId: string,
     data: Partial<CreatePostData>,
@@ -74,5 +79,23 @@ export const postsService = {
 
   async delete(postId: string): Promise<void> {
     await api.delete(`/api/v1/posts/${postId}`);
+  },
+
+  async deleteFacebook(postId: string): Promise<void> {
+    await api.delete(`/api/v1/posts/${postId}/facebook`);
+  },
+
+  async deleteInstagram(postId: string): Promise<void> {
+    await api.delete(`/api/v1/posts/${postId}/instagram`);
+  },
+
+  async getFacebookAnalytics(postId: string): Promise<any> {
+    const response = await api.get(`/api/v1/posts/${postId}/analytics/facebook`);
+    return response.data.data || response.data;
+  },
+
+  async getInstagramAnalytics(postId: string): Promise<any> {
+    const response = await api.get(`/api/v1/posts/${postId}/analytics/instagram`);
+    return response.data.data || response.data;
   },
 };

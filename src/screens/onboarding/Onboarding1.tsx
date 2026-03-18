@@ -1,432 +1,420 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Image,
-    Platform,
-    ScrollView,
-    Dimensions,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+  Linking,
+  Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Instagram,
+  AtSign,
+  BarChart2,
+  Youtube,
+  Twitter,
+  Check,
+  Plus,
+} from 'lucide-react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../../store';
+import { fetchAllAccounts } from '../../store/actions/accounts.actions';
+import { socialService } from '../../services/social.service';
 
 const { width } = Dimensions.get('window');
 
+// ── Platforms in the same order as accounts.tsx ──────────────────────────────
+type PlatformKey = 'instagram' | 'threads' | 'facebook' | 'youtube' | 'x';
+
+interface PlatformDef {
+  key: PlatformKey;
+  label: string;
+  meta: string;
+  iconColor: string;
+  Icon: React.ComponentType<any>;
+}
+
+const PLATFORMS: PlatformDef[] = [
+  { key: 'instagram', label: 'Instagram', meta: 'BUSINESS ACCOUNT', iconColor: '#5341cd', Icon: Instagram },
+  { key: 'threads', label: 'Threads', meta: 'TEXT CONVERSATIONS', iconColor: '#1c1b1b', Icon: AtSign },
+  { key: 'facebook', label: 'Facebook', meta: 'COMMUNITY REACH', iconColor: '#0058bd', Icon: BarChart2 },
+  { key: 'youtube', label: 'YouTube', meta: 'VIDEO CONTENT', iconColor: '#b2004b', Icon: Youtube },
+  { key: 'x', label: 'X (Twitter)', meta: 'UPDATE & TREND', iconColor: '#1DA1F2', Icon: Twitter },
+];
+
+const AVATAR_URLS = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuAmcA1yRzR9Z7Ur9EeJMpTQlP7OYt5cAyBsRdgeLSeUiqIdlfyjqPjU1AkJIgr1lm-HwUgTW4OQCFOe30rM2PGadQC-uicjx8EnRivUrwAyRQ14BAn7yGVGKW6C_bBugQHNpM4sC72JqP43eMNtgPgGkwDkcbjSra4EmTdXpAYmj-gxbTmv5IykIX52x-nxk6e9Sn_bH8kxC0-A9Zgwh_8y6j1o7k7-uVilRvN_G21G499drIbK6_SWPtjRGLOui1vOz3_zS45_YeFz',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuD6edTDPS9BlsjYn2icih_r87WYWF33Dg9BQ8VW9dPMjCxyuv_Dfw3f0qwbkMF1HBT65gsVqOTcGuk0V80D_Emuz-aPq2fUD_dJmbC16B_xA_uaa0zqY93m27d4sj2Ri-bW6uRZ5HVrM2SINc29fAeD3BzNzVR-3vN95d-zDIlL0qCwP3vQEVj82TaW6T8u34lzFq4K-__o3J7ei6Us6jn1upFLRWqviWThzUPsvnEYj4ullDJvNyNotzTUJkh4i-JPj6WG-NwE26x2',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuD2KcTNVD7fSgsZ6TCamH1iR7rp4HXmLC0fV0nbBMjz_cwIK96-B2rQaHOwo26h1KOBMVz55P_3_IsSj7IajDJwcbxwtL4LznebWdYpc3rMifVd6GfQqdeQvcsMlWfaWH8BsRyOjIencqxUoEoDVRBVKyfhgFxaIMN7beAWoxVOMHsXLkVet3jFw0rhcroVuOQhGmJcjC5yPHam6hkguJSvpYujo2mYPKcIWgRsKhrdHcD2cBGcrxcY0hhheBSKAew2vZWYT9NwmH-5',
+];
+
 const Onboarding1 = () => {
-    const navigation = useNavigation<any>();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: accounts } = useSelector((state: RootState) => state.accounts);
 
-    return (
-        <SafeAreaView style={styles.container}>
-            {/* Decorative Gradient Blurs */}
-            <View style={styles.decorativeBottomRight} />
-            <View style={styles.decorativeTopLeft} />
+  useEffect(() => {
+    dispatch(fetchAllAccounts());
+  }, [dispatch]);
 
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                    <View style={styles.logoContainer}>
-                        <Text style={styles.logoText}>P</Text>
+  // ── same deep-link handler as accounts.tsx ───────────────────────────────
+  const handleDeepLink = useCallback(
+    (event: { url: string }) => {
+      const url = event.url;
+      if (url.startsWith('postingautomation://social-auth-callback')) {
+        const queryString = url.split('?')[1] || '';
+        const params: Record<string, string> = {};
+        queryString.split('&').forEach(pair => {
+          const [key, ...rest] = pair.split('=');
+          if (key) params[key] = rest.join('=');
+        });
+        const success = params.success === 'true';
+        const platform = params.platform;
+        const account = params.account;
+        const message = params.message;
+
+        if (success && platform && account) {
+          Alert.alert(
+            'Account Connected',
+            `Successfully connected ${decodeURIComponent(account)} on ${platform}.`,
+          );
+        } else {
+          Alert.alert(
+            'Connection Failed',
+            message
+              ? decodeURIComponent(message)
+              : 'Failed to connect account. Please try again.',
+          );
+        }
+        dispatch(fetchAllAccounts());
+      }
+    },
+    [dispatch],
+  );
+
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    Linking.getInitialURL().then(url => {
+      if (url) handleDeepLink({ url });
+    });
+    return () => subscription.remove();
+  }, [handleDeepLink]);
+
+  // ── same connect logic as accounts.tsx ───────────────────────────────────
+  const handleConnect = async (platform: PlatformKey) => {
+    try {
+      const url = await socialService.getConnectUrl(platform);
+      if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+        Alert.alert(
+          'Connection Error',
+          'Could not get a valid authorization URL. Please check your Meta app configuration.',
+        );
+        return;
+      }
+      if (await InAppBrowser.isAvailable()) {
+        const result = await InAppBrowser.openAuth(
+          url,
+          'postingautomation://',
+          {
+            ephemeralWebSession: false,
+            showTitle: true,
+            enableUrlBarHiding: true,
+            enableDefaultShare: false,
+          },
+        );
+        if (result.type === 'success' && result.url) {
+          handleDeepLink({ url: result.url });
+        }
+      } else {
+        await Linking.openURL(url);
+      }
+    } catch (error: any) {
+      Alert.alert(
+        'Connection Error',
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to start connection. Please try again.',
+      );
+    }
+  };
+
+  // ── check which platforms are already connected ───────────────────────────
+  const isConnected = (key: PlatformKey): boolean => {
+    if (key === 'x') {
+      return accounts.some((a: any) => a.platform === 'x' || a.platform === 'twitter');
+    }
+    return accounts.some((a: any) => a.platform === key);
+  };
+
+  const connectedCount = PLATFORMS.filter(p => isConnected(p.key)).length;
+
+  return (
+    <LinearGradient
+      colors={['#ff4d6d', '#b71029', '#468faf']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.root}>
+
+      {/* Glow blobs */}
+      <View style={styles.blobTopLeft} />
+      <View style={styles.blobBottomRight} />
+
+      <View style={[styles.safeWrapper, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <Text style={styles.brandText}>PostOnce</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.skipText}>SKIP</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Scrollable body ── */}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}>
+
+          {/* Hero headline */}
+          <View style={styles.heroSection}>
+            <Text style={styles.heroTitle}>
+              {'Connect your\n'}
+              <Text style={styles.heroTitleFade}>social accounts</Text>
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              Sync your platforms once and reach your audience everywhere.{' '}
+              High energy distribution starts here.
+            </Text>
+          </View>
+
+          {/* Glass card */}
+          <View style={styles.glassCard}>
+
+            {/* Platform rows */}
+            {PLATFORMS.map(p => {
+              const connected = isConnected(p.key);
+              return (
+                <TouchableOpacity
+                  key={p.key}
+                  style={[styles.platformRow, connected && styles.platformRowLinked]}
+                  onPress={() => !connected && handleConnect(p.key)}
+                  activeOpacity={connected ? 1 : 0.75}>
+
+                  {/* Icon box */}
+                  <View style={styles.platformIconBox}>
+                    <p.Icon size={22} color={p.iconColor} />
+                  </View>
+
+                  {/* Labels */}
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.platformName}>{p.label}</Text>
+                    <Text style={[styles.platformStatus, connected && styles.platformStatusLinked]}>
+                      {connected ? 'LINKED' : 'CONNECT'}
+                    </Text>
+                  </View>
+
+                  {/* Action indicator */}
+                  {connected ? (
+                    <View style={styles.checkCircle}>
+                      <Check size={14} color="#ffffff" strokeWidth={3} />
                     </View>
-                    <Text style={styles.headerTitle}>PostOnce</Text>
-                </View>
-                <View style={styles.headerRight}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Icon name="bell-outline" size={22} color="#474554" />
-                    </TouchableOpacity>
-                    <View style={styles.profileContainer}>
-                        <Image
-                            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxY1JSK5wHDLLm4CXzaxUBoN8znNVI2ep74MkhrN2LCDy4gk7GWtLwq_GhrdRidtj7hpYRK1mNAxjiM2rN26cjsXPbFGt90RGb0LjQwoJaJgJHDlXh03WpO6pY3MzV7k_06UOy3JHf9mIxc4JmM8956H6L4GNAbzwgBMKS2qNFrOw3QNw6bicYZgiQALdMGV0LYk23bPEaTblJW0TTAV13hrVCbgKCzzegSvfELLsD14lmmbvrILbsHK3ze_U2xhRzTm-saDdIEwUC' }}
-                            style={styles.profileImage}
-                        />
+                  ) : (
+                    <View style={styles.addCircle}>
+                      <Plus size={16} color="rgba(255,255,255,0.55)" strokeWidth={2.5} />
                     </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+
+            {/* Social proof + CTA */}
+            <View style={styles.proofSection}>
+              <View style={styles.avatarRow}>
+                {AVATAR_URLS.map((url, i) => (
+                  <Image
+                    key={i}
+                    source={{ uri: url }}
+                    style={[styles.avatar, { marginLeft: i === 0 ? 0 : -10, zIndex: 10 - i }]}
+                    resizeMode="cover"
+                  />
+                ))}
+                <View style={[styles.avatar, styles.avatarCount, { marginLeft: -10 }]}>
+                  <Text style={styles.avatarCountText}>+2k</Text>
                 </View>
+              </View>
+              <Text style={styles.proofText}>
+                Join 2,000+ creators managing their presence with PostOnce.
+              </Text>
             </View>
 
-            {/* Scrollable Content */}
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                bounces={true}
-            >
-                {/* Progress Indicator */}
-                <View style={styles.progressContainer}>
-                    <LinearGradient
-                        colors={['#5341cd', '#6c5ce7']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.progressActive}
-                    />
-                    <View style={styles.progressInactive} />
-                    <View style={styles.progressInactive} />
-                </View>
+            {/* CTA */}
+            <TouchableOpacity
+              style={styles.ctaButton}
+              onPress={() => navigation.navigate('Onboarding2')}
+              activeOpacity={0.88}>
+              <Text style={styles.ctaButtonText}>Continue Journey</Text>
+            </TouchableOpacity>
+          </View>
 
-                {/* Hero Section */}
-                <View style={styles.heroSection}>
-                    <Text style={styles.heroTitle}>
-                        Connect your social accounts
-                    </Text>
-                    <Text style={styles.heroSubtitle}>
-                        PostOnce syncs with your favorite platforms to streamline your editorial workflow in one fluid experience.
-                    </Text>
-                </View>
+          <View style={{ height: 24 }} />
+        </ScrollView>
 
-                {/* Grid Cards */}
-                <View style={styles.gridContainer}>
-                    {/* Row 1: Instagram + LinkedIn */}
-                    <View style={styles.row}>
-                        <TouchableOpacity style={styles.card} activeOpacity={0.7}>
-                            <View style={[styles.iconContainer, { backgroundColor: 'rgba(225, 48, 108, 0.1)' }]}>
-                                <Icon name="instagram" size={24} color="#E1306C" />
-                            </View>
-                            <Text style={styles.cardTitle}>Instagram</Text>
-                            <Text style={styles.cardSubtitle}>READY TO LINK</Text>
-                            <View style={styles.cardArrow}>
-                                <Icon name="plus-circle-outline" size={22} color="#787586" />
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.card, styles.cardBordered]} activeOpacity={0.7}>
-                            <View style={[styles.iconContainer, { backgroundColor: 'rgba(0, 88, 189, 0.1)' }]}>
-                                <Icon name="linkedin" size={24} color="#0058bd" />
-                            </View>
-                            <Text style={styles.cardTitle}>LinkedIn</Text>
-                            <Text style={styles.cardSubtitle}>PROFESSIONAL NETWORK</Text>
-                            <View style={styles.cardArrow}>
-                                <Icon name="plus-circle-outline" size={22} color="#787586" />
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Wide Card: X / Twitter */}
-                    <TouchableOpacity style={[styles.card, styles.cardWide]} activeOpacity={0.7}>
-                        <View style={styles.cardRowContent}>
-                            <View style={[styles.iconContainerInline, { backgroundColor: '#313030' }]}>
-                                <Icon name="close" size={22} color="#fcf9f8" />
-                            </View>
-                            <View>
-                                <Text style={styles.cardTitle}>X Platform</Text>
-                                <Text style={styles.cardSubtitleNormal}>Formerly Twitter</Text>
-                            </View>
-                        </View>
-                        <Icon name="plus-circle-outline" size={22} color="#787586" />
-                    </TouchableOpacity>
-
-                    {/* Row 2: Pinterest + TikTok */}
-                    <View style={styles.row}>
-                        <TouchableOpacity style={[styles.card, styles.cardBordered]} activeOpacity={0.7}>
-                            <View style={[styles.iconContainer, { backgroundColor: 'rgba(178, 0, 75, 0.1)' }]}>
-                                <Icon name="pinterest" size={24} color="#b2004b" />
-                            </View>
-                            <Text style={styles.cardTitle}>Pinterest</Text>
-                            <Text style={styles.cardSubtitle}>VISUAL INSPIRATION</Text>
-                            <View style={styles.cardArrow}>
-                                <Icon name="plus-circle-outline" size={22} color="#787586" />
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.card} activeOpacity={0.7}>
-                            <View style={[styles.iconContainer, { backgroundColor: 'rgba(28, 27, 27, 0.1)' }]}>
-                                <Icon name="music-note" size={24} color="#1c1b1b" />
-                            </View>
-                            <Text style={styles.cardTitle}>TikTok</Text>
-                            <Text style={styles.cardSubtitle}>SHORT-FORM VIDEO</Text>
-                            <View style={styles.cardArrow}>
-                                <Icon name="plus-circle-outline" size={22} color="#787586" />
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* Footer spacing inside scroll */}
-                <View style={{ height: 32 }} />
-            </ScrollView>
-
-            {/* Fixed Footer Actions (outside ScrollView) */}
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Onboarding2')}
-                    activeOpacity={0.85}
-                >
-                    <LinearGradient
-                        colors={['#5341cd', '#6c5ce7']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.nextButton}
-                    >
-                        <Text style={styles.nextButtonText}>Next</Text>
-                        <Icon name="arrow-right" size={20} color="#ffffff" style={{ marginLeft: 8 }} />
-                    </LinearGradient>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.skipButton}
-                    onPress={() => navigation.navigate('Login')}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.skipButtonText}>Skip for now</Text>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
-    );
+        {/* Page dots */}
+        <View style={styles.dotsRow}>
+          <View style={[styles.dot, styles.dotActive]} />
+          <View style={styles.dot} />
+          <View style={styles.dot} />
+        </View>
+      </View>
+    </LinearGradient>
+  );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fcf9f8',
-    },
-    decorativeBottomRight: {
-        position: 'absolute',
-        bottom: -100,
-        right: -100,
-        width: 350,
-        height: 350,
-        borderRadius: 175,
-        backgroundColor: 'rgba(178, 0, 75, 0.05)',
-        zIndex: -1,
-    },
-    decorativeTopLeft: {
-        position: 'absolute',
-        top: 50,
-        left: -100,
-        width: 280,
-        height: 280,
-        borderRadius: 140,
-        backgroundColor: 'rgba(83, 65, 205, 0.05)',
-        zIndex: -1,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 24,
-        height: 56,
-        backgroundColor: 'rgba(252, 249, 248, 0.85)',
-        zIndex: 10,
-    },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    logoContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#6c5ce7',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoText: {
-        color: '#faf6ff',
-        fontSize: 18,
-        fontWeight: '800',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#1c1b1b',
-        letterSpacing: -0.5,
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    iconButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    profileContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#e5e2e1',
-        borderWidth: 2,
-        borderColor: '#f6f3f2',
-        overflow: 'hidden',
-    },
-    profileImage: {
-        width: '100%',
-        height: '100%',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingHorizontal: 24,
-        paddingTop: 24,
-        paddingBottom: 16,
-    },
-    progressContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 8,
-        marginBottom: 32,
-    },
-    progressActive: {
-        height: 6,
-        width: 48,
-        borderRadius: 3,
-    },
-    progressInactive: {
-        height: 6,
-        width: 48,
-        borderRadius: 3,
-        backgroundColor: '#e5e2e1',
-    },
-    heroSection: {
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    heroTitle: {
-        fontSize: 32,
-        fontWeight: '800',
-        textAlign: 'center',
-        color: '#5341cd',
-        letterSpacing: -1,
-        marginBottom: 12,
-        lineHeight: 38,
-    },
-    heroSubtitle: {
-        fontSize: 15,
-        color: '#474554',
-        textAlign: 'center',
-        lineHeight: 22,
-        maxWidth: '90%',
-    },
-    gridContainer: {
-        gap: 12,
-    },
-    row: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    card: {
-        flex: 1,
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 16,
-        ...Platform.select({
-            ios: {
-                shadowColor: 'rgba(28, 27, 27, 0.06)',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 1,
-                shadowRadius: 16,
-            },
-            android: {
-                elevation: 3,
-            },
-        }),
-    },
-    cardBordered: {
-        backgroundColor: '#f6f3f2',
-        borderWidth: 1,
-        borderColor: 'rgba(200, 196, 215, 0.15)',
-        ...Platform.select({
-            ios: {
-                shadowOpacity: 0,
-            },
-            android: {
-                elevation: 0,
-            },
-        }),
-    },
-    cardWide: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 14,
-    },
-    cardRowContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 14,
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 12,
-    },
-    iconContainerInline: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#1c1b1b',
-        marginBottom: 3,
-    },
-    cardSubtitle: {
-        fontSize: 9,
-        fontWeight: '600',
-        color: '#474554',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
-    cardSubtitleNormal: {
-        fontSize: 13,
-        color: '#474554',
-    },
-    cardArrow: {
-        alignItems: 'flex-end',
-        marginTop: 'auto',
-        paddingTop: 8,
-    },
-    footer: {
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: Platform.OS === 'ios' ? 8 : 16,
-        gap: 12,
-        backgroundColor: '#fcf9f8',
-    },
-    nextButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 16,
-        borderRadius: 16,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#5341cd',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-            },
-            android: {
-                elevation: 4,
-            },
-        }),
-    },
-    nextButtonText: {
-        color: '#ffffff',
-        fontSize: 17,
-        fontWeight: '800',
-    },
-    skipButton: {
-        paddingVertical: 10,
-        alignItems: 'center',
-    },
-    skipButtonText: {
-        color: '#474554',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-});
-
 export default Onboarding1;
+
+// ─────────────────────────────────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+
+  blobTopLeft: {
+    position: 'absolute', top: '-10%', left: '-10%',
+    width: width * 0.6, height: width * 0.6,
+    borderRadius: width * 0.3,
+    backgroundColor: '#ff7576', opacity: 0.4,
+  },
+  blobBottomRight: {
+    position: 'absolute', bottom: '-10%', right: '-10%',
+    width: width * 0.6, height: width * 0.6,
+    borderRadius: width * 0.3,
+    backgroundColor: '#026381', opacity: 0.4,
+  },
+
+  safeWrapper: { flex: 1 },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 16,
+  },
+  brandText: {
+    fontSize: 22, fontWeight: '900', color: '#ffffff', letterSpacing: -0.5,
+  },
+  skipText: {
+    color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '700', letterSpacing: 3,
+  },
+
+  scrollContent: { paddingHorizontal: 20 },
+
+  heroSection: { marginBottom: 24, paddingHorizontal: 4 },
+  heroTitle: {
+    fontSize: 40, fontWeight: '900', color: '#ffffff',
+    letterSpacing: -1.5, lineHeight: 46, marginBottom: 14,
+  },
+  heroTitleFade: { color: 'rgba(255,255,255,0.45)' },
+  heroSubtitle: {
+    fontSize: 15, color: 'rgba(255,255,255,0.80)', fontWeight: '500', lineHeight: 22,
+  },
+
+  glassCard: {
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    padding: 16,
+    gap: 10,
+    shadowColor: 'rgba(41,47,53,0.2)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    elevation: 10,
+  },
+
+  platformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
+  platformRowLinked: {
+    backgroundColor: 'rgba(255,255,255,0.20)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.30)',
+  },
+  platformIconBox: {
+    width: 46, height: 46, borderRadius: 10,
+    backgroundColor: '#ffffff',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  platformName: { color: '#ffffff', fontWeight: '700', fontSize: 15 },
+  platformStatus: {
+    color: 'rgba(255,255,255,0.55)', fontSize: 9,
+    fontWeight: '800', letterSpacing: 1.5,
+    textTransform: 'uppercase', marginTop: 2,
+  },
+  platformStatusLinked: { color: '#ffffff' },
+
+  checkCircle: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  addCircle: {
+    width: 28, height: 28, borderRadius: 14,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.30)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  proofSection: {
+    flexDirection: 'row', alignItems: 'center',
+    gap: 12, marginTop: 4,
+  },
+  avatarRow: { flexDirection: 'row', alignItems: 'center' },
+  avatar: {
+    width: 32, height: 32, borderRadius: 16,
+    borderWidth: 2, borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden',
+  },
+  avatarCount: { alignItems: 'center', justifyContent: 'center' },
+  avatarCountText: { color: '#ffffff', fontSize: 9, fontWeight: '900' },
+  proofText: {
+    flex: 1, color: 'rgba(255,255,255,0.7)',
+    fontSize: 12, lineHeight: 17, fontWeight: '500',
+  },
+
+  ctaButton: {
+    backgroundColor: '#ffffff', borderRadius: 14,
+    paddingVertical: 18,
+    alignItems: 'center', justifyContent: 'center',
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12, shadowRadius: 20, elevation: 6,
+  },
+  ctaButtonText: {
+    color: '#b71029', fontWeight: '900', fontSize: 17, letterSpacing: -0.3,
+  },
+
+  dotsRow: {
+    flexDirection: 'row', justifyContent: 'center',
+    alignItems: 'center', gap: 6,
+    paddingBottom: 20, paddingTop: 8,
+  },
+  dot: {
+    width: 40, height: 4, borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  dotActive: { backgroundColor: '#ffffff' },
+});
