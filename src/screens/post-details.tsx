@@ -945,6 +945,8 @@ const styles = StyleSheet.create({
   },
   gradientTitleContainer: {
     marginBottom: 16,
+    alignSelf: 'flex-start',
+    borderRadius: 8,
     // Note: To get the actual gradient text, we'd need @react-native-community/masked-view
     // For now, we'll use block gradient or just solid text to avoid more dependencies if not strictly needed
   },
@@ -954,7 +956,6 @@ const styles = StyleSheet.create({
     color: APP_COLORS.onPrimary, // if using background gradient
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
   },
   analyticsSubtitle: {
     color: APP_COLORS.onSurfaceVariant,
