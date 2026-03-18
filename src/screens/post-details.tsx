@@ -10,6 +10,8 @@ import {
   Linking,
   Animated,
   Easing,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
@@ -91,6 +93,7 @@ export default function PostDetails() {
 
   // Skeleton Animation Pulse
   const [pulseAnim] = useState(new Animated.Value(0.3));
+  const [selectedPlatform, setSelectedPlatform] = useState<any | null>(null);
 
   useEffect(() => {
     if (loadingAnalytics) {
@@ -115,20 +118,22 @@ export default function PostDetails() {
     }
   }, [loadingAnalytics, pulseAnim]);
 
+  const mediaUrl = post?.mediaUrl || post?.mediaUrls?.[0] || post?.img;
+
   useEffect(() => {
-    if (post?.img) {
+    if (mediaUrl) {
       // Basic check for video file extensions in the URL
       const _isVideo =
-        post.img.match(/\.(mp4|mov|m4v)$/i) || post.img.includes('video');
+        mediaUrl.match(/\.(mp4|mov|m4v)$/i) || mediaUrl.includes('video');
       setIsVideo(!!_isVideo);
 
       if (_isVideo) {
-        createThumbnail({ url: post.img, timeStamp: 1000 })
+        createThumbnail({ url: mediaUrl, timeStamp: 1000 })
           .then(res => setVideoThumbnail(res.path))
           .catch(err => console.log('Error generating thumbnail:', err));
       }
     }
-  }, [post?.img]);
+  }, [mediaUrl]);
 
   useEffect(() => {
     let mounted = true;
@@ -159,16 +164,25 @@ export default function PostDetails() {
           if (mounted) {
             const aggregated: any[] = [];
             let anySuccess = false;
+            const errors: string[] = [];
 
             results.forEach(res => {
               if (res.status === 'fulfilled' && res.value) {
                 aggregated.push(res.value);
                 anySuccess = true;
+              } else if (res.status === 'rejected') {
+                const errorMsg = res.reason?.response?.data?.message || res.reason?.message || 'Failed to fetch analytics.';
+                errors.push(errorMsg);
               }
             });
 
             if (!anySuccess) {
-              setAnalyticsError('Unable to fetch analytics from Meta. Please check your account connections.');
+              const uniqueErrors = Array.from(new Set(errors));
+              setAnalyticsError(
+                uniqueErrors.length > 0
+                  ? uniqueErrors.join('\n')
+                  : 'Unable to fetch analytics from Meta. Please check your account connections.'
+              );
             } else {
               setAnalytics(aggregated);
             }
@@ -183,9 +197,9 @@ export default function PostDetails() {
     };
   }, [post?._id, isPublished, post?.platforms]);
 
-  const platformList = post.platforms && Array.isArray(post.platforms)
-    ? post.platforms
-    : [];
+  const platformList = post.publishResults && Array.isArray(post.publishResults) && post.publishResults.some((r: any) => r.success)
+    ? post.publishResults.filter((r: any) => r.success).map((r: any) => r.platform)
+    : (post.platforms && Array.isArray(post.platforms) ? post.platforms : []);
 
   const displayAnalytics = platformList.map((platformName: string) => {
     const actual = analytics.find(
@@ -284,19 +298,19 @@ export default function PostDetails() {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Media Preview */}
-        {post.img ? (
+        {mediaUrl ? (
           <TouchableOpacity
             style={[styles.mediaPreview, { overflow: 'hidden' }]}
             activeOpacity={isVideo ? 0.8 : 1}
             onPress={() => {
               if (isVideo) {
-                Linking.openURL(post.img).catch(err =>
+                Linking.openURL(mediaUrl).catch(err =>
                   console.error("Couldn't load page", err),
                 );
               }
             }}>
             <Image
-              source={{ uri: isVideo ? videoThumbnail || post.img : post.img }}
+              source={{ uri: isVideo ? videoThumbnail || mediaUrl : mediaUrl }}
               style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
             />
             {isVideo && (
@@ -448,7 +462,14 @@ export default function PostDetails() {
                   ) : (
                     <>
                       {platformData.map((data: any, index: number) => (
-                        <View key={index} style={styles.barColumn}>
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.barColumn}
+                          onPress={() => {
+                            const stat = displayAnalytics.find((a: any) => a.platform === data.name);
+                            if (stat) setSelectedPlatform(stat);
+                          }}
+                        >
                           <View style={styles.barTrack}>
                             <View
                               style={[
@@ -463,7 +484,7 @@ export default function PostDetails() {
                           <Text style={styles.barLabel} numberOfLines={1}>
                             {data.name.substring(0, 3)}
                           </Text>
-                        </View>
+                        </TouchableOpacity>
                       ))}
                       {platformData.length === 0 && (
                         <Text style={styles.noDataText}>No platform data</Text>
@@ -651,79 +672,21 @@ export default function PostDetails() {
                 <Text style={[styles.cardTitle, { marginBottom: 16 }]}>
                   Platform Breakdown
                 </Text>
-                {displayAnalytics.map((platformStat: any, index: number) => (
-                  <View key={index} style={styles.platformCard}>
-                    <View style={styles.platformCardHeader}>
-                      <Text style={styles.platformNameText}>
-                        {platformStat.platform}
-                      </Text>
-                      <View style={styles.platformStatusBadge}>
-                        <Text style={styles.platformStatusText}>Active</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+                  {displayAnalytics.map((platformStat: any, index: number) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.platformMiniChip}
+                      onPress={() => setSelectedPlatform(platformStat)}
+                    >
+                      <View style={styles.platformChipHeader}>
+                        <Text style={styles.platformChipName}>{platformStat.platform}</Text>
+                        <Heart size={14} color={APP_COLORS.primary} style={{ marginLeft: 8 }} />
+                        <Text style={styles.platformChipValue}>{platformStat.likes || 0}</Text>
                       </View>
-                    </View>
-
-                    <View style={styles.platformStatsGrid}>
-                      <View style={styles.platformStatItem}>
-                        <Heart size={16} color={APP_COLORS.onSurfaceVariant} />
-                        <Text style={styles.platformStatValue}>
-                          {platformStat.likes || 0}
-                        </Text>
-                        <Text style={styles.platformStatLabel}>Likes</Text>
-                      </View>
-                      <View style={styles.platformStatItem}>
-                        <MessageCircle
-                          size={16}
-                          color={APP_COLORS.onSurfaceVariant}
-                        />
-                        <Text style={styles.platformStatValue}>
-                          {platformStat.comments || 0}
-                        </Text>
-                        <Text style={styles.platformStatLabel}>Comments</Text>
-                      </View>
-                      <View style={styles.platformStatItem}>
-                        <Share2 size={16} color={APP_COLORS.onSurfaceVariant} />
-                        <Text style={styles.platformStatValue}>
-                          {platformStat.shares || 0}
-                        </Text>
-                        <Text style={styles.platformStatLabel}>Shares</Text>
-                      </View>
-                      <View style={styles.platformStatItem}>
-                        <Users size={16} color={APP_COLORS.primary} />
-                        <Text
-                          style={[
-                            styles.platformStatValue,
-                            { color: APP_COLORS.primary },
-                          ]}>
-                          {platformStat.reach || 0}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.platformStatLabel,
-                            { color: APP_COLORS.primary },
-                          ]}>
-                          Reach
-                        </Text>
-                      </View>
-                      <View style={styles.platformStatItem}>
-                        <Eye size={16} color={APP_COLORS.secondary} />
-                        <Text
-                          style={[
-                            styles.platformStatValue,
-                            { color: APP_COLORS.secondary },
-                          ]}>
-                          {platformStat.impressions || 0}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.platformStatLabel,
-                            { color: APP_COLORS.secondary },
-                          ]}>
-                          Impress.
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                ))}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             )}
           </View>
@@ -761,6 +724,62 @@ export default function PostDetails() {
           </View>
         )}
       </ScrollView>
+
+      {/* Platform Analytics Modal */}
+      <Modal
+        visible={!!selectedPlatform}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedPlatform(null)}>
+        <TouchableWithoutFeedback onPress={() => setSelectedPlatform(null)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>{selectedPlatform?.platform} Analytics</Text>
+
+                <View style={[styles.platformStatsGrid, { width: '100%', marginBottom: 16 }]}>
+                  <View style={styles.platformStatItem}>
+                    <Heart size={20} color={APP_COLORS.onSurfaceVariant} />
+                    <Text style={styles.platformStatValue}>{selectedPlatform?.likes || 0}</Text>
+                    <Text style={styles.platformStatLabel}>Likes</Text>
+                  </View>
+                  <View style={styles.platformStatItem}>
+                    <MessageCircle size={20} color={APP_COLORS.onSurfaceVariant} />
+                    <Text style={styles.platformStatValue}>{selectedPlatform?.comments || 0}</Text>
+                    <Text style={styles.platformStatLabel}>Comments</Text>
+                  </View>
+                  <View style={styles.platformStatItem}>
+                    <Share2 size={20} color={APP_COLORS.onSurfaceVariant} />
+                    <Text style={styles.platformStatValue}>{selectedPlatform?.shares || 0}</Text>
+                    <Text style={styles.platformStatLabel}>Shares</Text>
+                  </View>
+                  <View style={styles.platformStatItem}>
+                    <Users size={20} color={APP_COLORS.primary} />
+                    <Text style={[styles.platformStatValue, { color: APP_COLORS.primary }]}>
+                      {selectedPlatform?.reach || 0}
+                    </Text>
+                    <Text style={[styles.platformStatLabel, { color: APP_COLORS.primary }]}>Reach</Text>
+                  </View>
+                  <View style={styles.platformStatItem}>
+                    <Eye size={20} color={APP_COLORS.secondary} />
+                    <Text style={[styles.platformStatValue, { color: APP_COLORS.secondary }]}>
+                      {selectedPlatform?.impressions || 0}
+                    </Text>
+                    <Text style={[styles.platformStatLabel, { color: APP_COLORS.secondary }]}>Impress.</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setSelectedPlatform(null)}>
+                  <Text style={styles.modalCloseButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1221,5 +1240,71 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: APP_COLORS.onSurfaceVariant,
     fontWeight: '600'
+  },
+  platformMiniChip: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 196, 215, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformChipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  platformChipName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: APP_COLORS.onSurface,
+    textTransform: 'capitalize',
+  },
+  platformChipValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginLeft: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: APP_COLORS.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: APP_COLORS.outlineVariant,
+    borderRadius: 2,
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginBottom: 24,
+    textTransform: 'capitalize',
+  },
+  modalCloseButton: {
+    marginTop: 32,
+    width: '100%',
+    paddingVertical: 14,
+    backgroundColor: APP_COLORS.primary,
+    borderRadius: 24,
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   }
 });
