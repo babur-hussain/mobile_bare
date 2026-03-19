@@ -152,6 +152,9 @@ export default function PostDetails() {
       if (platList.includes('instagram')) {
         fetchPromises.push(postsService.getInstagramAnalytics(post._id));
       }
+      if (platList.includes('threads')) {
+        fetchPromises.push(postsService.getThreadsAnalytics(post._id));
+      }
 
       if (fetchPromises.length === 0) {
         setLoadingAnalytics(false);
@@ -696,8 +699,11 @@ export default function PostDetails() {
         {!isFailed && !isScheduled && (
           <View style={{ gap: 12 }}>
             {platformList.map((platformName: string) => {
-              const isFb = platformName.toLowerCase() === 'facebook';
-              const isIg = platformName.toLowerCase() === 'instagram';
+              const platformLower = platformName.toLowerCase();
+              if (platformLower === 'threads') return null;
+
+              const isFb = platformLower === 'facebook';
+              const isIg = platformLower === 'instagram';
               return (
                 <TouchableOpacity
                   key={platformName}

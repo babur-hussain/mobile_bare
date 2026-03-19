@@ -27,6 +27,12 @@ export interface AppMedia {
   s3Url?: string;
   hasError: boolean;
 }
+
+export interface AppLocation {
+  name: string;
+  lat: number;
+  lng: number;
+}
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   Bell,
@@ -50,6 +56,7 @@ import {
   CheckCircle2,
   Sparkles,
   Share2,
+  Search,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,6 +64,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { createNewPost } from '../store/actions/posts.actions';
 import { mediaService } from '../services/media.service';
+import api from '../services/api';
 
 type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
@@ -106,8 +114,13 @@ export default function CreatePostScreen() {
   const [tagsModalVisible, setTagsModalVisible] = useState(false);
   const [advancedModalVisible, setAdvancedModalVisible] = useState(false);
 
+  // Location Search State
+  const [location, setLocation] = useState<AppLocation | null>(null);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [locationResults, setLocationResults] = useState<AppLocation[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+
   // Custom Tag Input
-  const [location, setLocation] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [currentTagInput, setCurrentTagInput] = useState('');
 
@@ -151,6 +164,23 @@ export default function CreatePostScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
+
+  const searchLocations = async (query: string) => {
+    if (!query.trim()) {
+      setLocationResults([]);
+      return;
+    }
+    setIsSearchingLocation(true);
+    try {
+      const res = await api.get(`/api/v1/locations/search?q=${encodeURIComponent(query)}`);
+      setLocationResults(res.data || []);
+    } catch (err) {
+      console.log('Location search failed', err);
+      setLocationResults([]);
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
 
   const pickMedia = async () => {
     const result = await launchImageLibrary({
@@ -291,6 +321,7 @@ export default function CreatePostScreen() {
           scheduledAt: submitAsScheduled
             ? scheduledDate.toISOString()
             : undefined,
+          location: location || undefined,
         }),
       ).unwrap();
 
@@ -452,6 +483,34 @@ export default function CreatePostScreen() {
               <TouchableOpacity
                 style={[
                   styles.platformRow,
+                  !hasPlatformAccount('threads') && styles.platformRowDisabled,
+                ]}
+                disabled={!hasPlatformAccount('threads')}
+                onPress={() => togglePlatform('threads')}
+                activeOpacity={0.8}>
+                <View style={styles.platformRowLeft}>
+                  <View style={[styles.platformIconBox, { backgroundColor: APP_COLORS.threads }]}>
+                    <AtSign size={20} color={APP_COLORS.onPrimary} />
+                  </View>
+                  <View>
+                    <Text style={styles.platformRowName}>Threads</Text>
+                    {!hasPlatformAccount('threads') && (
+                      <Text style={styles.notConnectedTextInline}>Connect Account</Text>
+                    )}
+                  </View>
+                </View>
+                <Switch
+                  value={selectedPlatforms.has('threads')}
+                  onValueChange={() => togglePlatform('threads')}
+                  disabled={!hasPlatformAccount('threads')}
+                  trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
+                  thumbColor="#ffffff"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.platformRow,
                   !hasPlatformAccount('x') && styles.platformRowDisabled,
                 ]}
                 disabled={!hasPlatformAccount('x')}
@@ -472,6 +531,34 @@ export default function CreatePostScreen() {
                   value={selectedPlatforms.has('x')}
                   onValueChange={() => togglePlatform('x')}
                   disabled={!hasPlatformAccount('x')}
+                  trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
+                  thumbColor="#ffffff"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.platformRow,
+                  !hasPlatformAccount('youtube') && styles.platformRowDisabled,
+                ]}
+                disabled={!hasPlatformAccount('youtube')}
+                onPress={() => togglePlatform('youtube')}
+                activeOpacity={0.8}>
+                <View style={styles.platformRowLeft}>
+                  <View style={[styles.platformIconBox, { backgroundColor: APP_COLORS.youtube }]}>
+                    <Youtube size={20} color={APP_COLORS.onPrimary} />
+                  </View>
+                  <View>
+                    <Text style={styles.platformRowName}>YouTube</Text>
+                    {!hasPlatformAccount('youtube') && (
+                      <Text style={styles.notConnectedTextInline}>Connect Account</Text>
+                    )}
+                  </View>
+                </View>
+                <Switch
+                  value={selectedPlatforms.has('youtube')}
+                  onValueChange={() => togglePlatform('youtube')}
+                  disabled={!hasPlatformAccount('youtube')}
                   trackColor={{ true: APP_COLORS.primary, false: '#e2e8f0' }}
                   thumbColor="#ffffff"
                 />
@@ -611,12 +698,21 @@ export default function CreatePostScreen() {
                 onChangeText={setCaption}
               />
               <View style={styles.captionFooter}>
+                {location && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#e2e8f0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginBottom: 8, alignSelf: 'flex-start' }}>
+                    <MapPin size={12} color={APP_COLORS.primary} style={{ marginRight: 4 }} />
+                    <Text style={{ fontSize: 12, color: APP_COLORS.onSurface }}>{location.name.split(',')[0]}...</Text>
+                    <TouchableOpacity onPress={() => setLocation(null)} style={{ marginLeft: 6 }}>
+                      <X size={14} color={APP_COLORS.onSurfaceVariant} />
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View style={styles.captionTools}>
                   <TouchableOpacity style={styles.toolBtn}>
                     <Smile size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.toolBtn}>
-                    <MapPin size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
+                  <TouchableOpacity style={styles.toolBtn} onPress={() => setLocationModalVisible(true)}>
+                    <MapPin size={20} color={location ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.toolBtn}>
                     <Text style={styles.boldIconText}>B</Text>
@@ -755,6 +851,60 @@ export default function CreatePostScreen() {
                   onPress={() => setTagsModalVisible(false)}>
                   <Text style={styles.modalSaveButtonText}>Done</Text>
                 </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          {/* Location Search Modal */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={locationModalVisible}
+            onRequestClose={() => setLocationModalVisible(false)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalOverlay}>
+              <View style={[styles.modalContent, { height: '80%' }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Search Location</Text>
+                  <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
+                    <X size={24} color={APP_COLORS.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.tagInputContainer}>
+                  <Search size={20} color={APP_COLORS.onSurfaceVariant} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    placeholder="Search places..."
+                    placeholderTextColor={APP_COLORS.onSurfaceVariant}
+                    value={locationSearchQuery}
+                    onChangeText={(text) => {
+                      setLocationSearchQuery(text);
+                      searchLocations(text);
+                    }}
+                    autoFocus
+                  />
+                </View>
+                {isSearchingLocation ? (
+                  <ActivityIndicator style={{ marginTop: 20 }} color={APP_COLORS.primary} />
+                ) : (
+                  <ScrollView style={{ marginTop: 16 }}>
+                    {locationResults.map((loc, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' }}
+                        onPress={() => {
+                          setLocation(loc);
+                          setLocationModalVisible(false);
+                          setLocationSearchQuery('');
+                          setLocationResults([]);
+                        }}>
+                        <Text style={{ fontSize: 16, color: APP_COLORS.onSurface, fontWeight: '500' }}>{loc.name.split(',')[0]}</Text>
+                        <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant, marginTop: 2 }}>{loc.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
               </View>
             </KeyboardAvoidingView>
           </Modal>

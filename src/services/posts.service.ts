@@ -5,6 +5,7 @@ export interface CreatePostData {
   caption?: string;
   platforms: ('instagram' | 'facebook')[];
   scheduledAt?: string;
+  location?: { name: string; lat: number; lng: number };
 }
 
 export interface PostItem {
@@ -43,12 +44,14 @@ export const postsService = {
     caption: string;
     platforms: ('facebook' | 'instagram')[];
     scheduledAt?: string;
+    location?: { name: string; lat: number; lng: number };
   }) {
     const payload = {
       caption: data.caption,
       platforms: data.platforms,
       mediaUrl: data.mediaUrls.length > 0 ? data.mediaUrls[0] : undefined,
       scheduledTime: data.scheduledAt,
+      location: data.location,
     };
     const response = await api.post('/api/v1/posts', payload);
     return response.data.data;
@@ -96,6 +99,11 @@ export const postsService = {
 
   async getInstagramAnalytics(postId: string): Promise<any> {
     const response = await api.get(`/api/v1/posts/${postId}/analytics/instagram`);
+    return response.data.data || response.data;
+  },
+
+  async getThreadsAnalytics(postId: string): Promise<any> {
+    const response = await api.get(`/api/v1/posts/${postId}/analytics/threads`);
     return response.data.data || response.data;
   },
 };

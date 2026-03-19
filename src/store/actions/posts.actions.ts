@@ -1,10 +1,10 @@
-import {createAsyncThunk} from '@reduxjs/toolkit';
-import {postsService} from '../../services/posts.service';
-import {setPostsLoading, setPostsError, setPosts} from '../slices/posts.slice';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { postsService } from '../../services/posts.service';
+import { setPostsLoading, setPostsError, setPosts } from '../slices/posts.slice';
 
 export const fetchAllPosts = createAsyncThunk(
   'posts/fetchAll',
-  async (page: number = 1, {dispatch, rejectWithValue}) => {
+  async (page: number = 1, { dispatch, rejectWithValue }) => {
     dispatch(setPostsLoading(true));
     try {
       const response = await postsService.getAll(page);
@@ -31,8 +31,9 @@ export const createNewPost = createAsyncThunk(
       caption?: string;
       platforms: string[];
       scheduledAt?: string;
+      location?: { name: string; lat: number; lng: number; };
     },
-    {dispatch, rejectWithValue},
+    { dispatch, rejectWithValue },
   ) => {
     try {
       const response = await postsService.create({
@@ -40,6 +41,7 @@ export const createNewPost = createAsyncThunk(
         caption: data.caption || '',
         platforms: data.platforms as ('facebook' | 'instagram')[],
         scheduledAt: data.scheduledAt,
+        location: data.location,
       });
       // the new post will be added to the top via unshift in the slice if we return it here,
       // or we can just fetch all posts again
