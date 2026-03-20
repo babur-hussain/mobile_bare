@@ -119,6 +119,8 @@ export default function HomeScreen() {
     return recentSlice.map(p => {
       const isPending = p.status === 'pending' || p.status === 'processing';
       const mediaUrl = Array.isArray(p.mediaUrl) ? p.mediaUrl[0] : p.mediaUrl;
+      // Use server-stored thumbnailUrl for videos (cross-device), fallback to mediaUrl for images
+      const img = (p as any).thumbnailUrl || mediaUrl || null;
       return {
         id: p._id,
         title: p.caption || 'No Caption',
@@ -126,11 +128,12 @@ export default function HomeScreen() {
         time: p.scheduledTime ? new Date(p.scheduledTime).toLocaleDateString() : 'Just now',
         platform: p.platforms?.[0] || 'App',
         platformColor: p.platforms?.[0] === 'instagram' ? APP_COLORS.primary : APP_COLORS.secondary,
-        img: mediaUrl || null,
+        img,
         desc: (p.caption || '').substring(0, 60) + (p.caption && p.caption.length > 60 ? '...' : ''),
       };
     });
   }, [posts]);
+
 
   const firstName = useMemo(() => {
     if (user?.name) return user.name.split(' ')[0];

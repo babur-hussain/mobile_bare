@@ -131,21 +131,28 @@ export default function PostDetails() {
   }, [loadingAnalytics, pulseAnim]);
 
   const mediaUrl = post?.mediaUrl || post?.mediaUrls?.[0] || post?.img;
+  const serverThumbnailUrl = post?.thumbnailUrl || null;
 
   useEffect(() => {
     if (mediaUrl) {
-      // Basic check for video file extensions in the URL
       const _isVideo =
         mediaUrl.match(/\.(mp4|mov|m4v)$/i) || mediaUrl.includes('video');
       setIsVideo(!!_isVideo);
 
       if (_isVideo) {
-        createThumbnail({ url: mediaUrl, timeStamp: 1000 })
-          .then(res => setVideoThumbnail(res.path))
-          .catch(err => console.log('Error generating thumbnail:', err));
+        if (serverThumbnailUrl) {
+          // Use server-stored thumbnail — works cross-device, no local generation needed
+          setVideoThumbnail(serverThumbnailUrl);
+        } else {
+          // Fallback: generate locally (only works on this device, this session)
+          createThumbnail({ url: mediaUrl, timeStamp: 1000 })
+            .then(res => setVideoThumbnail(res.path))
+            .catch(err => console.log('Error generating thumbnail:', err));
+        }
       }
     }
-  }, [mediaUrl]);
+  }, [mediaUrl, serverThumbnailUrl]);
+
 
   useEffect(() => {
     let mounted = true;

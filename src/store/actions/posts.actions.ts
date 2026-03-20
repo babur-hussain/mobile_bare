@@ -32,6 +32,7 @@ export const createNewPost = createAsyncThunk(
       platforms: string[];
       scheduledTime?: string;
       location?: { name: string; lat: number; lng: number; };
+      thumbnailUrl?: string;
     },
     { dispatch, rejectWithValue },
   ) => {
@@ -42,6 +43,7 @@ export const createNewPost = createAsyncThunk(
         platforms: data.platforms as ('facebook' | 'instagram')[],
         scheduledTime: data.scheduledTime,
         location: data.location,
+        thumbnailUrl: data.thumbnailUrl,
       });
       // #32: Insert new post directly into Redux store instead of re-fetching the entire list
       dispatch(addPost(response));

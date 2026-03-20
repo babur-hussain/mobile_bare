@@ -25,6 +25,7 @@ export interface AppMedia {
   isUploading: boolean;
   progress: number;
   s3Url?: string;
+  thumbnailS3Url?: string; // uploaded thumbnail URL for videos
   hasError: boolean;
 }
 
@@ -194,12 +195,15 @@ export default function CreatePostScreen() {
 
       newItems.forEach(async item => {
         let displayUri = item.asset.uri || '';
+        let thumbnailLocalPath: string | null = null;
+
         if (item.asset.type?.startsWith('video/')) {
           try {
             const thumb = await createThumbnail({
               url: displayUri,
               timeStamp: 1000,
             });
+            thumbnailLocalPath = thumb.path;
             displayUri = thumb.path;
           } catch (e) {
             console.log('Thumbnail error', e);
@@ -213,6 +217,7 @@ export default function CreatePostScreen() {
         );
 
         try {
+          // Upload main media
           const media = await mediaService.upload(item.asset, progressEvent => {
             if (progressEvent.total) {
               const progress = Math.round(
@@ -225,10 +230,22 @@ export default function CreatePostScreen() {
               );
             }
           });
+
+          // Upload thumbnail to S3 so it's stored server-side and cross-device
+          let thumbnailS3Url: string | undefined;
+          if (thumbnailLocalPath) {
+            try {
+              const thumbMedia = await mediaService.uploadFromPath(thumbnailLocalPath);
+              thumbnailS3Url = thumbMedia.s3Url;
+            } catch (thumbErr) {
+              console.log('Thumbnail S3 upload failed (non-critical):', thumbErr);
+            }
+          }
+
           setMediaItems(current =>
             current.map(m =>
               m.asset.uri === item.asset.uri
-                ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url }
+                ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url, thumbnailS3Url }
                 : m,
             ),
           );
@@ -310,6 +327,8 @@ export default function CreatePostScreen() {
 
     try {
       const urls = mediaItems.map(m => m.s3Url).filter(Boolean) as string[];
+      // Use the first video's thumbnail URL if available
+      const thumbnailUrl = mediaItems.find(m => m.thumbnailS3Url)?.thumbnailS3Url;
 
       const newPost = await dispatch(
         createNewPost({
@@ -320,6 +339,7 @@ export default function CreatePostScreen() {
             ? scheduledDate.toISOString()
             : undefined,
           location: location || undefined,
+          thumbnailUrl,
         }),
       ).unwrap();
 

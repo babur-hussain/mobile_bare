@@ -5,6 +5,7 @@ export interface CreatePostData {
   caption?: string;
   platforms: ('instagram' | 'facebook')[];
   scheduledTime?: string;
+  thumbnailUrl?: string;
   location?: { name: string; lat: number; lng: number };
 }
 
@@ -44,6 +45,7 @@ export const postsService = {
     caption: string;
     platforms: ('facebook' | 'instagram')[];
     scheduledTime?: string;
+    thumbnailUrl?: string;
     location?: { name: string; lat: number; lng: number };
   }) {
     const payload = {
@@ -52,6 +54,7 @@ export const postsService = {
       mediaUrls: data.mediaUrls,
       scheduledTime: data.scheduledTime,
       location: data.location,
+      thumbnailUrl: data.thumbnailUrl,
     };
     const response = await api.post('/api/v1/posts', payload);
     return response.data.data;
