@@ -12,6 +12,7 @@ import TabNavigator from './TabNavigator';
 import SplashScreen from '../screens/splash';
 import PostDetails from '../screens/post-details';
 import PostSuccessScreen from '../screens/post-success';
+import ThreadsHub from '../screens/threads-hub';
 import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
 import EditProfileScreen from '../screens/settings/edit-profile';
 import NotificationsScreen from '../screens/settings/notifications';
@@ -59,6 +60,7 @@ export default function RootNavigator() {
             <Stack.Screen name="AppTabs" component={TabNavigator} />
             <Stack.Screen name="PostDetails" component={PostDetails} />
             <Stack.Screen name="PostSuccess" component={PostSuccessScreen} />
+            <Stack.Screen name="ThreadsHub" component={ThreadsHub} />
             {/* Settings sub-screens */}
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />

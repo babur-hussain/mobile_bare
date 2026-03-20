@@ -165,15 +165,20 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
-        <TouchableOpacity style={styles.iconButton}>
-          {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.profileAvatar} />
-          ) : (
-            <View style={[styles.profileAvatar, styles.initialsAvatar]}>
-              <Text style={styles.initialsText}>{initials || '?'}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('ThreadsHub')}>
+            <Text style={{ fontSize: 18, color: APP_COLORS.primary, fontWeight: '800' }}>@</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.profileAvatar} />
+            ) : (
+              <View style={[styles.profileAvatar, styles.initialsAvatar]}>
+                <Text style={styles.initialsText}>{initials || '?'}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView

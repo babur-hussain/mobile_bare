@@ -39,7 +39,9 @@ import Svg, {
 } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import { postsService } from '../services/posts.service';
+import { threadsService } from '../services/threads.service';
 import { createThumbnail } from 'react-native-create-thumbnail';
+import { TextInput } from 'react-native';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -715,15 +717,18 @@ export default function PostDetails() {
           </View>
         )}
 
+        {/* Threads Replies Section */}
+        <ThreadsRepliesSection post={post} platformList={platformList} />
+
         {/* Action Buttons — show for published/partially-published posts */}
         {!isScheduled && (
           <View style={{ gap: 12 }}>
             {platformList.map((platformName: string) => {
               const platformLower = platformName.toLowerCase();
-              if (platformLower === 'threads') return null;
 
               const isFb = platformLower === 'facebook';
               const isIg = platformLower === 'instagram';
+              const isThreads = platformLower === 'threads';
               const isDeleting = deletingPlatform === platformLower;
 
               return (
@@ -733,7 +738,7 @@ export default function PostDetails() {
                   style={[
                     styles.actionButton,
                     {
-                      backgroundColor: isFb ? '#1877F2' : isIg ? '#E1306C' : APP_COLORS.primary,
+                      backgroundColor: isFb ? '#1877F2' : isIg ? '#E1306C' : isThreads ? '#000000' : APP_COLORS.primary,
                       opacity: (isDeleting || !!deletingPlatform) ? 0.6 : 1,
                     }
                   ]}
@@ -753,6 +758,8 @@ export default function PostDetails() {
                                 await postsService.deleteFacebook(post._id);
                               } else if (isIg) {
                                 await postsService.deleteInstagram(post._id);
+                              } else if (isThreads) {
+                                await postsService.deleteThreads(post._id);
                               }
                               setDeletingPlatform(null);
                               Alert.alert('Deleted', `Post removed from ${platformName}.`, [
@@ -838,6 +845,158 @@ export default function PostDetails() {
     </SafeAreaView>
   );
 }
+
+const ThreadsRepliesSection = React.memo(({ post, platformList }: { post: any, platformList: any[] }) => {
+  const [threadsReplies, setThreadsReplies] = useState<any[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+  const [replyText, setReplyText] = useState('');
+
+  const isPublished = (post.status || '').toUpperCase().includes('PUBLISHED') || post.status === 'SUCCESS';
+  const hasThreads = useMemo(() => platformList.map((p: string) => p.toLowerCase()).includes('threads'), [platformList]);
+
+  const threadsMediaId = useMemo(() => {
+    const res = post?.publishResults?.find((r: any) => r.platform?.toLowerCase() === 'threads' && r.success);
+    return res?.platformPostId || post?.platformPostId || null;
+  }, [post]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (isPublished && hasThreads && threadsMediaId) {
+      setLoadingReplies(true);
+      threadsService.getReplies(threadsMediaId)
+        .then(res => {
+          if (mounted) setThreadsReplies(res?.data || []);
+        })
+        .catch(err => console.log('Replies error', err))
+        .finally(() => {
+          if (mounted) setLoadingReplies(false);
+        });
+    }
+    return () => { mounted = false; };
+  }, [isPublished, hasThreads, threadsMediaId]);
+
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !threadsMediaId) return;
+    try {
+      await threadsService.replyToPost(threadsMediaId, replyText);
+      setThreadsReplies(prev => [{ text: replyText, timestamp: new Date().toISOString(), _id: Math.random().toString() }, ...prev]);
+      setReplyText('');
+      Alert.alert('Success', 'Reply sent to Threads!');
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to reply');
+    }
+  };
+
+  if (!isPublished || !hasThreads) return null;
+
+  return (
+    <View style={localStyles.repliesCard}>
+      <Text style={[localStyles.cardTitleTheme, { marginBottom: 4 }]}>Threads Replies</Text>
+      {!threadsMediaId && (
+        <Text style={localStyles.emptyRepliesText}>Analytics post ID missing.</Text>
+      )}
+      <View style={localStyles.replyInputContainer}>
+        <TextInput
+          style={localStyles.replyInput}
+          placeholder="Reply to this thread..."
+          value={replyText}
+          onChangeText={setReplyText}
+          placeholderTextColor={APP_COLORS.outlineVariant}
+        />
+        <TouchableOpacity style={localStyles.replyButton} onPress={handleSendReply}>
+          <MessageCircle size={18} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      {loadingReplies ? (
+        <ActivityIndicator size="small" color={APP_COLORS.primary} style={{ marginTop: 16 }} />
+      ) : threadsReplies.length === 0 ? (
+        <Text style={localStyles.emptyRepliesText}>No replies yet.</Text>
+      ) : (
+        threadsReplies.map((reply: any, idx: number) => (
+          <View key={idx} style={localStyles.replyItem}>
+            <View style={localStyles.replyAvatar} />
+            <View style={localStyles.replyContent}>
+              <Text style={localStyles.replyText} numberOfLines={0}>{reply.text}</Text>
+              <Text style={localStyles.replyTime}>{new Date(reply.timestamp).toLocaleString()}</Text>
+            </View>
+          </View>
+        ))
+      )}
+    </View>
+  );
+});
+
+const localStyles = StyleSheet.create({
+  repliesCard: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+    elevation: 4,
+    marginBottom: 32,
+  },
+  replyInputContainer: {
+    flexDirection: 'row',
+    marginTop: 16,
+    marginBottom: 20,
+    gap: 8,
+  },
+  replyInput: {
+    flex: 1,
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    height: 48,
+    color: APP_COLORS.onSurface,
+  },
+  replyButton: {
+    backgroundColor: APP_COLORS.primary,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyRepliesText: {
+    color: APP_COLORS.onSurfaceVariant,
+    textAlign: 'center',
+    marginVertical: 12,
+  },
+  replyItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: APP_COLORS.outlineVariant,
+    gap: 12,
+  },
+  replyAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: APP_COLORS.surfaceContainerHighest,
+  },
+  replyContent: {
+    flex: 1,
+  },
+  replyText: {
+    fontSize: 14,
+    color: APP_COLORS.onSurface,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  replyTime: {
+    fontSize: 11,
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  cardTitleTheme: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+  },
+});
 
 const styles = StyleSheet.create({
   safeArea: {

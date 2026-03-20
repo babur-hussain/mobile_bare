@@ -87,7 +87,8 @@ export default function AccountsScreen() {
       const url = event.url;
       if (url.startsWith('postingautomation://social-auth-callback')) {
         // Parse query params manually (Hermes doesn't support URLSearchParams.get)
-        const queryString = url.split('?')[1] || '';
+        const rawQueryString = url.split('?')[1] || '';
+        const queryString = rawQueryString.split('#')[0]; // Strip hash fragments like #_
         const params: Record<string, string> = {};
         queryString.split('&').forEach(pair => {
           const [key, ...rest] = pair.split('=');

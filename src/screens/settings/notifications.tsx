@@ -67,7 +67,7 @@ export default function NotificationsScreen({ navigation }: any) {
             </View>
             <Switch
                 value={disabled ? false : settings[key]}
-                onValueChange={() => !disabled && toggle(key)}
+                onValueChange={() => { if (!disabled) toggle(key); }}
                 trackColor={{ false: Colors.border, true: `${Colors.primary}66` }}
                 thumbColor={
                     !disabled && settings[key] ? Colors.primary : Colors.textMuted

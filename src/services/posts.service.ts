@@ -95,6 +95,10 @@ export const postsService = {
     await api.delete(`/api/v1/posts/${postId}/instagram`);
   },
 
+  async deleteThreads(postId: string): Promise<void> {
+    await api.delete(`/api/v1/posts/${postId}/threads`);
+  },
+
   async getFacebookAnalytics(postId: string): Promise<any> {
     const response = await api.get(`/api/v1/posts/${postId}/analytics/facebook`);
     return response.data.data || response.data;
