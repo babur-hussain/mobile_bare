@@ -38,4 +38,36 @@ export const Colors = {
   // Social platform colors
   instagram: '#E1306C',
   facebook: '#1877F2',
+  youtube: '#FF0000',
+  twitter: '#1DA1F2',
+  threads: '#000000',
 };
+
+// #24: Centralized APP_COLORS palette — previously duplicated in home.tsx and create-post.tsx
+export const APP_COLORS = {
+  primary: '#ea4353',
+  secondary: '#026381',
+  tertiary: '#006947',
+  surface: '#f6f8fb',
+  onSurface: '#1f2937',
+  onSurfaceVariant: '#4b5563',
+  surfaceContainerLow: '#ebf1fa',
+  surfaceContainerLowest: '#ffffff',
+  surfaceContainerHighest: '#dbe3ed',
+  outlineVariant: '#a8aeb5',
+  outline: '#787586',
+  onPrimary: '#ffffff',
+  primaryContainer: '#ff7576',
+  onPrimaryContainer: '#4e000a',
+  secondaryContainer: '#94dbfe',
+  onSecondaryContainer: '#004e66',
+  error: '#b02500',
+  onBackground: '#2a3136',
+  instagram: '#E1306C',
+  facebook: '#1877F2',
+  youtube: '#FF0000',
+  twitter: '#1DA1F2',
+  threads: '#000000',
+  tertiaryContainer: '#82f6bf',
+};
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Platform,
+  Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,27 +26,61 @@ import { RootState, AppDispatch } from '../store';
 import { fetchAllPosts } from '../store/actions/posts.actions';
 import { fetchAllAccounts } from '../store/actions/accounts.actions';
 
-// New Colors from Web Redesign
-const APP_COLORS = {
-  primary: '#ea4353', // Red accent
-  secondary: '#026381', // Blue text color
-  tertiary: '#006947',
-  surface: '#f6f8fb', // Main background
-  onSurface: '#1f2937', // Main text
-  onSurfaceVariant: '#4b5563',
-  surfaceContainerLow: '#ebf1fa',
-  surfaceContainerLowest: '#ffffff', // Card surfaces
-  surfaceContainerHighest: '#dbe3ed',
-  outlineVariant: '#a8aeb5',
-  onPrimary: '#ffffff',
-  primaryContainer: '#ff7576',
-  onPrimaryContainer: '#4e000a',
-  secondaryContainer: '#94dbfe', // Light blue card
-  onSecondaryContainer: '#004e66',
-  error: '#b02500',
-  onBackground: '#2a3136', // Dark card background
-  tertiaryContainer: '#82f6bf',
-};
+import { APP_COLORS } from '../constants/colors';
+
+// #46: Skeleton loading card component
+function SkeletonCards() {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+      ]),
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [opacity]);
+
+  return (
+    <>
+      {[1, 2, 3].map((i) => (
+        <Animated.View key={i} style={[skeletonStyles.card, { opacity }]}>
+          <View style={skeletonStyles.header}>
+            <View style={skeletonStyles.avatar} />
+            <View style={skeletonStyles.headerText}>
+              <View style={skeletonStyles.titleBar} />
+              <View style={skeletonStyles.subtitleBar} />
+            </View>
+          </View>
+          <View style={skeletonStyles.body} />
+          <View style={skeletonStyles.footer}>
+            <View style={skeletonStyles.footerChip} />
+            <View style={skeletonStyles.footerChip} />
+          </View>
+        </Animated.View>
+      ))}
+    </>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  card: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#e5e7eb' },
+  headerText: { marginLeft: 12, flex: 1 },
+  titleBar: { width: '60%', height: 12, borderRadius: 6, backgroundColor: '#e5e7eb', marginBottom: 8 },
+  subtitleBar: { width: '40%', height: 10, borderRadius: 5, backgroundColor: '#e5e7eb' },
+  body: { width: '100%', height: 60, borderRadius: 10, backgroundColor: '#e5e7eb', marginBottom: 14 },
+  footer: { flexDirection: 'row', gap: 8 },
+  footerChip: { width: 80, height: 24, borderRadius: 12, backgroundColor: '#e5e7eb' },
+});
 
 export default function HomeScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -68,66 +103,54 @@ export default function HomeScreen() {
     dispatch(fetchAllAccounts());
   };
 
-  // Real aggregates from store
-  const pendingCount =
-    posts.filter(p => p.status === 'pending' || p.status === 'processing').length;
-  const publishedCount =
-    posts.filter(p => p.status === 'published').length;
+  // Real aggregates from store — memoized to avoid recalculation every render
+  const pendingCount = useMemo(() =>
+    posts.filter(p => p.status === 'pending' || p.status === 'processing').length,
+    [posts],
+  );
+  const publishedCount = useMemo(() =>
+    posts.filter(p => p.status === 'published').length,
+    [posts],
+  );
   const accountsCount = accounts.length;
 
-  // Recent posts static matching design
-  const mockRecentPosts = [
-    {
-      id: '1',
-      title: 'Exploring the Golden Hour',
-      status: 'PUBLISHED',
-      time: '2 hours ago',
-      platform: 'Instagram',
-      platformColor: APP_COLORS.primary, // Red derived
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAdEts4_O06pzxle--ITlZXiImCODXl3haBum95rb2MBH-nfYdHIsYPO32NVX15DjTfoEZh4fH_40Hi4GsnPbHfoJHYziWPvWerBA2mBdMYYtBLQ8YtfBKI2oUTNQ3WQE8l95VUpFbwUNgq4bhF-hMA4CME0dDwLG70xwbhAAOkrwRP6Mavm37s5TdgVNEQC12lrXnXbowDV-iTp-OT0L1kpflfLsYzMPRy17sWtmc89px7PufovV5zunRBFqhsjKceSlm3Qen2tGYR',
-      desc: 'Discover the magic of desert sunsets and how to capture the perfect lighting...',
-    },
-    {
-      id: '2',
-      title: 'The Future of Tech Nostalgia',
-      status: 'QUEUED',
-      time: 'Scheduled for Tomorrow',
-      platform: 'LinkedIn',
-      platformColor: APP_COLORS.secondary, // Blue derived
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBfNd5v8Px9C9ckknVCUXlCb9VEZzEaflDnAWj4nuVCAwptQFYo8est2bsHztxpx29s25WSHSBEJICwLH9TDULky7TJBKHPqPKucXdr5jQIU4HQ2Aou8_qZxqntWIliZ5wHjJhkHfka9gd5BniHfdpLwZcTw36XN4noChEcs8wFAHV4Xg0NhCMol_grTIduTo3uMhGx7M3lXBAKp3YkVUlaRt0PxZXUcnia4wvY291KT8Zz0nsHcK2_5Ftc_kL8M314zKDGb60ARpy0',
-      desc: 'Why retro design is making a massive comeback in the digital age...',
-    },
-  ];
+  const displayPosts = useMemo(() => {
+    const recentSlice = posts.slice(0, 3);
+    return recentSlice.map(p => {
+      const isPending = p.status === 'pending' || p.status === 'processing';
+      const mediaUrl = Array.isArray(p.mediaUrl) ? p.mediaUrl[0] : p.mediaUrl;
+      return {
+        id: p._id,
+        title: p.caption || 'No Caption',
+        status: isPending ? 'QUEUED' : 'PUBLISHED',
+        time: p.scheduledTime ? new Date(p.scheduledTime).toLocaleDateString() : 'Just now',
+        platform: p.platforms?.[0] || 'App',
+        platformColor: p.platforms?.[0] === 'instagram' ? APP_COLORS.primary : APP_COLORS.secondary,
+        img: mediaUrl || null,
+        desc: (p.caption || '').substring(0, 60) + (p.caption && p.caption.length > 60 ? '...' : ''),
+      };
+    });
+  }, [posts]);
 
-  const recentPosts = posts.slice(0, 3);
-  const displayPosts = recentPosts.map(p => {
-    const isPending = p.status === 'pending' || p.status === 'processing';
-    // Support array or string media
-    const mediaUrl = Array.isArray(p.mediaUrl) ? p.mediaUrl[0] : p.mediaUrl;
-    return {
-      id: p._id,
-      title: p.caption || 'No Caption',
-      status: isPending ? 'QUEUED' : 'PUBLISHED',
-      time: p.scheduledTime ? new Date(p.scheduledTime).toLocaleDateString() : 'Just now',
-      platform: p.platforms?.[0] || 'App',
-      platformColor: p.platforms?.[0] === 'instagram' ? APP_COLORS.primary : APP_COLORS.secondary,
-      img: mediaUrl || null,
-      desc: (p.caption || '').substring(0, 60) + (p.caption && p.caption.length > 60 ? '...' : ''),
-    };
-  });
-
-  const getFirstName = () => {
+  const firstName = useMemo(() => {
     if (user?.name) return user.name.split(' ')[0];
     const fbUser = getAuth().currentUser;
     if (fbUser?.displayName) return fbUser.displayName.split(' ')[0];
     if (fbUser?.email) return fbUser.email.split('@')[0];
-    return 'Alex';
-  };
+    return 'there';
+  }, [user]);
 
   const fbUser = getAuth().currentUser;
-  const avatarUrl =
-    (user as any)?.picture || (user as any)?.profilePicture || fbUser?.photoURL ||
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuD0hYl29YrS2coxzV1IwgSciwbB2VzPTmPDoGyvrxLX3irqyn8l_-lrtUv4OAp138pGsv_XZMZrw5ZKm0n00RCnF-cN4b_oTaiNEwKojl9HQCOK8cAX57ssFTd6ZDw690AbLoOu-VrzbNmPMr7-Yj0S2Ko-6M8-MnKoWGNanKJwWAjMfHqpmFepOZSaSiOsa1N1IzD3IJLgWZzhiW916wHlVshGU9BGtCRP2uwK5TtKAoTFM-BSEAygQ5B7dkzx-Kjk3uC1jWy8PWfA';
+  const avatarUrl = useMemo(() => (
+    (user as any)?.picture || (user as any)?.profilePicture || fbUser?.photoURL || null
+  ), [user, fbUser?.photoURL]);
+
+  // #47: Generate initials for fallback avatar
+  const initials = useMemo(() => {
+    const name = user?.name || fbUser?.displayName || fbUser?.email || '';
+    const parts = name.split(/[\s@]+/);
+    return (parts[0]?.[0] || '').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+  }, [user, fbUser]);
 
   return (
     <View style={styles.container}>
@@ -140,7 +163,13 @@ export default function HomeScreen() {
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
         <TouchableOpacity style={styles.iconButton}>
-          <Image source={{ uri: avatarUrl }} style={styles.profileAvatar} />
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.profileAvatar} />
+          ) : (
+            <View style={[styles.profileAvatar, styles.initialsAvatar]}>
+              <Text style={styles.initialsText}>{initials || '?'}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -151,7 +180,7 @@ export default function HomeScreen() {
       >
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.overline}>WELCOME BACK, {getFirstName().toUpperCase()}</Text>
+          <Text style={styles.overline}>WELCOME BACK, {firstName.toUpperCase()}</Text>
           <Text style={styles.welcomeText}>Your creative{'\n'}canvas{'\n'}is ready.</Text>
 
           <View style={styles.actionRow}>
@@ -231,65 +260,89 @@ export default function HomeScreen() {
         {/* Recent Posts List */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Recent Posts</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Posts')}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.listContainer}>
-          {displayPosts.map((post, idx) => {
-            const isQueued = post.status.includes('QUEUED');
-            return (
+          {isLoading && posts.length === 0 ? (
+            <SkeletonCards />
+          ) : displayPosts.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateEmoji}>📝</Text>
+              <Text style={styles.emptyStateTitle}>No posts yet</Text>
+              <Text style={styles.emptyStateDesc}>Create your first post to get started!</Text>
               <TouchableOpacity
-                key={post.id || idx.toString()}
-                style={styles.listItem}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('PostDetails', { post: recentPosts[idx] })}>
-                <View style={styles.listItemHeaderAbsolute}>
-                  <MoreHorizontal size={20} color={APP_COLORS.outlineVariant} />
-                </View>
-                <View style={styles.listItemRow}>
-                  {post.img ? (
-                    <Image
-                      source={{ uri: post.img }}
-                      style={styles.listImg}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={[styles.listImg, styles.listImgPlaceholder]}>
-                      <Text style={styles.listImgPlaceholderText}>📷</Text>
-                    </View>
-                  )}
-                  <View style={styles.listContent}>
-                    <View style={styles.listMetaRow}>
-                      <View style={[styles.platformPill, { backgroundColor: `${post.platformColor}22` }]}>
-                        <Text style={[styles.platformPillText, { color: post.platformColor }]}>{post.platform.toUpperCase()}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.timeText}>{post.time}</Text>
-                    <Text style={styles.listTitle} numberOfLines={1}>{post.title}</Text>
-                    <Text style={styles.listDesc} numberOfLines={1}>{post.desc}</Text>
-                  </View>
-                </View>
-                <View style={styles.listStatusArea}>
-                  <View style={styles.statusRow}>
-                    {isQueued ? (
-                      <Clock size={14} color={APP_COLORS.secondary} strokeWidth={2.5} />
-                    ) : (
-                      <CheckCircle size={14} color={APP_COLORS.tertiary} strokeWidth={2.5} />
-                    )}
-                    <Text style={[styles.statusText, { color: isQueued ? APP_COLORS.secondary : APP_COLORS.tertiary }]}>
-                      {post.status}
-                    </Text>
-                  </View>
-                </View>
+                style={styles.emptyStateCTA}
+                onPress={() => navigation.navigate('Create Post')}
+                activeOpacity={0.8}>
+                <Plus size={16} color={APP_COLORS.onPrimary} strokeWidth={3} />
+                <Text style={styles.emptyStateCTAText}>Create Post</Text>
               </TouchableOpacity>
-            );
-          })}
+            </View>
+          ) : (
+            displayPosts.map((post, idx) => {
+              const isQueued = post.status.includes('QUEUED');
+              return (
+                <TouchableOpacity
+                  key={post.id || idx.toString()}
+                  style={styles.listItem}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('PostDetails', { post: posts[idx] })}>
+                  <TouchableOpacity
+                    style={styles.listItemHeaderAbsolute}
+                    onPress={() => navigation.navigate('PostDetails', { post: posts[idx] })}>
+                    <MoreHorizontal size={20} color={APP_COLORS.outlineVariant} />
+                  </TouchableOpacity>
+                  <View style={styles.listItemRow}>
+                    {post.img ? (
+                      <Image
+                        source={{ uri: post.img }}
+                        style={styles.listImg}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={[styles.listImg, styles.listImgPlaceholder]}>
+                        <Text style={styles.listImgPlaceholderText}>📷</Text>
+                      </View>
+                    )}
+                    <View style={styles.listContent}>
+                      <View style={styles.listMetaRow}>
+                        <View style={[styles.platformPill, { backgroundColor: `${post.platformColor}22` }]}>
+                          <Text style={[styles.platformPillText, { color: post.platformColor }]}>{post.platform.toUpperCase()}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.timeText}>{post.time}</Text>
+                      <Text style={styles.listTitle} numberOfLines={1}>{post.title}</Text>
+                      <Text style={styles.listDesc} numberOfLines={1}>{post.desc}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.listStatusArea}>
+                    <View style={styles.statusRow}>
+                      {isQueued ? (
+                        <Clock size={14} color={APP_COLORS.secondary} strokeWidth={2.5} />
+                      ) : (
+                        <CheckCircle size={14} color={APP_COLORS.tertiary} strokeWidth={2.5} />
+                      )}
+                      <Text style={[styles.statusText, { color: isQueued ? APP_COLORS.secondary : APP_COLORS.tertiary }]}>
+                        {post.status}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
 
-        {/* Growth Insight static mock */}
-        <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Growth Insight</Text>
+        {/* Growth Insight — Coming Soon (#34) */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Growth Insight</Text>
+          <View style={styles.comingSoonBadge}>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+        </View>
         <View style={styles.insightCard}>
           <TrendingUp size={28} color={APP_COLORS.surfaceContainerLowest} strokeWidth={3} style={styles.insightIcon} />
           <Text style={styles.insightTitle}>Best Time to Post</Text>
@@ -797,6 +850,65 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%'
-  }
+  },
+  // #47: Initials avatar fallback
+  initialsAvatar: {
+    backgroundColor: APP_COLORS.surfaceContainerHighest,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  initialsText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  // #45: Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+  },
+  emptyStateEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginBottom: 8,
+  },
+  emptyStateDesc: {
+    fontSize: 14,
+    color: APP_COLORS.onSurfaceVariant,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  emptyStateCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: APP_COLORS.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  emptyStateCTAText: {
+    color: APP_COLORS.onPrimary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  // #34: Coming Soon badge
+  comingSoonBadge: {
+    backgroundColor: `${APP_COLORS.secondary}22`,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  comingSoonText: {
+    color: APP_COLORS.secondary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
 });
 

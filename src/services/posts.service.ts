@@ -4,7 +4,7 @@ export interface CreatePostData {
   mediaUrls?: string[];
   caption?: string;
   platforms: ('instagram' | 'facebook')[];
-  scheduledAt?: string;
+  scheduledTime?: string;
   location?: { name: string; lat: number; lng: number };
 }
 
@@ -20,7 +20,7 @@ export interface PostItem {
   | 'published'
   | 'partially_published'
   | 'failed';
-  scheduledAt: string | null;
+  scheduledTime: string | null;
   publishResults: Array<{
     platform: string;
     success: boolean;
@@ -43,14 +43,14 @@ export const postsService = {
     mediaUrls: string[];
     caption: string;
     platforms: ('facebook' | 'instagram')[];
-    scheduledAt?: string;
+    scheduledTime?: string;
     location?: { name: string; lat: number; lng: number };
   }) {
     const payload = {
       caption: data.caption,
       platforms: data.platforms,
-      mediaUrl: data.mediaUrls.length > 0 ? data.mediaUrls[0] : undefined,
-      scheduledTime: data.scheduledAt,
+      mediaUrls: data.mediaUrls,
+      scheduledTime: data.scheduledTime,
       location: data.location,
     };
     const response = await api.post('/api/v1/posts', payload);

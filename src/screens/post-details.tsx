@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   Easing,
   Modal,
   TouchableWithoutFeedback,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
@@ -91,13 +93,15 @@ export default function PostDetails() {
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
 
-  // Skeleton Animation Pulse
-  const [pulseAnim] = useState(new Animated.Value(0.3));
+  // Skeleton Animation Pulse - useRef to persist across renders
+  const pulseAnim = useRef(new Animated.Value(0.3)).current;
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<any | null>(null);
+  const [deletingPlatform, setDeletingPlatform] = useState<string | null>(null);
 
   useEffect(() => {
     if (loadingAnalytics) {
-      Animated.loop(
+      const loop = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
             toValue: 0.7,
@@ -112,10 +116,18 @@ export default function PostDetails() {
             easing: Easing.inOut(Easing.ease),
           }),
         ])
-      ).start();
+      );
+      pulseLoopRef.current = loop;
+      loop.start();
     } else {
+      pulseLoopRef.current?.stop();
+      pulseLoopRef.current = null;
       pulseAnim.setValue(0.3);
     }
+    return () => {
+      pulseLoopRef.current?.stop();
+      pulseLoopRef.current = null;
+    };
   }, [loadingAnalytics, pulseAnim]);
 
   const mediaUrl = post?.mediaUrl || post?.mediaUrls?.[0] || post?.img;
@@ -200,11 +212,14 @@ export default function PostDetails() {
     };
   }, [post?._id, isPublished, post?.platforms]);
 
-  const platformList = post.publishResults && Array.isArray(post.publishResults) && post.publishResults.some((r: any) => r.success)
-    ? post.publishResults.filter((r: any) => r.success).map((r: any) => r.platform)
-    : (post.platforms && Array.isArray(post.platforms) ? post.platforms : []);
+  const platformList = useMemo(() => {
+    if (post.publishResults && Array.isArray(post.publishResults) && post.publishResults.some((r: any) => r.success)) {
+      return post.publishResults.filter((r: any) => r.success).map((r: any) => r.platform);
+    }
+    return post.platforms && Array.isArray(post.platforms) ? post.platforms : [];
+  }, [post.publishResults, post.platforms]);
 
-  const displayAnalytics = platformList.map((platformName: string) => {
+  const displayAnalytics = useMemo(() => platformList.map((platformName: string) => {
     const actual = analytics.find(
       (a: any) =>
         (a.platform || '').toLowerCase() === platformName.toLowerCase(),
@@ -218,45 +233,45 @@ export default function PostDetails() {
       reach: 0,
       impressions: 0,
     };
-  });
+  }), [platformList, analytics]);
 
-  const getMaxEngagement = () => {
+  const maxEngagement = useMemo(() => {
     let max = 1;
     displayAnalytics.forEach((a: any) => {
       const total = (a.likes || 0) + (a.comments || 0) + (a.shares || 0);
       if (total > max) { max = total; }
     });
     return max;
-  };
+  }, [displayAnalytics]);
 
-  const maxEngagement = getMaxEngagement();
-
-  const platformData = displayAnalytics.map((a: any) => {
+  const platformData = useMemo(() => displayAnalytics.map((a: any) => {
     const totalEngagement =
       (a.likes || 0) + (a.comments || 0) + (a.shares || 0);
     return {
       name: a.platform,
-      // Calculate height percentage, min 5% so bar isn't invisible
       height: Math.max((totalEngagement / maxEngagement) * 100, 5),
       color: APP_COLORS.primary,
     };
-  });
+  }), [displayAnalytics, maxEngagement]);
 
-  const totalEngagementAll = displayAnalytics.reduce(
+  const totalEngagementAll = useMemo(() => displayAnalytics.reduce(
     (acc: number, a: any) =>
       acc + (a.likes || 0) + (a.comments || 0) + (a.shares || 0),
     0,
-  );
-  const totalReachAll = displayAnalytics.reduce(
+  ), [displayAnalytics]);
+
+  const totalReachAll = useMemo(() => displayAnalytics.reduce(
     (acc: number, a: any) => acc + (a.reach || 0),
     0,
-  );
-  const totalImpressionsAll = displayAnalytics.reduce(
+  ), [displayAnalytics]);
+
+  const totalImpressionsAll = useMemo(() => displayAnalytics.reduce(
     (acc: number, a: any) => acc + (a.impressions || 0),
     0,
-  );
+  ), [displayAnalytics]);
 
-  const generateGrowthPath = (maxVal: number) => {
+  const growthCurve = useMemo(() => {
+    const maxVal = totalImpressionsAll;
     if (maxVal === 0) {
       return {
         path: "M0,140 L400,140",
@@ -283,9 +298,7 @@ export default function PostDetails() {
     }
 
     return { path: d, fillPath: `${d} V150 H0 Z`, dots: coords.slice(1, -1) };
-  };
-
-  const growthCurve = generateGrowthPath(totalImpressionsAll);
+  }, [totalImpressionsAll]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -695,8 +708,8 @@ export default function PostDetails() {
           </View>
         )}
 
-        {/* Action Buttons */}
-        {!isFailed && !isScheduled && (
+        {/* Action Buttons — show for published/partially-published posts */}
+        {!isScheduled && (
           <View style={{ gap: 12 }}>
             {platformList.map((platformName: string) => {
               const platformLower = platformName.toLowerCase();
@@ -704,26 +717,55 @@ export default function PostDetails() {
 
               const isFb = platformLower === 'facebook';
               const isIg = platformLower === 'instagram';
+              const isDeleting = deletingPlatform === platformLower;
+
               return (
                 <TouchableOpacity
                   key={platformName}
+                  disabled={isDeleting || !!deletingPlatform}
                   style={[
                     styles.actionButton,
-                    { backgroundColor: isFb ? '#1877F2' : isIg ? '#E1306C' : APP_COLORS.primary }
-                  ]}
-                  onPress={async () => {
-                    try {
-                      if (isFb) {
-                        await postsService.deleteFacebook(post._id);
-                      } else if (isIg) {
-                        await postsService.deleteInstagram(post._id);
-                      }
-                      navigation.goBack();
-                    } catch (err) {
-                      console.error(`Failed to delete ${platformName} post:`, err);
+                    {
+                      backgroundColor: isFb ? '#1877F2' : isIg ? '#E1306C' : APP_COLORS.primary,
+                      opacity: (isDeleting || !!deletingPlatform) ? 0.6 : 1,
                     }
+                  ]}
+                  onPress={() => {
+                    Alert.alert(
+                      `Delete ${platformName} Post`,
+                      `Are you sure you want to delete this post from ${platformName}? This cannot be undone.`,
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                          text: 'Delete',
+                          style: 'destructive',
+                          onPress: async () => {
+                            try {
+                              setDeletingPlatform(platformLower);
+                              if (isFb) {
+                                await postsService.deleteFacebook(post._id);
+                              } else if (isIg) {
+                                await postsService.deleteInstagram(post._id);
+                              }
+                              setDeletingPlatform(null);
+                              Alert.alert('Deleted', `Post removed from ${platformName}.`, [
+                                { text: 'OK', onPress: () => navigation.goBack() },
+                              ]);
+                            } catch (err: any) {
+                              setDeletingPlatform(null);
+                              const msg = err?.response?.data?.message || err?.message || 'Something went wrong.';
+                              Alert.alert('Delete Failed', msg);
+                            }
+                          },
+                        },
+                      ],
+                    );
                   }}>
-                  <Text style={styles.actionButtonText}>Delete {platformName} Post</Text>
+                  {isDeleting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.actionButtonText}>Delete {platformName} Post</Text>
+                  )}
                 </TouchableOpacity>
               );
             })}

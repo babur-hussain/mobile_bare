@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -66,33 +66,9 @@ import { createNewPost } from '../store/actions/posts.actions';
 import { mediaService } from '../services/media.service';
 import api from '../services/api';
 
-type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
+import { APP_COLORS } from '../constants/colors';
 
-const APP_COLORS = {
-  primary: '#ea4353',
-  secondary: '#026381',
-  tertiary: '#006947',
-  surface: '#f6f8fb',
-  onSurface: '#1f2937',
-  onSurfaceVariant: '#4b5563',
-  surfaceContainerLow: '#ebf1fa',
-  surfaceContainerLowest: '#ffffff',
-  surfaceContainerHighest: '#dbe3ed',
-  outlineVariant: '#a8aeb5',
-  outline: '#787586',
-  onPrimary: '#ffffff',
-  primaryContainer: '#ff7576',
-  onPrimaryContainer: '#4e000a',
-  secondaryContainer: '#94dbfe',
-  onSecondaryContainer: '#004e66',
-  error: '#b02500',
-  onBackground: '#2a3136',
-  instagram: '#E1306C',
-  facebook: '#1877F2',
-  youtube: '#FF0000',
-  twitter: '#1DA1F2',
-  threads: '#000000',
-};
+type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
 export default function CreatePostScreen() {
   const [caption, setCaption] = useState('');
@@ -130,14 +106,15 @@ export default function CreatePostScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isUploadingAny = mediaItems.some(m => m.isUploading);
+  const isUploadingAny = useMemo(() => mediaItems.some(m => m.isUploading), [mediaItems]);
 
-  // Animation state for loading screen
-  const [pulseValue] = useState(new Animated.Value(1));
+  // Animation state for loading screen — useRef to avoid leaking Animated nodes
+  const pulseValue = useRef(new Animated.Value(1)).current;
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
     if (isSubmitting) {
-      Animated.loop(
+      const loop = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseValue, {
             toValue: 1.2,
@@ -152,10 +129,18 @@ export default function CreatePostScreen() {
             easing: Easing.inOut(Easing.ease)
           })
         ])
-      ).start();
+      );
+      pulseLoopRef.current = loop;
+      loop.start();
     } else {
+      pulseLoopRef.current?.stop();
+      pulseLoopRef.current = null;
       pulseValue.setValue(1);
     }
+    return () => {
+      pulseLoopRef.current?.stop();
+      pulseLoopRef.current = null;
+    };
   }, [isSubmitting, pulseValue]);
 
   const { items: accounts } = useSelector((state: RootState) => state.accounts);
@@ -165,22 +150,30 @@ export default function CreatePostScreen() {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
 
-  const searchLocations = async (query: string) => {
+  // #40: Debounce location search to reduce API calls
+  const locationSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchLocations = useCallback((query: string) => {
     if (!query.trim()) {
       setLocationResults([]);
       return;
     }
-    setIsSearchingLocation(true);
-    try {
-      const res = await api.get(`/api/v1/locations/search?q=${encodeURIComponent(query)}`);
-      setLocationResults(res.data || []);
-    } catch (err) {
-      console.log('Location search failed', err);
-      setLocationResults([]);
-    } finally {
-      setIsSearchingLocation(false);
+    // Clear previous timer
+    if (locationSearchTimerRef.current) {
+      clearTimeout(locationSearchTimerRef.current);
     }
-  };
+    locationSearchTimerRef.current = setTimeout(async () => {
+      setIsSearchingLocation(true);
+      try {
+        const res = await api.get(`/api/v1/locations/search?q=${encodeURIComponent(query)}`);
+        setLocationResults(res.data || []);
+      } catch (err) {
+        console.log('Location search failed', err);
+        setLocationResults([]);
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 500);
+  }, []);
 
   const pickMedia = async () => {
     const result = await launchImageLibrary({
@@ -239,7 +232,10 @@ export default function CreatePostScreen() {
                 : m,
             ),
           );
-        } catch (e) {
+        } catch (e: any) {
+          // #41: Show user-friendly error message
+          const errMsg = e?.response?.data?.message || 'Upload failed. Please check your connection and try again.';
+          Alert.alert('Upload Error', errMsg);
           setMediaItems(current =>
             current.map(m =>
               m.asset.uri === item.asset.uri
@@ -252,20 +248,22 @@ export default function CreatePostScreen() {
     }
   };
 
-  const removeMedia = (index: number) => {
+  const removeMedia = useCallback((index: number) => {
     setMediaItems(items => items.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const togglePlatform = (platform: Platform_Type) => {
+  const togglePlatform = useCallback((platform: Platform_Type) => {
     setPlatformSelectionError(false);
-    const next = new Set(selectedPlatforms);
-    if (next.has(platform)) {
-      next.delete(platform);
-    } else {
-      next.add(platform);
-    }
-    setSelectedPlatforms(next);
-  };
+    setSelectedPlatforms(prev => {
+      const next = new Set(prev);
+      if (next.has(platform)) {
+        next.delete(platform);
+      } else {
+        next.add(platform);
+      }
+      return next;
+    });
+  }, []);
 
   const handlePostNow = async () => {
     setIsScheduled(false);
@@ -318,7 +316,7 @@ export default function CreatePostScreen() {
           mediaUrls: urls,
           caption: caption.trim(),
           platforms: Array.from(selectedPlatforms),
-          scheduledAt: submitAsScheduled
+          scheduledTime: submitAsScheduled
             ? scheduledDate.toISOString()
             : undefined,
           location: location || undefined,
@@ -342,17 +340,15 @@ export default function CreatePostScreen() {
     }
   };
 
-  const hasPlatformAccount = (platform: Platform_Type) =>
-    accounts.some((a: any) => a.platform === platform);
+  const hasPlatformAccount = useCallback((platform: Platform_Type) =>
+    accounts.some((a: any) => a.platform === platform), [accounts]);
 
   // Dynamic user avatar similar to home screen
-  const getAvatarUrl = () => {
-    return (
-      (user as any)?.picture ||
-      (user as any)?.profilePicture ||
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCQSzzHDXZ46-Z0Xr_8MJ8gowSA1wKCM1bJrEkfYW8rKM_9B5ypmBIJjXmEShmAmqWDXONuk1TCWl4nkZ4uoUoOaDWDThiyFqGkGjgSQWzv_1sGAb13D7BVlOViESBYl5trKHyudZhUnICNTmh7vY6JqsWc78EZWcysKzUhjMRwgSCwnSsmhCXb3tJopa3dS-7lvYP-MSr_cefXU8WXeVhJ27jseyOkCClpq2CSkqWWBfpPIKfiVVy78VRPPK0n1DvaGmm_USKGT6ZZ'
-    );
-  };
+  const avatarUrl = useMemo(() => (
+    (user as any)?.picture ||
+    (user as any)?.profilePicture ||
+    null
+  ), [user]);
 
   return (
     <KeyboardAvoidingView
@@ -373,7 +369,7 @@ export default function CreatePostScreen() {
             <Bell size={24} color={APP_COLORS.onSurfaceVariant} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton}>
-            <Image source={{ uri: getAvatarUrl() }} style={styles.avatarCircle} />
+            <Image source={{ uri: avatarUrl }} style={styles.avatarCircle} />
           </TouchableOpacity>
         </View>
       </View>
@@ -390,18 +386,11 @@ export default function CreatePostScreen() {
             <Text style={styles.title}>Compose</Text>
 
             {/* Replace floating Draft Auto-saved with an absolute positioning if tricky later, doing inline for now */}
-            <View style={styles.draftBadge}>
-              <CheckCircle2 size={16} color={APP_COLORS.primary} />
-              <View>
-                <Text style={styles.draftBadgeTitle}>Draft Auto-saved</Text>
-                <Text style={styles.draftBadgeSub}>Last saved at 10:42 AM</Text>
-              </View>
-            </View>
           </View>
 
           {/* Action Row right below title */}
           <View style={styles.heroActionsRow}>
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => { }}>
+            <TouchableOpacity style={styles.btnSecondary} onPress={() => Alert.alert('Coming Soon', 'Draft saving will be available in a future update.')}>
               <Text style={styles.btnSecondaryText}>Save Draft</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -674,7 +663,7 @@ export default function CreatePostScreen() {
                   style={styles.dropZoneEmptyBox}
                   onPress={pickMedia}>
                   <UploadCloud size={48} color={APP_COLORS.outlineVariant} />
-                  <Text style={styles.dropZoneTitle}>Drag and drop assets here</Text>
+                  <Text style={styles.dropZoneTitle}>Tap to select photos or videos</Text>
                   <Text style={styles.dropZoneSub}>Supports High-Res JPG, PNG, or MP4 up to 100MB</Text>
                   <View style={styles.browseButton}>
                     <Text style={styles.browseButtonText}>Browse Files</Text>
@@ -768,7 +757,7 @@ export default function CreatePostScreen() {
                 <View style={styles.bannerIconBox}>
                   <Text style={{ fontSize: 10, fontWeight: '800', color: '#ea580c' }}>i</Text>
                 </View>
-                <Text style={styles.infoBannerText}>Peak engagement predicted for LinkedIn</Text>
+                <Text style={styles.infoBannerText}>Peak engagement predicted based on your audience</Text>
               </View>
             </View>
           </View>

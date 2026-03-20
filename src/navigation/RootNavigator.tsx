@@ -13,6 +13,11 @@ import SplashScreen from '../screens/splash';
 import PostDetails from '../screens/post-details';
 import PostSuccessScreen from '../screens/post-success';
 import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
+import EditProfileScreen from '../screens/settings/edit-profile';
+import NotificationsScreen from '../screens/settings/notifications';
+import PrivacySecurityScreen from '../screens/settings/privacy-security';
+import HelpCenterScreen from '../screens/settings/help-center';
+import ContactUsScreen from '../screens/settings/contact-us';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +59,12 @@ export default function RootNavigator() {
             <Stack.Screen name="AppTabs" component={TabNavigator} />
             <Stack.Screen name="PostDetails" component={PostDetails} />
             <Stack.Screen name="PostSuccess" component={PostSuccessScreen} />
+            {/* Settings sub-screens */}
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} />
+            <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
+            <Stack.Screen name="ContactUs" component={ContactUsScreen} />
           </>
         ) : (
           <>

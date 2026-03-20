@@ -1,29 +1,12 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
-  Home,
   LayoutDashboard,
   Settings as SettingsIcon,
-  LogOut,
-  FileText,
-  Image as ImageIcon,
   Users,
-  Camera,
-  BarChart2,
-  Bell,
-  Share2,
   Plus,
-  Edit2,
-  Smile,
-  AtSign,
-  MapPin,
-  Tag,
-  Sliders,
-  Calendar,
-  Send,
-  Check,
 } from 'lucide-react-native';
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 
 import HomeScreen from '../screens/home';
 import CreatePostScreen from '../screens/create-post';
@@ -68,7 +51,7 @@ export default function TabNavigator() {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <LayoutDashboard size={24} color={color} />
           ),
         }}
@@ -78,7 +61,7 @@ export default function TabNavigator() {
         component={CreatePostScreen}
         options={{
           tabBarLabel: 'Post',
-          tabBarIcon: ({color, size}) => <Plus size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Plus size={24} color={color} />,
         }}
       />
       <Tab.Screen
@@ -86,7 +69,7 @@ export default function TabNavigator() {
         component={AccountsScreen}
         options={{
           tabBarLabel: 'Accounts',
-          tabBarIcon: ({color, size}) => <Users size={24} color={color} />,
+          tabBarIcon: ({ color, size }) => <Users size={24} color={color} />,
         }}
       />
       <Tab.Screen
@@ -94,7 +77,7 @@ export default function TabNavigator() {
         component={SettingsScreen}
         options={{
           tabBarLabel: 'Settings',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <SettingsIcon size={24} color={color} />
           ),
         }}

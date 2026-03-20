@@ -25,11 +25,15 @@ api.interceptors.request.use(
   error => Promise.reject(error),
 );
 
+// #17: Guard to prevent infinite 401 sign-out loop
+let isSigningOut = false;
+
 // Response interceptor: handle 401
 api.interceptors.response.use(
   response => response,
   async error => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isSigningOut) {
+      isSigningOut = true;
       try {
         const {store} = require('../store');
         const {logout} = require('../store/slices/auth.slice');
@@ -37,6 +41,8 @@ api.interceptors.response.use(
         await signOut(getAuth());
       } catch (e) {
         /* ignore */
+      } finally {
+        isSigningOut = false;
       }
     }
     return Promise.reject(error);

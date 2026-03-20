@@ -1,3 +1,4 @@
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,29 +7,39 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Sparkles,
-  User,
   ChevronRight,
   Bell,
   Shield,
   HelpCircle,
   MessageCircle,
   LogOut,
+  UserCog,
 } from 'lucide-react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState, AppDispatch} from '../store';
-import {logoutUser} from '../store/actions/auth.actions';
-import {Colors} from '../constants/colors';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../store';
+import { logoutUser, checkAuthStatus } from '../store/actions/auth.actions';
+import { Colors } from '../constants/colors';
 
-export default function SettingsScreen() {
-  const {user} = useSelector((state: RootState) => state.auth);
+export default function SettingsScreen({ navigation }: any) {
+  const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
+
+  // Refresh profile every time the settings tab gains focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(checkAuthStatus());
+    }, [dispatch]),
+  );
+
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to log out?', [
-      {text: 'Cancel', style: 'cancel'},
+    Alert.alert('Log Out', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Logout',
+        text: 'Log Out',
         style: 'destructive',
         onPress: async () => {
           await dispatch(logoutUser());
@@ -43,14 +54,27 @@ export default function SettingsScreen() {
     enterprise: 'Enterprise',
   };
 
+  const initials =
+    user?.name
+      ?.split(' ')
+      .map(w => w[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase() || '?';
+
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 },
+      ]}>
       {/* Profile Card */}
       <View style={styles.profileCard}>
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>
-            {user?.name?.[0]?.toUpperCase() || '?'}
-          </Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
         <Text style={styles.name}>{user?.name || 'User'}</Text>
         <Text style={styles.email}>{user?.email || ''}</Text>
@@ -62,53 +86,59 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Menu Items */}
+      {/* Account Section */}
       <View style={styles.menuSection}>
         <Text style={styles.menuSectionTitle}>Account</Text>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View
-            style={[styles.menuIcon, {backgroundColor: `${Colors.primary}15`}]}>
-            <User size={20} color={Colors.primary} />
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('EditProfile')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}15` }]}>
+            <UserCog size={20} color={Colors.primary} />
           </View>
           <Text style={styles.menuText}>Edit Profile</Text>
           <ChevronRight size={20} color={Colors.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View
-            style={[styles.menuIcon, {backgroundColor: `${Colors.accent}15`}]}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('Notifications')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.accent}15` }]}>
             <Bell size={20} color={Colors.accent} />
           </View>
           <Text style={styles.menuText}>Notifications</Text>
           <ChevronRight size={20} color={Colors.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View
-            style={[styles.menuIcon, {backgroundColor: `${Colors.warning}15`}]}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('PrivacySecurity')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.warning}15` }]}>
             <Shield size={20} color={Colors.warning} />
           </View>
-          <Text style={styles.menuText}>Privacy & Security</Text>
+          <Text style={styles.menuText}>Privacy &amp; Security</Text>
           <ChevronRight size={20} color={Colors.textMuted} />
         </TouchableOpacity>
       </View>
 
+      {/* Support Section */}
       <View style={styles.menuSection}>
         <Text style={styles.menuSectionTitle}>Support</Text>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View
-            style={[styles.menuIcon, {backgroundColor: `${Colors.info}15`}]}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('HelpCenter')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.info}15` }]}>
             <HelpCircle size={20} color={Colors.info} />
           </View>
           <Text style={styles.menuText}>Help Center</Text>
           <ChevronRight size={20} color={Colors.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <View
-            style={[styles.menuIcon, {backgroundColor: `${Colors.success}15`}]}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('ContactUs')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.success}15` }]}>
             <MessageCircle size={20} color={Colors.success} />
           </View>
           <Text style={styles.menuText}>Contact Us</Text>
@@ -135,7 +165,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     gap: 20,
-    paddingBottom: 40,
   },
   profileCard: {
     backgroundColor: Colors.white,
@@ -143,24 +172,30 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
   avatarContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
+    width: 76,
+    height: 76,
+    borderRadius: 22,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   avatarText: {
     fontSize: 28,
     fontWeight: '700',
     color: Colors.white,
+    letterSpacing: 1,
   },
   name: {
     fontSize: 20,
@@ -207,10 +242,15 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
     marginBottom: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   menuIcon: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -229,7 +269,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
     borderRadius: 14,
     padding: 16,
-    marginTop: 8,
+    marginTop: 4,
   },
   logoutText: {
     fontSize: 15,
@@ -240,5 +280,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     color: Colors.textMuted,
+    paddingBottom: 8,
   },
 });

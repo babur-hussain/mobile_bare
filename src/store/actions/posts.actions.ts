@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { postsService } from '../../services/posts.service';
-import { setPostsLoading, setPostsError, setPosts } from '../slices/posts.slice';
+import { setPostsLoading, setPostsError, setPosts, addPost } from '../slices/posts.slice';
 
 export const fetchAllPosts = createAsyncThunk(
   'posts/fetchAll',
@@ -30,7 +30,7 @@ export const createNewPost = createAsyncThunk(
       mediaUrls?: string[];
       caption?: string;
       platforms: string[];
-      scheduledAt?: string;
+      scheduledTime?: string;
       location?: { name: string; lat: number; lng: number; };
     },
     { dispatch, rejectWithValue },
@@ -40,12 +40,11 @@ export const createNewPost = createAsyncThunk(
         mediaUrls: data.mediaUrls || [],
         caption: data.caption || '',
         platforms: data.platforms as ('facebook' | 'instagram')[],
-        scheduledAt: data.scheduledAt,
+        scheduledTime: data.scheduledTime,
         location: data.location,
       });
-      // the new post will be added to the top via unshift in the slice if we return it here,
-      // or we can just fetch all posts again
-      dispatch(fetchAllPosts(1));
+      // #32: Insert new post directly into Redux store instead of re-fetching the entire list
+      dispatch(addPost(response));
       return response;
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create post';
@@ -53,3 +52,4 @@ export const createNewPost = createAsyncThunk(
     }
   },
 );
+

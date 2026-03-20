@@ -1,18 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Image,
   Dimensions,
   Animated,
   Easing,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
-  Bell,
   Check,
   Heart,
   Sparkles,
@@ -24,7 +22,7 @@ import {
 } from 'lucide-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -48,11 +46,11 @@ const APP_COLORS = {
 
 // Map platform strings to UI props
 const platformIcons: Record<string, any> = {
-  instagram: {icon: Camera, color: APP_COLORS.instagram, label: 'Ig'},
-  facebook: {icon: Users, color: APP_COLORS.facebook, label: 'Fb'},
-  youtube: {icon: Youtube, color: APP_COLORS.youtube, label: 'Yt'},
-  x: {icon: Twitter, color: APP_COLORS.twitter, label: 'X'},
-  threads: {icon: AtSign, color: APP_COLORS.threads, label: 'Th'},
+  instagram: { icon: Camera, color: APP_COLORS.instagram, label: 'Ig' },
+  facebook: { icon: Users, color: APP_COLORS.facebook, label: 'Fb' },
+  youtube: { icon: Youtube, color: APP_COLORS.youtube, label: 'Yt' },
+  x: { icon: Twitter, color: APP_COLORS.twitter, label: 'X' },
+  threads: { icon: AtSign, color: APP_COLORS.threads, label: 'Th' },
 };
 
 export default function PostSuccessScreen() {
@@ -60,12 +58,12 @@ export default function PostSuccessScreen() {
   const route = useRoute();
 
   // Extract post details. Fallback empty array if missing.
-  const {post} = (route.params as any) || {};
+  const { post } = (route.params as any) || {};
   const platforms: string[] = post?.platforms || [];
 
-  // Animation Values
-  const scaleValue = new Animated.Value(0);
-  const opacityValue = new Animated.Value(0);
+  // Animation Values - useRef to avoid recreating on every render
+  const scaleValue = useRef(new Animated.Value(0)).current;
+  const opacityValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Pop-in animation
@@ -85,29 +83,13 @@ export default function PostSuccessScreen() {
   }, []);
 
   // Use a generalized reach estimate for UI polish as requested in the HTML reference.
-  const estimatedReach =
-    platforms.length > 0 ? `${platforms.length * 3.1}k+` : '0';
+  const estimatedReach = useMemo(
+    () => (platforms.length > 0 ? `${platforms.length * 3.1}k+` : '0'),
+    [platforms.length],
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.avatarCircle}>
-            <Image
-              source={{
-                uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxZQKqX-J5qmmKK5iE521icZDb15TItgDzqld78zPzjd7wOauYhnitVkTwQ5Dj0qK2FOEufbqMBEW4hrsoSuxUf136oxQ1F-KSW3YUYdoxpcQJD2JAPFH8tfqb5jpiIgxrrEqGk3uEUNPEaecWZWiXnz_8UBAFgrUWgd-GeNyXRX0NEssuU2oA6nhTumecpxQ5fgkJkDkZK4v3QRwjskZOwjTp0H8zmZ8ESoopc4xIWRksNzlAMKMHegegYlU2TDErRBhiyMSEmFEa',
-              }}
-              style={styles.profileImage}
-            />
-          </View>
-          <Text style={styles.headerBrand}>PostOnce</Text>
-        </View>
-        <TouchableOpacity style={styles.iconButton}>
-          <Bell size={24} color={APP_COLORS.onSurfaceVariant} />
-        </TouchableOpacity>
-      </View>
-
       <View style={styles.content}>
         {/* Success Visual */}
         <View style={styles.visualContainer}>
@@ -117,13 +99,13 @@ export default function PostSuccessScreen() {
           <Animated.View
             style={[
               styles.iconCircle,
-              {opacity: opacityValue, transform: [{scale: scaleValue}]},
+              { opacity: opacityValue, transform: [{ scale: scaleValue }] },
             ]}>
             <LinearGradient
               colors={[APP_COLORS.primary, '#6c5ce7']}
               style={styles.innerIconCircle}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}>
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}>
               <Check size={48} color={APP_COLORS.onPrimary} strokeWidth={3} />
             </LinearGradient>
 
@@ -168,7 +150,7 @@ export default function PostSuccessScreen() {
                       key={idx}
                       style={[
                         styles.platformBadge,
-                        {backgroundColor: pData.color},
+                        { backgroundColor: pData.color },
                       ]}>
                       <Text style={styles.platformBadgeText}>
                         {pData.label}
@@ -205,8 +187,8 @@ export default function PostSuccessScreen() {
             <LinearGradient
               colors={[APP_COLORS.primary, '#6c5ce7']}
               style={styles.primaryGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}>
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}>
               <Text style={styles.primaryButtonText}>Back to Home</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -217,7 +199,7 @@ export default function PostSuccessScreen() {
             onPress={() => {
               if (post?._id) {
                 // Try navigating directly to the details if we have it
-                navigation.navigate('PostDetails', {post});
+                navigation.navigate('PostDetails', { post });
               } else {
                 navigation.navigate('Home');
               }
@@ -230,8 +212,8 @@ export default function PostSuccessScreen() {
       {/* Background Texture Bottom */}
       <LinearGradient
         colors={[APP_COLORS.surfaceContainerLow, 'transparent']}
-        start={{x: 0, y: 1}}
-        end={{x: 0, y: 0}}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 0, y: 0 }}
         style={styles.bottomTexture}
       />
     </SafeAreaView>
@@ -243,48 +225,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: APP_COLORS.surface,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    zIndex: 10,
-    backgroundColor: 'rgba(252, 249, 248, 0.7)',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: APP_COLORS.surfaceContainerHighest,
-    overflow: 'hidden',
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  headerBrand: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: APP_COLORS.onSurface,
-  },
-  iconButton: {
-    padding: 8,
-    borderRadius: 24,
-  },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
     zIndex: 2,
-    marginTop: -80, // Offset header visually to truly center
   },
   visualContainer: {
     position: 'relative',
@@ -297,7 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: APP_COLORS.primary,
     opacity: 0.15,
     borderRadius: 125,
-    transform: [{scale: 1.5}],
+    transform: [{ scale: 1.5 }],
     top: -50,
     left: -60,
   },
@@ -309,7 +255,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 16},
+    shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.1,
     shadowRadius: 24,
     elevation: 10,
@@ -404,7 +350,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     width: '100%',
     shadowColor: APP_COLORS.primary,
-    shadowOffset: {width: 0, height: 8},
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
     elevation: 8,
