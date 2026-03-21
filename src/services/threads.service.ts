@@ -6,6 +6,11 @@ export const threadsService = {
     return response.data;
   },
 
+  async getRecentReplies() {
+    const response = await api.get('/api/v1/threads/recent-replies');
+    return response.data;
+  },
+
   async searchThreads(query: string) {
     const response = await api.get('/api/v1/threads/search', { params: { query } });
     return response.data;

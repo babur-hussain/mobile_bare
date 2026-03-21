@@ -23,7 +23,7 @@ import {
 import { threadsService } from '../services/threads.service';
 import { APP_COLORS } from '../constants/colors';
 
-type TabType = 'mentions' | 'search' | 'discovery';
+type TabType = 'mentions' | 'replies' | 'search' | 'discovery';
 type PlatformType = 'all' | 'threads' | 'instagram' | 'facebook';
 
 export default function SocialHub() {
@@ -33,6 +33,7 @@ export default function SocialHub() {
 
   // State for each tab
   const [mentions, setMentions] = useState<any[]>([]);
+  const [replies, setReplies] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [discoveryProfile, setDiscoveryProfile] = useState<any>(null);
 
@@ -46,6 +47,8 @@ export default function SocialHub() {
   useEffect(() => {
     if (activeTab === 'mentions') {
       fetchMentions();
+    } else if (activeTab === 'replies') {
+      fetchReplies();
     }
   }, [activeTab, platform]);
 
@@ -61,6 +64,23 @@ export default function SocialHub() {
       setMentions(data?.data || []);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to fetch mentions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReplies = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (platform === 'instagram' || platform === 'facebook') {
+        setReplies([]);
+        return;
+      }
+      const data = await threadsService.getRecentReplies();
+      setReplies(data?.data || []);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to fetch replies');
     } finally {
       setLoading(false);
     }
@@ -130,10 +150,13 @@ export default function SocialHub() {
                 // Clear state when switching to FB/IG
                 if (p === 'instagram' || p === 'facebook') {
                   setMentions([]);
+                  setReplies([]);
                   setSearchResults([]);
                   setDiscoveryProfile(null);
                 } else if (activeTab === 'mentions') {
-                  fetchMentions(); // Re-fetch mentions if switching back to 'all' or 'threads'
+                  fetchMentions();
+                } else if (activeTab === 'replies') {
+                  fetchReplies();
                 }
               }}>
               <Text style={[styles.platformPillText, platform === p && styles.activePlatformPillText]}>
@@ -145,25 +168,37 @@ export default function SocialHub() {
       </View>
 
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'mentions' && styles.activeTab]}
-          onPress={() => setActiveTab('mentions')}>
-          <AtSign size={16} color={activeTab === 'mentions' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
-          <Text style={[styles.tabText, activeTab === 'mentions' && styles.activeTabText]}>Mentions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'search' && styles.activeTab]}
-          onPress={() => setActiveTab('search')}>
-          <Search size={16} color={activeTab === 'search' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
-          <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'discovery' && styles.activeTab]}
-          onPress={() => setActiveTab('discovery')}>
-          <UserCheck size={16} color={activeTab === 'discovery' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
-          <Text style={[styles.tabText, activeTab === 'discovery' && styles.activeTabText]}>Discovery</Text>
-        </TouchableOpacity>
+      <View>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsContainer}
+        >
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'mentions' && styles.activeTab]}
+            onPress={() => setActiveTab('mentions')}>
+            <AtSign size={16} color={activeTab === 'mentions' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
+            <Text style={[styles.tabText, activeTab === 'mentions' && styles.activeTabText]}>Mentions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'replies' && styles.activeTab]}
+            onPress={() => setActiveTab('replies')}>
+            <MessageCircle size={16} color={activeTab === 'replies' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
+            <Text style={[styles.tabText, activeTab === 'replies' && styles.activeTabText]}>Replies</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'search' && styles.activeTab]}
+            onPress={() => setActiveTab('search')}>
+            <Search size={16} color={activeTab === 'search' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
+            <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>Search</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'discovery' && styles.activeTab]}
+            onPress={() => setActiveTab('discovery')}>
+            <UserCheck size={16} color={activeTab === 'discovery' ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
+            <Text style={[styles.tabText, activeTab === 'discovery' && styles.activeTabText]}>Discovery</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {error && (
@@ -174,7 +209,7 @@ export default function SocialHub() {
 
       {/* Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {activeTab === 'mentions' && (
+         {activeTab === 'mentions' && (
           <View>
             <View style={styles.infoBanner}>
               <Text style={styles.infoText}>Recent conversations mentioning your connected account.</Text>
@@ -186,10 +221,40 @@ export default function SocialHub() {
             ) : (
               mentions.map((mention, idx) => (
                 <View key={idx} style={styles.itemCard}>
-                  <MessageCircle size={20} color={APP_COLORS.primary} style={{ marginTop: 2 }} />
+                  <AtSign size={20} color={APP_COLORS.primary} style={{ marginTop: 2 }} />
                   <View style={styles.itemCardContent}>
                     <Text style={styles.itemText}>{mention.text}</Text>
                     <Text style={styles.timeText}>{new Date(mention.timestamp).toLocaleString()}</Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+        )}
+
+        {activeTab === 'replies' && (
+          <View>
+            <View style={styles.infoBanner}>
+              <Text style={styles.infoText}>Recent replies to your Threads posts.</Text>
+            </View>
+            {loading ? (
+              <ActivityIndicator style={{ marginTop: 40 }} color={APP_COLORS.primary} />
+            ) : replies.length === 0 ? (
+              <Text style={styles.emptyText}>No replies found on your recent posts.</Text>
+            ) : (
+              replies.map((reply, idx) => (
+                <View key={idx} style={styles.itemCard}>
+                  <MessageCircle size={20} color={APP_COLORS.primary} style={{ marginTop: 2 }} />
+                  <View style={styles.itemCardContent}>
+                    {reply.originalPostText ? (
+                      <View style={{ marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: APP_COLORS.surfaceContainerLow }}>
+                         <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, fontStyle: 'italic' }}>
+                           Replying to: "{reply.originalPostText.length > 50 ? reply.originalPostText.substring(0, 50) + '...' : reply.originalPostText}"
+                         </Text>
+                      </View>
+                    ) : null}
+                    <Text style={styles.itemText}>{reply.text}</Text>
+                    <Text style={styles.timeText}>{new Date(reply.timestamp).toLocaleString()}</Text>
                   </View>
                 </View>
               ))

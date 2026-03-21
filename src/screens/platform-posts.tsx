@@ -11,11 +11,14 @@ import {
   Modal,
   Platform,
   Dimensions,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye } from 'lucide-react-native';
+import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye, AtSign, CornerUpLeft } from 'lucide-react-native';
 import api from '../services/api';
+import { threadsService } from '../services/threads.service';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -50,6 +53,49 @@ export default function PlatformPostsScreen() {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
 
+  // Replies Modal State
+  const [postReplies, setPostReplies] = useState<any[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [replyTargetId, setReplyTargetId] = useState<string | null>(null);
+  const [likedReplies, setLikedReplies] = useState<Set<string>>(new Set());
+
+  const handleSendReply = async () => {
+    const targetId = replyTargetId || selectedPost?.id;
+    if (!replyText.trim() || !targetId) return;
+    try {
+      await threadsService.replyToPost(targetId, replyText);
+      setPostReplies(prev => [{ text: replyText, timestamp: new Date().toISOString(), _id: Math.random().toString() }, ...prev]);
+      setReplyText('');
+      setReplyTargetId(null);
+      Alert.alert('Success', 'Reply sent to Threads!');
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to reply');
+    }
+  };
+
+  const toggleLikeReply = (replyId: string) => {
+    setLikedReplies(prev => {
+      const next = new Set(prev);
+      if (next.has(replyId)) next.delete(replyId);
+      else next.add(replyId);
+      return next;
+    });
+  };
+
+  const fetchReplies = async (postId: string) => {
+    setLoadingReplies(true);
+    setPostReplies([]);
+    try {
+      const data = await threadsService.getReplies(postId);
+      setPostReplies(data?.data || []);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoadingReplies(false);
+    }
+  };
+
   const fetchAnalytics = async (postId: string) => {
     setAnalytics(null);
     setAnalyticsError(null);
@@ -68,6 +114,9 @@ export default function PlatformPostsScreen() {
   const openAnalytics = (post: any) => {
     setSelectedPost(post);
     fetchAnalytics(post.id);
+    if (platform?.toLowerCase() === 'threads') {
+      fetchReplies(post.id);
+    }
   };
 
   const fetchPosts = async (isLoadMore = false) => {
@@ -271,12 +320,75 @@ export default function PlatformPostsScreen() {
                 <View style={styles.analyticStatBox}>
                    <Eye size={24} color="#9b59b6" />
                    <Text style={styles.statValue}>{analytics.reach.toLocaleString()}</Text>
-                   <Text style={styles.statLabel}>Reach</Text>
-                </View>
-              </View>
-            ) : null}
-            
-            <View style={{ marginTop: 24 }}>
+                    <Text style={styles.statLabel}>Reach</Text>
+                 </View>
+               </View>
+             ) : null}
+
+             {selectedPost && platform?.toLowerCase() === 'threads' && (
+               <View style={styles.repliesContainer}>
+                  <View style={styles.repliesHeader}>
+                    <MessageCircle size={16} color={APP_COLORS.onSurfaceVariant} />
+                    <Text style={styles.repliesTitle}>Threads Replies</Text>
+                  </View>
+                  
+                  <View style={styles.replyInputContainer}>
+                    <TextInput
+                      style={styles.replyInput}
+                      placeholder={replyTargetId ? "Reply to comment..." : "Reply to this thread..."}
+                      value={replyText}
+                      onChangeText={setReplyText}
+                      placeholderTextColor={APP_COLORS.outlineVariant}
+                    />
+                    {replyTargetId && (
+                      <TouchableOpacity style={{ justifyContent: 'center', marginRight: 8 }} onPress={() => setReplyTargetId(null)}>
+                         <XIcon size={20} color={APP_COLORS.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity style={styles.replyInputButton} onPress={handleSendReply}>
+                      <MessageCircle size={18} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  {loadingReplies ? (
+                     <View style={{ padding: 24, alignItems: 'center' }}>
+                       <ActivityIndicator size="small" color={APP_COLORS.primary} />
+                       <Text style={{ marginTop: 8, fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>Loading replies...</Text>
+                     </View>
+                  ) : postReplies.length === 0 ? (
+                     <View style={{ padding: 24, alignItems: 'center' }}>
+                       <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>No replies to show.</Text>
+                     </View>
+                  ) : (
+                     <FlatList
+                       data={postReplies}
+                       scrollEnabled={false}
+                       keyExtractor={(r, idx) => r.id || idx.toString()}
+                       renderItem={({ item, index }) => (
+                         <View style={[styles.replyItem, index === postReplies.length - 1 && { borderBottomWidth: 0 }]}>
+                           <View style={styles.replyAvatar}>
+                             <AtSign size={16} color="#fff" />
+                           </View>
+                           <View style={styles.replyContent}>
+                             <Text style={styles.replyText}>{item.text}</Text>
+                             <Text style={styles.replyTime}>{new Date(item.timestamp).toLocaleString()}</Text>
+                           </View>
+                           <View style={styles.replyActions}>
+                             <TouchableOpacity style={styles.replyActionBtn} onPress={() => toggleLikeReply(item.id || index.toString())}>
+                                <Heart size={16} color={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : APP_COLORS.onSurfaceVariant} fill={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : 'transparent'} />
+                             </TouchableOpacity>
+                             <TouchableOpacity style={styles.replyActionBtn} onPress={() => setReplyTargetId(item.id)}>
+                                <CornerUpLeft size={16} color={replyTargetId === item.id ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
+                             </TouchableOpacity>
+                           </View>
+                         </View>
+                       )}
+                     />
+                  )}
+               </View>
+             )}
+             
+             <View style={{ marginTop: 24 }}>
               <TouchableOpacity 
                 style={styles.closeBtn} 
                 onPress={() => setSelectedPost(null)}>
@@ -432,6 +544,86 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: APP_COLORS.onSurfaceVariant,
     marginTop: 4,
+  },
+  repliesContainer: {
+    marginTop: 24,
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    borderRadius: 16,
+    padding: 16,
+  },
+  repliesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: APP_COLORS.outlineVariant,
+    paddingBottom: 12,
+  },
+  repliesTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: APP_COLORS.onSurface,
+    marginLeft: 8,
+  },
+  replyItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: APP_COLORS.outlineVariant,
+  },
+  replyAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: APP_COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  replyContent: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  replyActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  replyActionBtn: {
+    padding: 4,
+  },
+  replyText: {
+    fontSize: 14,
+    color: APP_COLORS.onSurface,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  replyTime: {
+    fontSize: 12,
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  replyInputContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 8,
+  },
+  replyInput: {
+    flex: 1,
+    backgroundColor: APP_COLORS.surface,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    height: 44,
+    color: APP_COLORS.onSurface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.outlineVariant,
+  },
+  replyInputButton: {
+    backgroundColor: APP_COLORS.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeBtn: {
     backgroundColor: APP_COLORS.primary,
