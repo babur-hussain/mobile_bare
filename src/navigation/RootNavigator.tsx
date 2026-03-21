@@ -12,13 +12,15 @@ import TabNavigator from './TabNavigator';
 import SplashScreen from '../screens/splash';
 import PostDetails from '../screens/post-details';
 import PostSuccessScreen from '../screens/post-success';
-import ThreadsHub from '../screens/threads-hub';
+import SocialHub from '../screens/social-hub';
+import ChatScreen from '../screens/messages/chat';
 import OnboardingFlow from '../screens/onboarding/OnboardingFlow';
 import EditProfileScreen from '../screens/settings/edit-profile';
 import NotificationsScreen from '../screens/settings/notifications';
 import PrivacySecurityScreen from '../screens/settings/privacy-security';
 import HelpCenterScreen from '../screens/settings/help-center';
 import ContactUsScreen from '../screens/settings/contact-us';
+import PlatformPostsScreen from '../screens/platform-posts';
 
 const Stack = createNativeStackNavigator();
 
@@ -60,7 +62,9 @@ export default function RootNavigator() {
             <Stack.Screen name="AppTabs" component={TabNavigator} />
             <Stack.Screen name="PostDetails" component={PostDetails} />
             <Stack.Screen name="PostSuccess" component={PostSuccessScreen} />
-            <Stack.Screen name="ThreadsHub" component={ThreadsHub} />
+            <Stack.Screen name="SocialHub" component={SocialHub} />
+            <Stack.Screen name="ChatScreen" component={ChatScreen} />
+            <Stack.Screen name="PlatformPosts" component={PlatformPostsScreen} />
             {/* Settings sub-screens */}
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />

@@ -24,10 +24,12 @@ import { threadsService } from '../services/threads.service';
 import { APP_COLORS } from '../constants/colors';
 
 type TabType = 'mentions' | 'search' | 'discovery';
+type PlatformType = 'all' | 'threads' | 'instagram' | 'facebook';
 
-export default function ThreadsHub() {
+export default function SocialHub() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState<TabType>('mentions');
+  const [platform, setPlatform] = useState<PlatformType>('all');
 
   // State for each tab
   const [mentions, setMentions] = useState<any[]>([]);
@@ -45,12 +47,16 @@ export default function ThreadsHub() {
     if (activeTab === 'mentions') {
       fetchMentions();
     }
-  }, [activeTab]);
+  }, [activeTab, platform]);
 
   const fetchMentions = async () => {
     setLoading(true);
     setError(null);
     try {
+      if (platform === 'instagram' || platform === 'facebook') {
+        setMentions([]);
+        return;
+      }
       const data = await threadsService.getMentions();
       setMentions(data?.data || []);
     } catch (err: any) {
@@ -65,8 +71,11 @@ export default function ThreadsHub() {
     setLoading(true);
     setError(null);
     try {
+      if (platform === 'instagram' || platform === 'facebook') {
+        setSearchResults([]);
+        return;
+      }
       const data = await threadsService.searchThreads(searchQuery.trim());
-      // Depending on the exact API response shape, assume data.data
       setSearchResults(data?.data || []);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to search threads');
@@ -81,6 +90,9 @@ export default function ThreadsHub() {
     setError(null);
     setDiscoveryProfile(null);
     try {
+      if (platform === 'instagram' || platform === 'facebook') {
+        return;
+      }
       const data = await threadsService.discoverProfile(usernameQuery.trim());
       setDiscoveryProfile(data);
     } catch (err: any) {
@@ -99,8 +111,37 @@ export default function ThreadsHub() {
           onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color={APP_COLORS.onSurface} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Threads Hub</Text>
+        <Text style={styles.headerTitle}>Social Hub</Text>
         <View style={{ width: 40 }} />
+      </View>
+
+      {/* Platform Selector */}
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.platformsContainer}>
+          {(['all', 'threads', 'instagram', 'facebook'] as PlatformType[]).map((p) => (
+            <TouchableOpacity
+              key={p}
+              style={[styles.platformPill, platform === p && styles.activePlatformPill]}
+              onPress={() => {
+                setPlatform(p);
+                // Clear state when switching to FB/IG
+                if (p === 'instagram' || p === 'facebook') {
+                  setMentions([]);
+                  setSearchResults([]);
+                  setDiscoveryProfile(null);
+                } else if (activeTab === 'mentions') {
+                  fetchMentions(); // Re-fetch mentions if switching back to 'all' or 'threads'
+                }
+              }}>
+              <Text style={[styles.platformPillText, platform === p && styles.activePlatformPillText]}>
+                {p === 'all' ? 'All Platforms' : p.charAt(0).toUpperCase() + p.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Tabs */}
@@ -259,10 +300,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: APP_COLORS.onSurface,
   },
+  platformsContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  platformPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: APP_COLORS.surfaceContainerHighest,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  activePlatformPill: {
+    backgroundColor: APP_COLORS.primaryContainer,
+    borderColor: APP_COLORS.primary,
+  },
+  platformPillText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  activePlatformPillText: {
+    color: APP_COLORS.primary,
+  },
   tabsContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 8,
     gap: 12,
   },

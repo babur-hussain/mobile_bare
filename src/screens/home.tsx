@@ -166,7 +166,7 @@ export default function HomeScreen() {
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('ThreadsHub')}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('SocialHub')}>
             <Text style={{ fontSize: 18, color: APP_COLORS.primary, fontWeight: '800' }}>@</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
