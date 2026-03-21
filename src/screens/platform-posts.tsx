@@ -10,6 +10,7 @@ import {
   Linking,
   Modal,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -25,6 +26,9 @@ const APP_COLORS = {
   error: '#ba1a1a',
   surfaceContainerLow: '#f6f3f2',
 };
+
+const { width } = Dimensions.get('window');
+const TILE_SIZE = width / 3;
 
 export default function PlatformPostsScreen() {
   const insets = useSafeAreaInsets();
@@ -115,55 +119,39 @@ export default function PlatformPostsScreen() {
   const renderItem = ({ item }: { item: any }) => {
     const isImage = item.mediaType === 'IMAGE' || item.mediaType === 'CAROUSEL_ALBUM';
     const isVideo = item.mediaType === 'VIDEO' || item.mediaType === 'REELS';
+    const hasMedia = !!(item.mediaUrl || item.thumbnailUrl);
 
     return (
       <TouchableOpacity 
-        style={styles.card} 
+        style={[styles.tile, { width: TILE_SIZE, height: TILE_SIZE }]} 
         activeOpacity={0.8} 
         onPress={() => openAnalytics(item)}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.timestamp}>
-            {item.timestamp ? new Date(item.timestamp).toLocaleString(undefined, {
-              year: 'numeric', month: 'short', day: 'numeric',
-              hour: '2-digit', minute: '2-digit'
-            }) : 'Unknown Date'}
-          </Text>
-          <TouchableOpacity 
-            style={styles.linkButton}
-            onPress={() => item.permalink && Linking.openURL(item.permalink)}>
-            <ExternalLink size={16} color={APP_COLORS.primary} />
-            <Text style={styles.linkText}>View Original</Text>
-          </TouchableOpacity>
-        </View>
 
-        {(item.mediaUrl || item.thumbnailUrl) && (
-          <View style={styles.mediaContainer}>
-            <Image 
-              source={{ uri: item.thumbnailUrl || item.mediaUrl }} 
-              style={styles.media} 
-              resizeMode="cover" 
-            />
-            {isVideo && (
-              <View style={styles.mediaIconOverlay}>
-                <Video size={24} color="#fff" />
-              </View>
-            )}
-            {isImage && (
-              <View style={styles.mediaIconOverlay}>
-                <ImageIcon size={24} color="#fff" />
-              </View>
+        {hasMedia ? (
+          <Image 
+            source={{ uri: item.thumbnailUrl || item.mediaUrl }} 
+            style={styles.tileImage} 
+            resizeMode="cover" 
+          />
+        ) : (
+          <View style={styles.textTile}>
+            {item.text ? (
+              <Text style={styles.textTileCaption} numberOfLines={4}>{item.text}</Text>
+            ) : (
+              <AlignLeft size={24} color={APP_COLORS.outlineVariant} />
             )}
           </View>
         )}
 
-        {item.text ? (
-          <Text style={styles.caption} numberOfLines={4}>
-            {item.text}
-          </Text>
-        ) : (
-          <View style={{ flexDirection: 'row', alignItems: 'center', opacity: 0.5, marginTop: 8 }}>
-            <AlignLeft size={16} color={APP_COLORS.onSurfaceVariant} style={{ marginRight: 6 }} />
-            <Text style={{ color: APP_COLORS.onSurfaceVariant, fontSize: 13, fontStyle: 'italic' }}>No caption</Text>
+        {isVideo && (
+          <View style={styles.tileIconOverlay}>
+            <Video size={16} color="#fff" />
+          </View>
+        )}
+        
+        {item.mediaType === 'CAROUSEL_ALBUM' && (
+          <View style={styles.tileIconOverlay}>
+            <ImageIcon size={16} color="#fff" />
           </View>
         )}
       </TouchableOpacity>
@@ -200,7 +188,8 @@ export default function PlatformPostsScreen() {
             data={posts}
             keyExtractor={(item, index) => item.id || index.toString()}
             renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
+            numColumns={3}
+            contentContainerStyle={styles.gridContent}
             onEndReached={() => fetchPosts(true)}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={
@@ -341,72 +330,40 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
   },
-  listContent: {
-    padding: 16,
+  gridContent: {
     paddingBottom: 40,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: APP_COLORS.surfaceContainerLow,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: APP_COLORS.onSurfaceVariant,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tile: {
+    borderWidth: 0.5,
+    borderColor: APP_COLORS.surface,
     backgroundColor: APP_COLORS.surfaceContainerLow,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  linkText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: APP_COLORS.primary,
-    marginLeft: 6,
-  },
-  mediaContainer: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: APP_COLORS.surfaceContainerLow,
-    marginBottom: 12,
     position: 'relative',
   },
-  media: {
+  tileImage: {
     width: '100%',
     height: '100%',
   },
-  mediaIconOverlay: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 6,
-    borderRadius: 8,
+  textTile: {
+    width: '100%',
+    height: '100%',
+    padding: 8,
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  caption: {
-    fontSize: 14,
-    color: APP_COLORS.onSurface,
-    lineHeight: 20,
+  textTileCaption: {
+    fontSize: 10,
+    color: APP_COLORS.onSurfaceVariant,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  tileIconOverlay: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 4,
+    borderRadius: 6,
   },
   fetchMoreBtn: {
     paddingHorizontal: 24,
