@@ -13,12 +13,16 @@ import {
   Dimensions,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye, AtSign, CornerUpLeft } from 'lucide-react-native';
+import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye, AtSign, CornerUpLeft, ArrowUp } from 'lucide-react-native';
 import api from '../services/api';
 import { threadsService } from '../services/threads.service';
+import { instagramService } from '../services/instagram.service';
+import { facebookService } from '../services/facebook.service';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -63,12 +67,20 @@ export default function PlatformPostsScreen() {
   const handleSendReply = async () => {
     const targetId = replyTargetId || selectedPost?.id;
     if (!replyText.trim() || !targetId) return;
+    const sentText = replyText;
+    
+    setReplyText('');
+    setReplyTargetId(null);
+    setPostReplies(prev => [{ text: sentText, timestamp: new Date().toISOString(), id: Math.random().toString(), username: 'You' }, ...prev]);
+
     try {
-      await threadsService.replyToPost(targetId, replyText);
-      setPostReplies(prev => [{ text: replyText, timestamp: new Date().toISOString(), _id: Math.random().toString() }, ...prev]);
-      setReplyText('');
-      setReplyTargetId(null);
-      Alert.alert('Success', 'Reply sent to Threads!');
+      if (platform?.toLowerCase() === 'threads') {
+        await threadsService.replyToPost(targetId, sentText);
+      } else if (platform?.toLowerCase() === 'instagram') {
+        await instagramService.replyToComment(accountId, targetId, sentText);
+      } else if (platform?.toLowerCase() === 'facebook') {
+        await facebookService.replyToComment(accountId, targetId, sentText);
+      }
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Failed to reply');
     }
@@ -83,14 +95,25 @@ export default function PlatformPostsScreen() {
     });
   };
 
+  const handlePressReply = (item: any) => {
+    setReplyTargetId(item.id);
+  };
+
   const fetchReplies = async (postId: string) => {
-    setLoadingReplies(true);
-    setPostReplies([]);
     try {
-      const data = await threadsService.getReplies(postId);
-      setPostReplies(data?.data || []);
+      setLoadingReplies(true);
+      if (platform?.toLowerCase() === 'threads') {
+        const responseData = await threadsService.getReplies(postId);
+        setPostReplies(responseData?.data || []);
+      } else if (platform?.toLowerCase() === 'instagram') {
+        const responseData = await instagramService.getComments(accountId, postId);
+        setPostReplies(responseData?.data || []);
+      } else if (platform?.toLowerCase() === 'facebook') {
+        const responseData = await facebookService.getComments(accountId, postId);
+        setPostReplies(responseData?.data || []);
+      }
     } catch (err: any) {
-      console.error(err);
+      Alert.alert('Fetch Error', err?.response?.data?.message || err?.message || 'Failed to fetch replies');
     } finally {
       setLoadingReplies(false);
     }
@@ -114,7 +137,7 @@ export default function PlatformPostsScreen() {
   const openAnalytics = (post: any) => {
     setSelectedPost(post);
     fetchAnalytics(post.id);
-    if (platform?.toLowerCase() === 'threads') {
+    if (['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase())) {
       fetchReplies(post.id);
     }
   };
@@ -276,8 +299,12 @@ export default function PlatformPostsScreen() {
         animationType="slide"
         onRequestClose={() => setSelectedPost(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <BarChart2 size={20} color={APP_COLORS.primary} />
@@ -287,108 +314,133 @@ export default function PlatformPostsScreen() {
                 <XIcon size={24} color={APP_COLORS.onSurfaceVariant} />
               </TouchableOpacity>
             </View>
-            
-            {analyticsLoading ? (
-              <View style={styles.modalCenter}>
-                <ActivityIndicator size="large" color={APP_COLORS.primary} />
-                <Text style={{ marginTop: 12, color: APP_COLORS.onSurfaceVariant }}>Loading insights...</Text>
-              </View>
-            ) : analyticsError ? (
-              <View style={styles.modalCenter}>
-                <Text style={{ color: APP_COLORS.error, textAlign: 'center', marginBottom: 16 }}>{analyticsError}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={() => fetchAnalytics(selectedPost?.id)}>
-                  <Text style={{ color: '#fff', fontWeight: '600' }}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            ) : analytics ? (
-              <View style={styles.analyticsGrid}>
-                <View style={styles.analyticStatBox}>
-                   <Heart size={24} color="#e74c3c" />
-                   <Text style={styles.statValue}>{analytics.likes.toLocaleString()}</Text>
-                   <Text style={styles.statLabel}>Likes</Text>
-                </View>
-                <View style={styles.analyticStatBox}>
-                   <MessageCircle size={24} color="#3498db" />
-                   <Text style={styles.statValue}>{analytics.comments.toLocaleString()}</Text>
-                   <Text style={styles.statLabel}>Comments</Text>
-                </View>
-                <View style={styles.analyticStatBox}>
-                   <Share2 size={24} color="#f39c12" />
-                   <Text style={styles.statValue}>{analytics.shares.toLocaleString()}</Text>
-                   <Text style={styles.statLabel}>Shares</Text>
-                </View>
-                <View style={styles.analyticStatBox}>
-                   <Eye size={24} color="#9b59b6" />
-                   <Text style={styles.statValue}>{analytics.reach.toLocaleString()}</Text>
-                    <Text style={styles.statLabel}>Reach</Text>
-                 </View>
-               </View>
-             ) : null}
 
-             {selectedPost && platform?.toLowerCase() === 'threads' && (
-               <View style={styles.repliesContainer}>
-                  <View style={styles.repliesHeader}>
-                    <MessageCircle size={16} color={APP_COLORS.onSurfaceVariant} />
-                    <Text style={styles.repliesTitle}>Threads Replies</Text>
-                  </View>
-                  
-                  <View style={styles.replyInputContainer}>
-                    <TextInput
-                      style={styles.replyInput}
-                      placeholder={replyTargetId ? "Reply to comment..." : "Reply to this thread..."}
-                      value={replyText}
-                      onChangeText={setReplyText}
-                      placeholderTextColor={APP_COLORS.outlineVariant}
-                    />
-                    {replyTargetId && (
-                      <TouchableOpacity style={{ justifyContent: 'center', marginRight: 8 }} onPress={() => setReplyTargetId(null)}>
-                         <XIcon size={20} color={APP_COLORS.onSurfaceVariant} />
-                      </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <FlatList
+                data={['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase()) ? postReplies : []}
+                keyExtractor={(r, idx) => r.id || idx.toString()}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                ListHeaderComponent={
+                  <View style={{ paddingBottom: 16 }}>
+                    {analyticsLoading ? (
+                      <View style={styles.modalCenter}>
+                        <ActivityIndicator size="large" color={APP_COLORS.primary} />
+                        <Text style={{ marginTop: 12, color: APP_COLORS.onSurfaceVariant }}>Loading insights...</Text>
+                      </View>
+                    ) : analyticsError ? (
+                      <View style={styles.modalCenter}>
+                        <Text style={{ color: APP_COLORS.error, textAlign: 'center', marginBottom: 16 }}>{analyticsError}</Text>
+                        <TouchableOpacity style={styles.retryButton} onPress={() => fetchAnalytics(selectedPost?.id)}>
+                          <Text style={{ color: '#fff', fontWeight: '600' }}>Retry</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : analytics ? (
+                      <View style={styles.analyticsGrid}>
+                        <View style={styles.analyticStatBox}>
+                           <Heart size={24} color="#e74c3c" />
+                           <Text style={styles.statValue}>{analytics.likes.toLocaleString()}</Text>
+                           <Text style={styles.statLabel}>Likes</Text>
+                        </View>
+                        <View style={styles.analyticStatBox}>
+                           <MessageCircle size={24} color="#3498db" />
+                           <Text style={styles.statValue}>{analytics.comments.toLocaleString()}</Text>
+                           <Text style={styles.statLabel}>Comments</Text>
+                        </View>
+                        <View style={styles.analyticStatBox}>
+                           <Share2 size={24} color="#f39c12" />
+                           <Text style={styles.statValue}>{analytics.shares.toLocaleString()}</Text>
+                           <Text style={styles.statLabel}>Shares</Text>
+                        </View>
+                        <View style={styles.analyticStatBox}>
+                           <Eye size={24} color="#9b59b6" />
+                           <Text style={styles.statValue}>{analytics.reach.toLocaleString()}</Text>
+                            <Text style={styles.statLabel}>Reach</Text>
+                         </View>
+                       </View>
+                    ) : null}
+
+                     {selectedPost && ['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase()) && (
+                      <View style={[styles.repliesHeader, { marginTop: 24 }]}>
+                        <MessageCircle size={16} color={APP_COLORS.onSurfaceVariant} />
+                        <Text style={styles.repliesTitle}>
+                          {platform?.toLowerCase() === 'threads' ? 'Threads Replies' : platform?.toLowerCase() === 'instagram' ? 'Instagram Comments' : 'Facebook Comments'}
+                        </Text>
+                      </View>
                     )}
-                    <TouchableOpacity style={styles.replyInputButton} onPress={handleSendReply}>
-                      <MessageCircle size={18} color="#fff" />
+                    
+                    {selectedPost && ['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase()) && loadingReplies && (
+                      <View style={{ padding: 24, alignItems: 'center' }}>
+                        <ActivityIndicator size="small" color={APP_COLORS.primary} />
+                        <Text style={{ marginTop: 8, fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>Loading {platform?.toLowerCase() === 'threads' ? 'replies' : 'comments'}...</Text>
+                      </View>
+                    )}
+                    {selectedPost && ['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase()) && !loadingReplies && postReplies.length === 0 && (
+                      <View style={{ padding: 24, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>No {platform?.toLowerCase() === 'threads' ? 'replies' : 'comments'} to show.</Text>
+                      </View>
+                    )}
+                  </View>
+                }
+                renderItem={({ item, index }) => (
+                  <View style={[styles.replyItem, index === postReplies.length - 1 && { borderBottomWidth: 0 }]}>
+                    <View style={styles.replyAvatar}>
+                      {item.username ? (
+                        <Image source={{ uri: `https://ui-avatars.com/api/?name=${item.username}&background=random` }} style={styles.replyAvatarImg} />
+                      ) : (
+                        <AtSign size={16} color="#fff" />
+                      )}
+                    </View>
+                    <View style={styles.replyContent}>
+                      {item.username && <Text style={styles.replyUsername}>{item.username}</Text>}
+                      <Text style={styles.replyText}>{item.text}</Text>
+                      <View style={styles.replyActionsRow}>
+                        <Text style={styles.replyTime}>{new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
+                        {item.id && (
+                          <TouchableOpacity onPress={() => handlePressReply(item)}>
+                            <Text style={styles.replyActionText}>Reply</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                    <View style={styles.replyFarRight}>
+                      <TouchableOpacity onPress={() => toggleLikeReply(item.id || index.toString())}>
+                         <Heart size={14} color={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : APP_COLORS.outlineVariant} fill={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : 'transparent'} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              />
+            </View>
+
+            {selectedPost && ['threads', 'instagram', 'facebook'].includes(platform?.toLowerCase()) && (
+              <View style={styles.replyInputContainer}>
+                {replyTargetId && (
+                  <View style={styles.replyingToBanner}>
+                    <Text style={styles.replyingToText}>
+                      Replying to {postReplies.find(r => r.id === replyTargetId)?.username || 'comment'}
+                    </Text>
+                    <TouchableOpacity onPress={() => { setReplyTargetId(null); setReplyText(''); }}>
+                       <XIcon size={14} color={APP_COLORS.onSurfaceVariant} />
                     </TouchableOpacity>
                   </View>
-                  
-                  {loadingReplies ? (
-                     <View style={{ padding: 24, alignItems: 'center' }}>
-                       <ActivityIndicator size="small" color={APP_COLORS.primary} />
-                       <Text style={{ marginTop: 8, fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>Loading replies...</Text>
-                     </View>
-                  ) : postReplies.length === 0 ? (
-                     <View style={{ padding: 24, alignItems: 'center' }}>
-                       <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant }}>No replies to show.</Text>
-                     </View>
-                  ) : (
-                     <FlatList
-                       data={postReplies}
-                       scrollEnabled={false}
-                       keyExtractor={(r, idx) => r.id || idx.toString()}
-                       renderItem={({ item, index }) => (
-                         <View style={[styles.replyItem, index === postReplies.length - 1 && { borderBottomWidth: 0 }]}>
-                           <View style={styles.replyAvatar}>
-                             <AtSign size={16} color="#fff" />
-                           </View>
-                           <View style={styles.replyContent}>
-                             <Text style={styles.replyText}>{item.text}</Text>
-                             <Text style={styles.replyTime}>{new Date(item.timestamp).toLocaleString()}</Text>
-                           </View>
-                           <View style={styles.replyActions}>
-                             <TouchableOpacity style={styles.replyActionBtn} onPress={() => toggleLikeReply(item.id || index.toString())}>
-                                <Heart size={16} color={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : APP_COLORS.onSurfaceVariant} fill={likedReplies.has(item.id || index.toString()) ? '#e74c3c' : 'transparent'} />
-                             </TouchableOpacity>
-                             <TouchableOpacity style={styles.replyActionBtn} onPress={() => setReplyTargetId(item.id)}>
-                                <CornerUpLeft size={16} color={replyTargetId === item.id ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} />
-                             </TouchableOpacity>
-                           </View>
-                         </View>
-                       )}
-                     />
-                  )}
-               </View>
-             )}
-             
-             <View style={{ marginTop: 24 }}>
+                )}
+                <View style={styles.replyInputRow}>
+                  <TextInput
+                    style={styles.replyInput}
+                    placeholder="Add a reply..."
+                    value={replyText}
+                    onChangeText={setReplyText}
+                    placeholderTextColor={APP_COLORS.outlineVariant}
+                  />
+                  <TouchableOpacity style={styles.replyInputButton} onPress={handleSendReply}>
+                    <ArrowUp size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            
+            <View style={{ marginTop: 12 }}>
               <TouchableOpacity 
                 style={styles.closeBtn} 
                 onPress={() => setSelectedPost(null)}>
@@ -397,6 +449,7 @@ export default function PlatformPostsScreen() {
             </View>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -493,7 +546,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    minHeight: 350,
+    height: '90%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -554,7 +607,7 @@ const styles = StyleSheet.create({
   repliesHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: APP_COLORS.outlineVariant,
     paddingBottom: 12,
@@ -579,18 +632,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    overflow: 'hidden',
+  },
+  replyAvatarImg: {
+    width: '100%',
+    height: '100%',
   },
   replyContent: {
     flex: 1,
     paddingRight: 8,
   },
-  replyActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  replyActionBtn: {
-    padding: 4,
+  replyUsername: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginBottom: 2,
   },
   replyText: {
     fontSize: 14,
@@ -602,9 +658,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: APP_COLORS.onSurfaceVariant,
   },
-  replyInputContainer: {
+  replyActionsRow: {
     flexDirection: 'row',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginTop: 2,
+    gap: 12,
+  },
+  replyActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  replyFarRight: {
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 4,
+    paddingLeft: 8,
+  },
+  replyInputContainer: {
+    paddingTop: 8,
+    flexDirection: 'column',
+    gap: 8,
+    backgroundColor: APP_COLORS.surface,
+    paddingBottom: 8,
+  },
+  replyingToBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  replyingToText: {
+    fontSize: 12,
+    color: APP_COLORS.onSurfaceVariant,
+    fontWeight: '600',
+  },
+  replyInputRow: {
+    flexDirection: 'row',
     gap: 8,
   },
   replyInput: {
@@ -612,16 +705,17 @@ const styles = StyleSheet.create({
     backgroundColor: APP_COLORS.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
-    height: 44,
+    height: 40,
+    fontSize: 14,
     color: APP_COLORS.onSurface,
     borderWidth: 1,
     borderColor: APP_COLORS.outlineVariant,
   },
   replyInputButton: {
     backgroundColor: APP_COLORS.primary,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
