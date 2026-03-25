@@ -203,12 +203,19 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={acc._id || idx}
                     style={styles.connectedAvatarBtn}
-                    onPress={() => navigation.navigate('PlatformPosts', {
-                      accountId: acc._id, // User accounts use _id in Redux 
-                      platform: acc.platform,
-                      accountName: acc.accountName,
-                      profilePicture: acc.profilePicture,
-                    })}
+                    onPress={() => {
+                      const screenName = acc.platform === 'facebook' ? 'FacebookPosts' :
+                                         acc.platform === 'instagram' ? 'InstagramPosts' :
+                                         acc.platform === 'threads' ? 'ThreadsPosts' :
+                                         (acc.platform === 'twitter' || acc.platform === 'x') ? 'TwitterPosts' :
+                                         acc.platform === 'youtube' ? 'YouTubePosts' : 'PlatformPosts';
+                      navigation.navigate(screenName, {
+                        accountId: acc._id, // User accounts use _id in Redux 
+                        platform: acc.platform,
+                        accountName: acc.accountName,
+                        profilePicture: acc.profilePicture,
+                      });
+                    }}
                     activeOpacity={0.8}
                   >
                     <View style={[styles.connectedAvatarContainer, { overflow: 'hidden' }]}>

@@ -21,6 +21,11 @@ import PrivacySecurityScreen from '../screens/settings/privacy-security';
 import HelpCenterScreen from '../screens/settings/help-center';
 import ContactUsScreen from '../screens/settings/contact-us';
 import PlatformPostsScreen from '../screens/platform-posts';
+import FacebookPostsScreen from '../screens/facebook-posts';
+import InstagramPostsScreen from '../screens/instagram-posts';
+import ThreadsPostsScreen from '../screens/threads-posts';
+import TwitterPostsScreen from '../screens/twitter-posts';
+import YouTubePostsScreen from '../screens/youtube-posts';
 
 const Stack = createNativeStackNavigator();
 
@@ -65,6 +70,11 @@ export default function RootNavigator() {
             <Stack.Screen name="SocialHub" component={SocialHub} />
             <Stack.Screen name="ChatScreen" component={ChatScreen} />
             <Stack.Screen name="PlatformPosts" component={PlatformPostsScreen} />
+            <Stack.Screen name="FacebookPosts" component={FacebookPostsScreen} />
+            <Stack.Screen name="InstagramPosts" component={InstagramPostsScreen} />
+            <Stack.Screen name="ThreadsPosts" component={ThreadsPostsScreen} />
+            <Stack.Screen name="TwitterPosts" component={TwitterPostsScreen} />
+            <Stack.Screen name="YouTubePosts" component={YouTubePostsScreen} />
             {/* Settings sub-screens */}
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
