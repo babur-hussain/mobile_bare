@@ -47,8 +47,9 @@ export const postsService = {
     scheduledTime?: string;
     thumbnailUrl?: string;
     location?: { name: string; lat: number; lng: number };
+    platformConfig?: Record<string, { mentions?: string[]; hashtags?: string[]; location?: { name: string; lat: number; lng: number } }>;
   }) {
-    const payload = {
+    const payload: any = {
       caption: data.caption,
       platforms: data.platforms,
       mediaUrls: data.mediaUrls,
@@ -56,6 +57,9 @@ export const postsService = {
       location: data.location,
       thumbnailUrl: data.thumbnailUrl,
     };
+    if (data.platformConfig) {
+      payload.platformConfig = data.platformConfig;
+    }
     const response = await api.post('/api/v1/posts', payload);
     return response.data.data;
   },

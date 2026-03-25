@@ -16,6 +16,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary, Asset } from 'react-native-image-picker';
 import { createThumbnail } from 'react-native-create-thumbnail';
 
@@ -34,7 +35,19 @@ export interface AppLocation {
   lat: number;
   lng: number;
 }
+import { LayoutAnimation, UIManager } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+export interface PlatformConfig {
+  mentions: string[];
+  hashtags: string[];
+  location?: AppLocation;
+}
 import {
   Bell,
   Camera,
@@ -100,6 +113,36 @@ export default function CreatePostScreen() {
   // Custom Tag Input
   const [tags, setTags] = useState<string[]>([]);
   const [currentTagInput, setCurrentTagInput] = useState('');
+
+  // Platform-Specific Config
+  const [platformConfig, setPlatformConfig] = useState<Record<Platform_Type, PlatformConfig>>({
+    instagram: { mentions: [], hashtags: [] },
+    facebook: { mentions: [], hashtags: [] },
+    threads: { mentions: [], hashtags: [] },
+    x: { mentions: [], hashtags: [] },
+    youtube: { mentions: [], hashtags: [] },
+  });
+  const [activePlatformInput, setActivePlatformInput] = useState<{ platform: Platform_Type; field: 'mentions' | 'hashtags' } | null>(null);
+  const [chipInputText, setChipInputText] = useState('');
+  const [platformLocationModal, setPlatformLocationModal] = useState<Platform_Type | null>(null);
+  const [platformLocQuery, setPlatformLocQuery] = useState('');
+  const [platformLocResults, setPlatformLocResults] = useState<AppLocation[]>([]);
+  const [platformLocSearching, setPlatformLocSearching] = useState(false);
+
+  // Mention Search State
+  const [mentionSearchResults, setMentionSearchResults] = useState<any[]>([]);
+  const [mentionSearching, setMentionSearching] = useState(false);
+  const [recentMentions, setRecentMentions] = useState<string[]>([]);
+  const mentionSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load recent mentions on mount
+  useEffect(() => {
+    AsyncStorage.getItem('recent_mentions').then(val => {
+      if (val) {
+        try { setRecentMentions(JSON.parse(val)); } catch (e) {}
+      }
+    });
+  }, []);
 
   // Advanced Settings State
   const [hideLikes, setHideLikes] = useState(false);
@@ -271,6 +314,7 @@ export default function CreatePostScreen() {
 
   const togglePlatform = useCallback((platform: Platform_Type) => {
     setPlatformSelectionError(false);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedPlatforms(prev => {
       const next = new Set(prev);
       if (next.has(platform)) {
@@ -281,6 +325,176 @@ export default function CreatePostScreen() {
       return next;
     });
   }, []);
+
+  const addChipToConfig = useCallback((platform: Platform_Type, field: 'mentions' | 'hashtags', value: string) => {
+    const clean = value.trim().replace(/^[@#]/, '');
+    if (!clean) return;
+    setPlatformConfig(prev => {
+      const current = prev[platform][field];
+      if (current.includes(clean)) return prev;
+      return { ...prev, [platform]: { ...prev[platform], [field]: [...current, clean] } };
+    });
+
+    if (field === 'mentions') {
+      setRecentMentions(prev => {
+        const updated = [clean, ...prev.filter(m => m !== clean)].slice(0, 5);
+        AsyncStorage.setItem('recent_mentions', JSON.stringify(updated)).catch(() => {});
+        return updated;
+      });
+    }
+  }, []);
+
+  const removeChipFromConfig = useCallback((platform: Platform_Type, field: 'mentions' | 'hashtags', index: number) => {
+    setPlatformConfig(prev => ({
+      ...prev,
+      [platform]: {
+        ...prev[platform],
+        [field]: prev[platform][field].filter((_, i) => i !== index),
+      },
+    }));
+  }, []);
+
+  const setPlatformLocation = useCallback((platform: Platform_Type, loc: AppLocation | undefined) => {
+    setPlatformConfig(prev => ({
+      ...prev, [platform]: { ...prev[platform], location: loc },
+    }));
+  }, []);
+
+  const searchPlatformLocations = useCallback((query: string, platform: Platform_Type) => {
+    if (!query.trim()) { setPlatformLocResults([]); return; }
+    if (locationSearchTimerRef.current) clearTimeout(locationSearchTimerRef.current);
+    locationSearchTimerRef.current = setTimeout(async () => {
+      setPlatformLocSearching(true);
+      try {
+        console.log(`[PlatformLocationSearch] query: ${query}, platform: ${platform}`);
+        const res = await api.get('/api/v1/social-accounts/search-locations', {
+          params: { platform, q: query }
+        });
+        const data = res.data?.data || res.data;
+        setPlatformLocResults(data?.results || []);
+      } catch (err: any) { 
+        console.error('[PlatformLocationSearch] Error:', err?.message, err?.response?.data);
+        setPlatformLocResults([]); 
+      }
+      finally { setPlatformLocSearching(false); }
+    }, 500);
+  }, []);
+
+  const searchMentionUsers = useCallback((query: string, platform: Platform_Type) => {
+    if (!query.trim() || query.length < 2) { setMentionSearchResults([]); return; }
+    if (mentionSearchTimerRef.current) clearTimeout(mentionSearchTimerRef.current);
+    mentionSearchTimerRef.current = setTimeout(async () => {
+      setMentionSearching(true);
+      console.log('[MentionSearch] Searching for:', query, 'on platform:', platform);
+      try {
+        const res = await api.get('/api/v1/social-accounts/search-users', {
+          params: { platform, q: query },
+        });
+        console.log('[MentionSearch] Response:', JSON.stringify(res.data));
+        const data = res.data?.data || res.data;
+        setMentionSearchResults(data?.results || []);
+      } catch (err: any) {
+        console.error('[MentionSearch] Error:', err?.message, err?.response?.data);
+        setMentionSearchResults([]);
+      }
+      finally { setMentionSearching(false); }
+    }, 600);
+  }, []);
+
+  const PLATFORM_FEATURES: Record<Platform_Type, { mentions: boolean; hashtags: boolean; location: boolean }> = {
+    instagram: { mentions: true, hashtags: true, location: false },
+    facebook: { mentions: true, hashtags: true, location: false },
+    threads: { mentions: true, hashtags: true, location: false },
+    x: { mentions: true, hashtags: true, location: false },
+    youtube: { mentions: false, hashtags: true, location: false },
+  };
+
+  const renderPlatformConfigPanel = (platform: Platform_Type) => {
+    if (!selectedPlatforms.has(platform)) return null;
+    const features = PLATFORM_FEATURES[platform];
+    const config = platformConfig[platform];
+
+    return (
+      <View style={pcStyles.panel}>
+        {/* Mentions */}
+        {features.mentions && (
+          <View style={pcStyles.fieldRow}>
+            <View style={pcStyles.fieldHeader}>
+              <AtSign size={14} color={APP_COLORS.primary} />
+              <Text style={pcStyles.fieldLabel}>Mentions</Text>
+            </View>
+            <View style={pcStyles.chipsWrap}>
+              {config.mentions.map((m, i) => (
+                <View key={i} style={pcStyles.chip}>
+                  <Text style={pcStyles.chipText}>@{m}</Text>
+                  <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'mentions', i)}>
+                    <X size={12} color={APP_COLORS.onSurfaceVariant} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity
+                style={pcStyles.addChipBtn}
+                onPress={() => { setActivePlatformInput({ platform, field: 'mentions' }); setChipInputText(''); }}>
+                <Text style={pcStyles.addChipText}>+ Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Hashtags */}
+        {features.hashtags && (
+          <View style={pcStyles.fieldRow}>
+            <View style={pcStyles.fieldHeader}>
+              <Tag size={14} color="#f97316" />
+              <Text style={pcStyles.fieldLabel}>Hashtags</Text>
+            </View>
+            <View style={pcStyles.chipsWrap}>
+              {config.hashtags.map((h, i) => (
+                <View key={i} style={[pcStyles.chip, { backgroundColor: 'rgba(249,115,22,0.1)' }]}>
+                  <Text style={[pcStyles.chipText, { color: '#f97316' }]}>#{h}</Text>
+                  <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'hashtags', i)}>
+                    <X size={12} color="#f97316" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity
+                style={pcStyles.addChipBtn}
+                onPress={() => { setActivePlatformInput({ platform, field: 'hashtags' }); setChipInputText(''); }}>
+                <Text style={pcStyles.addChipText}>+ Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Location */}
+        {features.location && (
+          <View style={pcStyles.fieldRow}>
+            <View style={pcStyles.fieldHeader}>
+              <MapPin size={14} color={APP_COLORS.primary} />
+              <Text style={pcStyles.fieldLabel}>Location</Text>
+            </View>
+            {config.location ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={[pcStyles.chip, { backgroundColor: 'rgba(83,65,205,0.08)' }]}>
+                  <MapPin size={12} color={APP_COLORS.primary} />
+                  <Text style={[pcStyles.chipText, { color: APP_COLORS.primary }]}>{config.location.name.split(',')[0]}</Text>
+                  <TouchableOpacity onPress={() => setPlatformLocation(platform, undefined)}>
+                    <X size={12} color={APP_COLORS.primary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={pcStyles.addChipBtn}
+                onPress={() => { setPlatformLocationModal(platform); setPlatformLocQuery(''); setPlatformLocResults([]); }}>
+                <Text style={pcStyles.addChipText}>Search Location</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </View>
+    );
+  };
 
   const handlePostNow = async () => {
     setIsScheduled(false);
@@ -330,6 +544,19 @@ export default function CreatePostScreen() {
       // Use the first video's thumbnail URL if available
       const thumbnailUrl = mediaItems.find(m => m.thumbnailS3Url)?.thumbnailS3Url;
 
+      // Build per-platform config payload (only for selected platforms with data)
+      const configPayload: Record<string, any> = {};
+      for (const p of Array.from(selectedPlatforms)) {
+        const pc = platformConfig[p];
+        if (pc.mentions.length > 0 || pc.hashtags.length > 0 || pc.location) {
+          configPayload[p] = {
+            ...(pc.mentions.length > 0 ? { mentions: pc.mentions } : {}),
+            ...(pc.hashtags.length > 0 ? { hashtags: pc.hashtags } : {}),
+            ...(pc.location ? { location: pc.location } : {}),
+          };
+        }
+      }
+
       const newPost = await dispatch(
         createNewPost({
           mediaUrls: urls,
@@ -340,6 +567,7 @@ export default function CreatePostScreen() {
             : undefined,
           location: location || undefined,
           thumbnailUrl,
+          ...(Object.keys(configPayload).length > 0 ? { platformConfig: configPayload } : {}),
         }),
       ).unwrap();
 
@@ -347,6 +575,13 @@ export default function CreatePostScreen() {
       setCaption('');
       setMediaItems([]);
       setSelectedPlatforms(new Set());
+      setPlatformConfig({
+        instagram: { mentions: [], hashtags: [] },
+        facebook: { mentions: [], hashtags: [] },
+        threads: { mentions: [], hashtags: [] },
+        x: { mentions: [], hashtags: [] },
+        youtube: { mentions: [], hashtags: [] }
+      });
 
       // Navigate to success screen
       navigation.navigate('PostSuccess', { post: newPost });
@@ -460,6 +695,7 @@ export default function CreatePostScreen() {
                   thumbColor="#ffffff"
                 />
               </TouchableOpacity>
+              {renderPlatformConfigPanel('instagram')}
 
               <TouchableOpacity
                 style={[
@@ -488,6 +724,7 @@ export default function CreatePostScreen() {
                   thumbColor="#ffffff"
                 />
               </TouchableOpacity>
+              {renderPlatformConfigPanel('facebook')}
 
               <TouchableOpacity
                 style={[
@@ -516,6 +753,7 @@ export default function CreatePostScreen() {
                   thumbColor="#ffffff"
                 />
               </TouchableOpacity>
+              {renderPlatformConfigPanel('threads')}
 
               <TouchableOpacity
                 style={[
@@ -544,6 +782,7 @@ export default function CreatePostScreen() {
                   thumbColor="#ffffff"
                 />
               </TouchableOpacity>
+              {renderPlatformConfigPanel('x')}
 
               <TouchableOpacity
                 style={[
@@ -572,6 +811,7 @@ export default function CreatePostScreen() {
                   thumbColor="#ffffff"
                 />
               </TouchableOpacity>
+              {renderPlatformConfigPanel('youtube')}
             </View>
             {platformSelectionError && (
               <Text style={styles.platformErrorText}>
@@ -707,6 +947,7 @@ export default function CreatePostScreen() {
                 onChangeText={setCaption}
               />
               <View style={styles.captionFooter}>
+                {/* TEMP DISABLED: Global Location Tagging
                 {location && (
                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#e2e8f0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginBottom: 8, alignSelf: 'flex-start' }}>
                     <MapPin size={12} color={APP_COLORS.primary} style={{ marginRight: 4 }} />
@@ -716,13 +957,16 @@ export default function CreatePostScreen() {
                     </TouchableOpacity>
                   </View>
                 )}
+                */}
                 <View style={styles.captionTools}>
                   <TouchableOpacity style={styles.toolBtn}>
                     <Smile size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
                   </TouchableOpacity>
+                  {/* TEMP DISABLED: Global Location Button
                   <TouchableOpacity style={styles.toolBtn} onPress={() => setLocationModalVisible(true)}>
                     <MapPin size={20} color={location ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
                   </TouchableOpacity>
+                  */}
                   <TouchableOpacity style={styles.toolBtn}>
                     <Text style={styles.boldIconText}>B</Text>
                   </TouchableOpacity>
@@ -910,6 +1154,225 @@ export default function CreatePostScreen() {
                         }}>
                         <Text style={{ fontSize: 16, color: APP_COLORS.onSurface, fontWeight: '500' }}>{loc.name.split(',')[0]}</Text>
                         <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant, marginTop: 2 }}>{loc.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+              </View>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          {/* Chip Input Modal (Mentions / Hashtags) */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!activePlatformInput}
+            onRequestClose={() => { setActivePlatformInput(null); setMentionSearchResults([]); }}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>
+                    Add {activePlatformInput?.field === 'mentions' ? '@Mention' : '#Hashtag'}
+                  </Text>
+                  <TouchableOpacity onPress={() => { setActivePlatformInput(null); setMentionSearchResults([]); }}>
+                    <X size={24} color={APP_COLORS.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.tagInputContainer}>
+                  <TextInput
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    placeholder={activePlatformInput?.field === 'mentions' ? 'Search username...' : 'hashtag'}
+                    placeholderTextColor={APP_COLORS.onSurfaceVariant}
+                    value={chipInputText}
+                    onChangeText={(text) => {
+                      setChipInputText(text);
+                      if (activePlatformInput?.field === 'mentions') {
+                        searchMentionUsers(text, activePlatformInput.platform);
+                      }
+                    }}
+                    autoFocus
+                    autoCapitalize="none"
+                    onSubmitEditing={() => {
+                      if (activePlatformInput && chipInputText.trim()) {
+                        addChipToConfig(activePlatformInput.platform, activePlatformInput.field, chipInputText);
+                        setChipInputText('');
+                        setMentionSearchResults([]);
+                      }
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={styles.addTagButton}
+                    onPress={() => {
+                      if (activePlatformInput && chipInputText.trim()) {
+                        addChipToConfig(activePlatformInput.platform, activePlatformInput.field, chipInputText);
+                        setChipInputText('');
+                        setMentionSearchResults([]);
+                      }
+                    }}>
+                    <Text style={styles.addTagButtonText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Live Search Results for Mentions */}
+                {activePlatformInput?.field === 'mentions' && mentionSearching && (
+                  <ActivityIndicator style={{ marginVertical: 12 }} color={APP_COLORS.primary} />
+                )}
+                {/* Show Recent Mentions when not searching and results are empty */}
+                {activePlatformInput?.field === 'mentions' && !mentionSearching && mentionSearchResults.length === 0 && recentMentions.length > 0 && chipInputText.length < 2 && (
+                  <View style={{ marginBottom: 12 }}>
+                    <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, marginBottom: 8, fontWeight: '600' }}>Recent Pickups</Text>
+                    <ScrollView style={{ maxHeight: 180 }} keyboardShouldPersistTaps="handled">
+                      {recentMentions.map((username, idx) => (
+                        <TouchableOpacity
+                          key={idx}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 12,
+                            paddingVertical: 8,
+                            paddingHorizontal: 4,
+                            borderBottomWidth: idx !== recentMentions.length - 1 ? 1 : 0,
+                            borderBottomColor: '#f1f5f9',
+                          }}
+                          onPress={() => {
+                            if (activePlatformInput) {
+                              addChipToConfig(activePlatformInput.platform, 'mentions', username);
+                              setChipInputText('');
+                            }
+                          }}>
+                          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: APP_COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center' }}>
+                            <AtSign size={14} color={APP_COLORS.primary} />
+                          </View>
+                          <Text style={{ fontSize: 15, fontWeight: '500', color: APP_COLORS.onSurface }}>@{username}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+                {activePlatformInput?.field === 'mentions' && mentionSearchResults.length > 0 && (
+                  <ScrollView style={{ maxHeight: 180, marginBottom: 12 }} keyboardShouldPersistTaps="handled">
+                    {mentionSearchResults.map((user, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 12,
+                          paddingVertical: 10,
+                          paddingHorizontal: 4,
+                          borderBottomWidth: 1,
+                          borderBottomColor: '#e2e8f0',
+                        }}
+                        onPress={() => {
+                          if (activePlatformInput) {
+                            addChipToConfig(activePlatformInput.platform, 'mentions', user.username);
+                            setChipInputText('');
+                            setMentionSearchResults([]);
+                          }
+                        }}>
+                        {user.profilePicture ? (
+                          <Image
+                            source={{ uri: user.profilePicture }}
+                            style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#e2e8f0' }}
+                          />
+                        ) : (
+                          <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: APP_COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center' }}>
+                            <AtSign size={16} color={APP_COLORS.primary} />
+                          </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 15, fontWeight: '600', color: APP_COLORS.onSurface }}>@{user.username}</Text>
+                          {user.name && user.name !== user.username && (
+                            <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant }}>{user.name}</Text>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+
+                {/* Show current chips */}
+                {activePlatformInput && (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                    {platformConfig[activePlatformInput.platform][activePlatformInput.field].map((v, i) => (
+                      <View key={i} style={[pcStyles.chip, { backgroundColor: activePlatformInput.field === 'mentions' ? 'rgba(83,65,205,0.1)' : 'rgba(249,115,22,0.1)' }]}>
+                        <Text style={[pcStyles.chipText, { color: activePlatformInput.field === 'mentions' ? APP_COLORS.primary : '#f97316' }]}>
+                          {activePlatformInput.field === 'mentions' ? '@' : '#'}{v}
+                        </Text>
+                        <TouchableOpacity onPress={() => removeChipFromConfig(activePlatformInput.platform, activePlatformInput.field, i)}>
+                          <X size={12} color={APP_COLORS.onSurfaceVariant} />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.modalSaveButton}
+                  onPress={() => { setActivePlatformInput(null); setMentionSearchResults([]); }}>
+                  <Text style={styles.modalSaveButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          {/* Per-Platform Location Search Modal */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!platformLocationModal}
+            onRequestClose={() => setPlatformLocationModal(null)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalOverlay}>
+              <View style={[styles.modalContent, { height: '80%' }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Location for {platformLocationModal ? platformLocationModal.charAt(0).toUpperCase() + platformLocationModal.slice(1) : ''}</Text>
+                  <TouchableOpacity onPress={() => setPlatformLocationModal(null)}>
+                    <X size={24} color={APP_COLORS.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.tagInputContainer}>
+                  <Search size={20} color={APP_COLORS.onSurfaceVariant} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    placeholder="Search places..."
+                    placeholderTextColor={APP_COLORS.onSurfaceVariant}
+                    value={platformLocQuery}
+                    onChangeText={(text) => {
+                      setPlatformLocQuery(text);
+                      if (platformLocationModal) {
+                        searchPlatformLocations(text, platformLocationModal);
+                      }
+                    }}
+                    autoFocus
+                  />
+                </View>
+                {platformLocSearching ? (
+                  <ActivityIndicator style={{ marginTop: 20 }} color={APP_COLORS.primary} />
+                ) : (
+                  <ScrollView style={{ marginTop: 16 }}>
+                    {platformLocResults.map((loc, idx) => (
+                      <TouchableOpacity
+                        key={loc.id || idx}
+                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' }}
+                        onPress={() => {
+                          if (platformLocationModal) {
+                            // Ensure loc structure matches what we expect
+                            setPlatformLocation(platformLocationModal, {
+                              name: loc.name,
+                              lat: 0, // native place IDs don't expose simple lat/lng in our UI directly
+                              lng: 0,
+                              id: loc.id // IMPORTANT: inject the Place ID directly properties
+                            } as any);
+                          }
+                          setPlatformLocationModal(null);
+                          setPlatformLocQuery('');
+                          setPlatformLocResults([]);
+                        }}>
+                        <Text style={{ fontSize: 16, color: APP_COLORS.onSurface, fontWeight: '500' }}>{loc.name}</Text>
+                        <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant, marginTop: 2 }}>{loc.address || ''}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -1686,5 +2149,66 @@ const styles = StyleSheet.create({
     color: '#4b5563',
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+});
+
+// Platform config panel styles
+const pcStyles = StyleSheet.create({
+  panel: {
+    marginLeft: 56,
+    marginTop: -4,
+    marginBottom: 8,
+    paddingLeft: 16,
+    borderLeftWidth: 2,
+    borderLeftColor: 'rgba(83, 65, 205, 0.15)',
+    gap: 12,
+  },
+  fieldRow: {
+    gap: 6,
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: APP_COLORS.onSurfaceVariant,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  chipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    alignItems: 'center',
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(83, 65, 205, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: APP_COLORS.primary,
+  },
+  addChipBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: APP_COLORS.outlineVariant,
+    borderStyle: 'dashed',
+  },
+  addChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: APP_COLORS.onSurfaceVariant,
   },
 });

@@ -18,21 +18,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye, AtSign, CornerUpLeft, ArrowUp } from 'lucide-react-native';
+import { ArrowLeft, ExternalLink, Image as ImageIcon, Video, AlignLeft, BarChart2, Heart, MessageCircle, Share2, X as XIcon, Eye, AtSign, CornerUpLeft, ArrowUp, Facebook, Instagram, BadgeCheck, Users } from 'lucide-react-native';
 import api from '../services/api';
 import { threadsService } from '../services/threads.service';
 import { instagramService } from '../services/instagram.service';
 import { facebookService } from '../services/facebook.service';
-
-const APP_COLORS = {
-  primary: '#5341cd',
-  surface: '#fcf9f8',
-  onSurface: '#1c1b1b',
-  onSurfaceVariant: '#474554',
-  outlineVariant: '#c8c4d7',
-  error: '#ba1a1a',
-  surfaceContainerLow: '#f6f3f2',
-};
+import { APP_COLORS } from '../constants/colors';
 
 const { width } = Dimensions.get('window');
 const TILE_SIZE = width / 3;
@@ -42,7 +33,7 @@ export default function PlatformPostsScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
 
-  const { accountId, platform, accountName } = route.params || {};
+  const { accountId, platform, accountName, profilePicture } = route.params || {};
 
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,9 +55,45 @@ export default function PlatformPostsScreen() {
   const [replyTargetId, setReplyTargetId] = useState<string | null>(null);
   const [likedReplies, setLikedReplies] = useState<Set<string>>(new Set());
 
+  // Threads Profile Discovery State
+  const [threadsProfile, setThreadsProfile] = useState<any>(null);
+  const [threadsProfileLoading, setThreadsProfileLoading] = useState(false);
+
+  // Account Analytics State
+  const [accountAnalytics, setAccountAnalytics] = useState<any>(null);
+  const [accountAnalyticsLoading, setAccountAnalyticsLoading] = useState(false);
+
+  // Fetch Threads profile discovery data on mount
+  useEffect(() => {
+    if (platform?.toLowerCase() === 'threads' && accountName) {
+      setThreadsProfileLoading(true);
+      threadsService.discoverProfile(accountName)
+        .then((data) => setThreadsProfile(data?.data || data))
+        .catch(() => { }) // Silently fail — fallback to local data
+        .finally(() => setThreadsProfileLoading(false));
+    }
+  }, [platform, accountName]);
+
+  // Fetch standard Account Analytics on mount
+  useEffect(() => {
+    if (accountId) {
+      setAccountAnalyticsLoading(true);
+      api.get(`/api/v1/social-accounts/${accountId}/analytics`)
+        .then((response) => setAccountAnalytics(response.data?.data || response.data))
+        .catch((err) => console.error('Failed to load account analytics', err))
+        .finally(() => setAccountAnalyticsLoading(false));
+    }
+  }, [accountId]);
+
+  // Resolve display values: prefer API data, fall back to route params
+  const displayPicture = threadsProfile?.threads_profile_picture_url || profilePicture;
+  const displayName = threadsProfile?.name || threadsProfile?.username || accountName;
+  const displayHandle = threadsProfile?.username ? `@${threadsProfile.username}` : `@${platform?.toLowerCase()} account`;
+  const displayBio = threadsProfile?.threads_biography || null;
+
   const handleSendReply = async () => {
-    // For Threads, always reply to the original post (not to nested replies)
-    // The Threads API's reply_to_id must reference the top-level post
+    // Threads API only supports reply_to_id referencing a TOP-LEVEL post, not nested comments.
+    // For Instagram/Facebook, we can reply to a specific comment directly.
     const targetId = platform?.toLowerCase() === 'threads'
       ? selectedPost?.id
       : (replyTargetId || selectedPost?.id);
@@ -87,6 +114,20 @@ export default function PlatformPostsScreen() {
       }
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Failed to reply');
+    }
+  };
+
+  const handleHideReply = async (replyId: string, currentlyHidden: boolean) => {
+    // Optimistic update
+    setPostReplies(prev => prev.map(r => r.id === replyId ? { ...r, is_hidden: !currentlyHidden } : r));
+    try {
+      if (platform?.toLowerCase() === 'threads') {
+        await threadsService.hideReply(replyId, !currentlyHidden);
+      }
+    } catch (err: any) {
+      // Revert optimistic update
+      setPostReplies(prev => prev.map(r => r.id === replyId ? { ...r, is_hidden: currentlyHidden } : r));
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to hide/unhide reply');
     }
   };
 
@@ -234,19 +275,96 @@ export default function PlatformPostsScreen() {
     );
   };
 
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft size={24} color={APP_COLORS.onSurface} />
+  const renderHeader = () => (
+    <View>
+      {/* Cover Photo Area with Back Button */}
+      <View style={[styles.profileCover, { paddingTop: insets.top }]}>
+        <TouchableOpacity style={styles.coverBackButton} onPress={() => navigation.goBack()}>
+          <ArrowLeft size={24} color="#fff" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle} numberOfLines={1}>Lifetime Posts</Text>
-          <Text style={styles.headerSubtitle} numberOfLines={1}>{accountName} • {platform}</Text>
-        </View>
       </View>
 
-      <View style={{ flex: 1 }}>
+      {/* Profile Header Info */}
+      <View style={styles.profileInfoSection}>
+        <View style={styles.profileAvatarContainer}>
+          {displayPicture ? (
+            <Image source={{ uri: displayPicture }} style={styles.profileAvatar} />
+          ) : (
+            <View style={[styles.profileAvatar, styles.profileAvatarFallback]}>
+              <Text style={styles.profileAvatarInitial}>{accountName?.charAt(0)?.toUpperCase() || '?'}</Text>
+            </View>
+          )}
+
+          <View style={[
+            styles.profilePlatformBadge,
+            { backgroundColor: platform === 'facebook' ? '#1877f2' : (platform === 'instagram' ? '#e1306c' : '#000') }
+          ]}>
+            {platform === 'facebook' && <Facebook size={12} color="#fff" strokeWidth={3} />}
+            {platform === 'instagram' && <Instagram size={12} color="#fff" strokeWidth={3} />}
+            {(!['facebook', 'instagram'].includes(platform?.toLowerCase())) && <AtSign size={12} color="#fff" strokeWidth={3} />}
+          </View>
+        </View>
+
+        <View style={styles.profileNameRow}>
+          <Text style={styles.profileNameText} numberOfLines={1}>{displayName}</Text>
+          <BadgeCheck size={18} color={APP_COLORS.primary} style={{ marginLeft: 6 }} />
+        </View>
+        <Text style={styles.profileHandleText}>{displayHandle}</Text>
+
+        {/* Threads Bio */}
+        {displayBio ? (
+          <Text style={styles.profileBioText}>{displayBio}</Text>
+        ) : threadsProfileLoading && platform?.toLowerCase() === 'threads' ? (
+          <ActivityIndicator size="small" color={APP_COLORS.primary} style={{ marginBottom: 12 }} />
+        ) : null}
+
+        {/* Stats Row */}
+        {(threadsProfile?.follower_count !== undefined || threadsProfile?.followers_count !== undefined) && (
+          <View style={styles.profileStatsRow}>
+            {(threadsProfile?.follower_count !== undefined || threadsProfile?.followers_count !== undefined) && (
+              <View style={styles.profileStatItem}>
+                <Text style={styles.profileStatValue}>{(threadsProfile.follower_count ?? threadsProfile.followers_count).toLocaleString()}</Text>
+                <Text style={styles.profileStatLabel}>Followers</Text>
+              </View>
+            )}
+            {/* If there's a following count available */}
+            {threadsProfile?.following_count !== undefined && (
+              <View style={styles.profileStatItem}>
+                <Text style={styles.profileStatValue}>{threadsProfile.following_count.toLocaleString()}</Text>
+                <Text style={styles.profileStatLabel}>Following</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Account Analytics Row */}
+        {accountAnalyticsLoading ? (
+          <ActivityIndicator size="small" color={APP_COLORS.primary} style={{ marginVertical: 16 }} />
+        ) : accountAnalytics && Object.keys(accountAnalytics).length > 0 ? (
+          <View style={styles.analyticsSection}>
+            <Text style={styles.analyticsSectionTitle}>Account Analytics</Text>
+            <View style={styles.analyticsStatsGrid}>
+              {Object.entries(accountAnalytics).map(([key, val]) => (
+                <View key={key} style={styles.analyticsStatCard}>
+                  <Text style={styles.analyticsStatValue}>{(val as number).toLocaleString()}</Text>
+                  <Text style={styles.analyticsStatLabel}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Lifetime Posts</Text>
+          <Text style={styles.sectionSubtitle}>Tap any post to view full analytics</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={{ flex: 1, backgroundColor: APP_COLORS.surfaceContainerLow }}>
         {loading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={APP_COLORS.primary} />
@@ -261,6 +379,7 @@ export default function PlatformPostsScreen() {
           </View>
         ) : (
           <FlatList
+            ListHeaderComponent={renderHeader}
             data={posts}
             keyExtractor={(item, index) => item.id || index.toString()}
             renderItem={renderItem}
@@ -405,6 +524,13 @@ export default function PlatformPostsScreen() {
                               <Text style={styles.replyActionText}>Reply</Text>
                             </TouchableOpacity>
                           )}
+                          {item.id && platform?.toLowerCase() === 'threads' && (
+                            <TouchableOpacity onPress={() => handleHideReply(item.id, item.is_hidden)} style={{ marginLeft: 12 }}>
+                              <Text style={[styles.replyActionText, item.is_hidden && { color: APP_COLORS.outlineVariant }]}>
+                                {item.is_hidden ? 'Unhide' : 'Hide'}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </View>
                       <View style={styles.replyFarRight}>
@@ -483,6 +609,172 @@ const styles = StyleSheet.create({
     color: APP_COLORS.onSurface,
   },
   headerSubtitle: {
+    fontSize: 13,
+    color: APP_COLORS.onSurfaceVariant,
+    marginTop: 2,
+  },
+  profileCover: {
+    height: 140,
+    backgroundColor: APP_COLORS.primaryContainer,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+  },
+  coverBackButton: {
+    padding: 8,
+    marginLeft: -8,
+    marginTop: 8,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 20,
+  },
+  profileInfoSection: {
+    backgroundColor: APP_COLORS.surface,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: APP_COLORS.surfaceContainerLow,
+    zIndex: 10,
+  },
+  profileAvatarContainer: {
+    marginTop: -50,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  profileAvatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: APP_COLORS.surface,
+    backgroundColor: '#f1f5f9',
+  },
+  profileAvatarFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e5e7eb',
+  },
+  profileAvatarInitial: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  profilePlatformBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: APP_COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  profileNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  profileNameText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  profileHandleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: APP_COLORS.primary,
+    marginBottom: 12,
+  },
+  profileBioText: {
+    fontSize: 14,
+    color: APP_COLORS.onSurface,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  profileStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  profileStatItem: {
+    alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  profileStatValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+  },
+  profileStatLabel: {
+    fontSize: 12,
+    color: APP_COLORS.onSurfaceVariant,
+    marginTop: 4,
+  },
+  analyticsSection: {
+    width: '100%',
+    marginVertical: 12,
+  },
+  analyticsSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  analyticsStatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  analyticsStatCard: {
+    width: '48%',
+    backgroundColor: APP_COLORS.surfaceContainerLow,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  analyticsStatValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: APP_COLORS.primary,
+  },
+  analyticsStatLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: APP_COLORS.onSurfaceVariant,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  sectionHeader: {
+    width: '100%',
+    alignItems: 'flex-start',
+    marginTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  sectionSubtitle: {
     fontSize: 13,
     color: APP_COLORS.onSurfaceVariant,
     marginTop: 2,

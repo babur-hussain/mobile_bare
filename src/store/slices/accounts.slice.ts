@@ -1,8 +1,8 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface SocialAccount {
   _id: string;
-  platform: 'instagram' | 'facebook';
+  platform: 'instagram' | 'facebook' | 'threads' | 'twitter' | 'x' | 'youtube';
   accountId: string;
   accountName: string;
   profilePicture?: string;

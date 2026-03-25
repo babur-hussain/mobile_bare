@@ -19,6 +19,9 @@ import {
   Clock,
   TrendingUp,
   Share2,
+  Facebook,
+  Instagram,
+  AtSign,
 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAuth } from '@react-native-firebase/auth';
@@ -190,6 +193,36 @@ export default function HomeScreen() {
         <View style={styles.welcomeSection}>
           <Text style={styles.overline}>WELCOME BACK, {firstName.toUpperCase()}</Text>
           <Text style={styles.welcomeText}>Your creative{'\n'}canvas{'\n'}is ready.</Text>
+
+          {/* Connected Platforms Strip */}
+          {accounts.length > 0 && (
+            <View style={styles.connectedRow}>
+              <Text style={styles.connectedLabel}>Direct Access</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.connectedScroll}>
+                {accounts.map((acc, idx) => (
+                  <TouchableOpacity
+                    key={acc._id || idx}
+                    style={styles.connectedAvatarBtn}
+                    onPress={() => navigation.navigate('PlatformPosts', {
+                      accountId: acc._id, // User accounts use _id in Redux 
+                      platform: acc.platform,
+                      accountName: acc.accountName,
+                      profilePicture: acc.profilePicture,
+                    })}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.connectedAvatarContainer, { overflow: 'hidden' }]}>
+                      {acc.platform === 'facebook' && <Image source={require('../Logos/Facebook Logo.png')} style={styles.connectedAvatarImg} />}
+                      {acc.platform === 'instagram' && <Image source={require('../Logos/Instagram Logo.png')} style={styles.connectedAvatarImg} />}
+                      {acc.platform === 'threads' && <Image source={require('../Logos/Threads Logo.png')} style={styles.connectedAvatarImg} />}
+                      {(acc.platform === 'twitter' || acc.platform === 'x') && <Image source={require('../Logos/Twitter_new_X_logo.png')} style={styles.connectedAvatarImg} />}
+                      {acc.platform === 'youtube' && <Image source={require('../Logos/YouTube Logo.png')} style={styles.connectedAvatarImg} />}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
 
           <View style={styles.actionRow}>
             <TouchableOpacity
@@ -455,6 +488,66 @@ const styles = StyleSheet.create({
     letterSpacing: -1.5,
     lineHeight: 44,
     marginBottom: 24,
+  },
+  connectedRow: {
+    marginBottom: 24,
+  },
+  connectedLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#9ca3af',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  connectedScroll: {
+    gap: 12,
+    paddingRight: 24,
+  },
+  connectedAvatarBtn: {
+    paddingBottom: 4,
+  },
+  connectedAvatarContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    position: 'relative',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  connectedAvatarImg: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 26,
+  },
+  connectedAvatarFallback: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 26,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectedAvatarInitial: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: APP_COLORS.onSurfaceVariant,
+  },
+  platformBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: APP_COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionRow: {
     flexDirection: 'row',

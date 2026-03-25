@@ -29,6 +29,8 @@ import {
   Share2,
   Users,
   Eye,
+  Trash2,
+  CheckCircle,
 } from 'lucide-react-native';
 import Svg, {
   Path,
@@ -42,6 +44,11 @@ import { postsService } from '../services/posts.service';
 import { threadsService } from '../services/threads.service';
 import { createThumbnail } from 'react-native-create-thumbnail';
 import { TextInput } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { removePost } from '../store/slices/posts.slice';
+import api from '../services/api';
+import LottieView from 'lottie-react-native';
+import { Config } from '../constants/config';
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -101,6 +108,71 @@ export default function PostDetails() {
   const [selectedPlatform, setSelectedPlatform] = useState<any | null>(null);
   const [deletingPlatform, setDeletingPlatform] = useState<string | null>(null);
 
+  const dispatch = useDispatch();
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+  const successScale = useRef(new Animated.Value(0)).current;
+  const successOpacity = useRef(new Animated.Value(0)).current;
+
+  const handleDeleteEverywhere = () => {
+    Alert.alert(
+      'Delete Post Everywhere',
+      'Are you sure you want to completely delete this post from all platforms and your history? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setIsDeletingAll(true);
+            try {
+              // 1. Delete from all platforms if published
+              const promises = [];
+              const platList = (post?.platforms || []).map((p: string) => p.toLowerCase());
+              if (platList.includes('facebook')) promises.push(postsService.deleteFacebook(post._id));
+              if (platList.includes('instagram')) promises.push(postsService.deleteInstagram(post._id));
+              if (platList.includes('threads')) promises.push(postsService.deleteThreads(post._id));
+              
+              await Promise.allSettled(promises);
+
+              // 2. Delete from backend DB
+              await api.delete(`/api/v1/posts/${post._id}`);
+
+              // 3. Remove locally so it disappears from Recent Posts immediately
+              dispatch(removePost(post._id));
+
+              // 4. Show success animation
+              setIsDeletingAll(false);
+              setShowSuccessOverlay(true);
+
+              Animated.timing(successOpacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }).start(() => {
+                // Let the Lottie animation play for 2.5 seconds before navigating back
+                setTimeout(() => {
+                  Animated.timing(successOpacity, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                  }).start(() => {
+                    setShowSuccessOverlay(false);
+                    navigation.goBack();
+                  });
+                }, 2500); 
+              });
+
+            } catch (err: any) {
+              setIsDeletingAll(false);
+              Alert.alert('Error', err?.message || 'Failed to delete post.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   useEffect(() => {
     if (loadingAnalytics) {
       const loop = Animated.loop(
@@ -132,8 +204,18 @@ export default function PostDetails() {
     };
   }, [loadingAnalytics, pulseAnim]);
 
-  const mediaUrl = post?.mediaUrl || post?.mediaUrls?.[0] || post?.img;
-  const serverThumbnailUrl = post?.thumbnailUrl || null;
+  const getFullUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('/')) return `${Config.API_BASE_URL}${url}`;
+    return `${Config.API_BASE_URL}/${url}`;
+  };
+
+  const rawMediaUrl = post?.mediaUrl || post?.mediaUrls?.[0] || post?.img;
+  const rawThumbnailUrl = post?.thumbnailUrl || null;
+
+  const mediaUrl = getFullUrl(rawMediaUrl);
+  const serverThumbnailUrl = getFullUrl(rawThumbnailUrl);
 
   useEffect(() => {
     if (mediaUrl) {
@@ -734,12 +816,12 @@ export default function PostDetails() {
               return (
                 <TouchableOpacity
                   key={platformName}
-                  disabled={isDeleting || !!deletingPlatform}
+                  disabled={isDeleting || !!deletingPlatform || isDeletingAll}
                   style={[
                     styles.actionButton,
                     {
                       backgroundColor: isFb ? '#1877F2' : isIg ? '#E1306C' : isThreads ? '#000000' : APP_COLORS.primary,
-                      opacity: (isDeleting || !!deletingPlatform) ? 0.6 : 1,
+                      opacity: (isDeleting || !!deletingPlatform || isDeletingAll) ? 0.6 : 1,
                     }
                   ]}
                   onPress={() => {
@@ -762,9 +844,28 @@ export default function PostDetails() {
                                 await postsService.deleteThreads(post._id);
                               }
                               setDeletingPlatform(null);
-                              Alert.alert('Deleted', `Post removed from ${platformName}.`, [
-                                { text: 'OK', onPress: () => navigation.goBack() },
-                              ]);
+                              
+                              // Check if we just deleted the LAST platform
+                              const remainingPlatforms = platformList.filter((p: string) => p.toLowerCase() !== platformLower);
+                              
+                              if (remainingPlatforms.length === 0) {
+                                // Effectively deleted from everywhere -> remove from DB and show animation!
+                                await api.delete(`/api/v1/posts/${post._id}`);
+                                dispatch(removePost(post._id));
+                                setShowSuccessOverlay(true);
+                                Animated.timing(successOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start(() => {
+                                  setTimeout(() => {
+                                    Animated.timing(successOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+                                      setShowSuccessOverlay(false);
+                                      navigation.goBack();
+                                    });
+                                  }, 2500);
+                                });
+                              } else {
+                                Alert.alert('Deleted', `Post removed from ${platformName}.`, [
+                                  { text: 'OK', onPress: () => navigation.goBack() },
+                                ]);
+                              }
                             } catch (err: any) {
                               setDeletingPlatform(null);
                               const msg = err?.response?.data?.message || err?.message || 'Something went wrong.';
@@ -783,9 +884,50 @@ export default function PostDetails() {
                 </TouchableOpacity>
               );
             })}
+            
+            {/* Delete Everywhere Master Button */}
+            <TouchableOpacity
+              disabled={isDeletingAll || !!deletingPlatform}
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: 'transparent',
+                  borderWidth: 2,
+                  borderColor: APP_COLORS.error,
+                  opacity: (isDeletingAll || !!deletingPlatform) ? 0.6 : 1,
+                  marginTop: 16
+                }
+              ]}
+              onPress={handleDeleteEverywhere}>
+              {isDeletingAll ? (
+                <ActivityIndicator color={APP_COLORS.error} />
+              ) : (
+                <>
+                  <Trash2 size={20} color={APP_COLORS.error} />
+                  <Text style={[styles.actionButtonText, { color: APP_COLORS.error }]}>Delete Post Everywhere</Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
+
+      {/* Success Deletion Overlay */}
+      {showSuccessOverlay && (
+        <Animated.View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(255,255,255,0.95)', justifyContent: 'center', alignItems: 'center', zIndex: 9999, opacity: successOpacity }]}>
+          <View style={{ alignItems: 'center', padding: 24, width: '100%' }}>
+            <LottieView
+              source={require('../Lottie Animations/Delete message.lottie')}
+              autoPlay
+              loop={false}
+              style={{ width: 250, height: 250, marginBottom: 16 }}
+              resizeMode="contain"
+            />
+            <Text style={{ fontSize: 24, fontWeight: '800', color: '#1c1b1b', marginBottom: 8, textAlign: 'center' }}>Deleted Successfully</Text>
+            <Text style={{ fontSize: 15, color: '#474554', textAlign: 'center', maxWidth: 280 }}>This post has been permanently removed from your history and all platforms.</Text>
+          </View>
+        </Animated.View>
+      )}
 
       {/* Platform Analytics Modal */}
       <Modal

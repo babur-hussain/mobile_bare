@@ -19,6 +19,7 @@ import {
   UserCheck,
   MessageCircle,
   ExternalLink,
+  BadgeCheck,
 } from 'lucide-react-native';
 import { threadsService } from '../services/threads.service';
 import { APP_COLORS } from '../constants/colors';
@@ -169,8 +170,8 @@ export default function SocialHub() {
 
       {/* Tabs */}
       <View>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabsContainer}
         >
@@ -209,7 +210,7 @@ export default function SocialHub() {
 
       {/* Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-         {activeTab === 'mentions' && (
+        {activeTab === 'mentions' && (
           <View>
             <View style={styles.infoBanner}>
               <Text style={styles.infoText}>Recent conversations mentioning your connected account.</Text>
@@ -248,9 +249,9 @@ export default function SocialHub() {
                   <View style={styles.itemCardContent}>
                     {reply.originalPostText ? (
                       <View style={{ marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: APP_COLORS.surfaceContainerLow }}>
-                         <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, fontStyle: 'italic' }}>
-                           Replying to: "{reply.originalPostText.length > 50 ? reply.originalPostText.substring(0, 50) + '...' : reply.originalPostText}"
-                         </Text>
+                        <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, fontStyle: 'italic' }}>
+                          Replying to: "{reply.originalPostText.length > 50 ? reply.originalPostText.substring(0, 50) + '...' : reply.originalPostText}"
+                        </Text>
                       </View>
                     ) : null}
                     <Text style={styles.itemText}>{reply.text}</Text>
@@ -315,21 +316,31 @@ export default function SocialHub() {
             {loading ? (
               <ActivityIndicator style={{ marginTop: 40 }} color={APP_COLORS.primary} />
             ) : discoveryProfile ? (
-              <View style={styles.profileCard}>
-                <Image
-                  source={{ uri: discoveryProfile.profile_picture_url || 'https://via.placeholder.com/150' }}
-                  style={styles.profileImage}
-                />
-                <Text style={styles.profileName}>{discoveryProfile.name || discoveryProfile.username}</Text>
-                <Text style={styles.profileUsername}>@{discoveryProfile.username}</Text>
-                {discoveryProfile.biography ? (
-                  <Text style={styles.profileBio}>{discoveryProfile.biography}</Text>
-                ) : null}
-                <View style={styles.profileStats}>
-                  <View style={styles.statBox}>
-                    <Text style={styles.statValue}>{discoveryProfile.followers_count || 0}</Text>
-                    <Text style={styles.statLabel}>Followers</Text>
+              <View style={styles.discoveryCardWrapper}>
+                <View style={styles.discoveryCardCover} />
+                <View style={styles.discoveryAvatarContainer}>
+                  <Image
+                    source={{ uri: discoveryProfile.threads_profile_picture_url || 'https://via.placeholder.com/150' }}
+                    style={styles.discoveryAvatar}
+                  />
+                </View>
+                <View style={styles.discoveryInfoSection}>
+                  <View style={styles.discoveryNameRow}>
+                    <Text style={styles.discoveryNameText} numberOfLines={1}>
+                      {discoveryProfile.name || discoveryProfile.username}
+                    </Text>
+                    <BadgeCheck size={18} color={APP_COLORS.primary} style={{ marginLeft: 6 }} />
                   </View>
+                  <Text style={styles.discoveryHandleText}>@{discoveryProfile.username}</Text>
+
+                  {discoveryProfile.threads_biography ? (
+                    <Text style={styles.discoveryBioText}>{discoveryProfile.threads_biography}</Text>
+                  ) : null}
+
+                  <TouchableOpacity style={styles.discoveryActionButton}>
+                    <UserCheck size={18} color="#fff" style={{ marginRight: 8 }} />
+                    <Text style={styles.discoveryActionText}>Analyze Competitor</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             ) : (
@@ -497,60 +508,81 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileCard: {
+  discoveryCardWrapper: {
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
+    borderRadius: 24,
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 5,
+    marginTop: 10,
+    marginBottom: 20,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
+  discoveryCardCover: {
+    height: 120,
+    backgroundColor: APP_COLORS.primaryContainer,
   },
-  profileName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: APP_COLORS.onSurface,
+  discoveryAvatarContainer: {
+    alignItems: 'center',
+    marginTop: -55,
+  },
+  discoveryAvatar: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 4,
+    borderColor: '#fff',
+    backgroundColor: '#f1f5f9',
+  },
+  discoveryInfoSection: {
+    padding: 24,
+    paddingTop: 16,
+    alignItems: 'center',
+  },
+  discoveryNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 4,
   },
-  profileUsername: {
+  discoveryNameText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  discoveryHandleText: {
     fontSize: 15,
+    fontWeight: '600',
     color: APP_COLORS.primary,
     marginBottom: 16,
   },
-  profileBio: {
-    fontSize: 14,
+  discoveryBioText: {
+    fontSize: 15,
     color: APP_COLORS.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
     marginBottom: 24,
   },
-  profileStats: {
+  discoveryActionButton: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: APP_COLORS.outlineVariant,
-  },
-  statBox: {
+    backgroundColor: APP_COLORS.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: APP_COLORS.primary,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 3,
+    width: '100%',
   },
-  statValue: {
-    fontSize: 18,
+  discoveryActionText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '700',
-    color: APP_COLORS.onSurface,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: APP_COLORS.onSurfaceVariant,
-    marginTop: 4,
   },
 });
