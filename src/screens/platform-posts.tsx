@@ -86,10 +86,14 @@ export default function PlatformPostsScreen() {
   }, [accountId]);
 
   // Resolve display values: prefer API data, fall back to route params
-  const displayPicture = threadsProfile?.threads_profile_picture_url || profilePicture;
-  const displayName = threadsProfile?.name || threadsProfile?.username || accountName;
-  const displayHandle = threadsProfile?.username ? `@${threadsProfile.username}` : `@${platform?.toLowerCase()} account`;
-  const displayBio = threadsProfile?.threads_biography || null;
+  const displayPicture = accountAnalytics?.profilePicture || threadsProfile?.threads_profile_picture_url || profilePicture;
+  const displayName = accountAnalytics?.name || threadsProfile?.name || threadsProfile?.username || accountName;
+  const displayHandle = accountAnalytics?.username ? `@${accountAnalytics.username}` : (threadsProfile?.username ? `@${threadsProfile.username}` : `@${platform?.toLowerCase()} account`);
+  const displayBio = accountAnalytics?.about || threadsProfile?.threads_biography || null;
+
+  // Filter out profile metadata strings from the numeric analytics grid
+  const FILTERED_ANALYTICS_KEYS = ['name', 'username', 'about', 'category', 'website', 'profilePicture', 'id'];
+  const renderAnalytics = accountAnalytics ? Object.entries(accountAnalytics).filter(([k]) => !FILTERED_ANALYTICS_KEYS.includes(k)) : [];
 
   const handleSendReply = async () => {
     // Threads API only supports reply_to_id referencing a TOP-LEVEL post, not nested comments.
@@ -340,11 +344,16 @@ export default function PlatformPostsScreen() {
         {/* Account Analytics Row */}
         {accountAnalyticsLoading ? (
           <ActivityIndicator size="small" color={APP_COLORS.primary} style={{ marginVertical: 16 }} />
-        ) : accountAnalytics && Object.keys(accountAnalytics).length > 0 ? (
+        ) : renderAnalytics.length > 0 ? (
           <View style={styles.analyticsSection}>
-            <Text style={styles.analyticsSectionTitle}>Account Analytics</Text>
+            <Text style={styles.analyticsSectionTitle}>ACCOUNT ANALYTICS</Text>
+            {accountAnalytics?.category && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 13, color: APP_COLORS.primary, fontWeight: '600', textTransform: 'uppercase' }}>{accountAnalytics.category}</Text>
+              </View>
+            )}
             <View style={styles.analyticsStatsGrid}>
-              {Object.entries(accountAnalytics).map(([key, val]) => (
+              {renderAnalytics.map(([key, val]) => (
                 <View key={key} style={styles.analyticsStatCard}>
                   <Text style={styles.analyticsStatValue}>{(val as number).toLocaleString()}</Text>
                   <Text style={styles.analyticsStatLabel}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</Text>

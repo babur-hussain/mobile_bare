@@ -113,6 +113,7 @@ export default function PostDetails() {
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const successScale = useRef(new Animated.Value(0)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
+  const [successMessage, setSuccessMessage] = useState('This post has been permanently removed from your history and all platforms.');
 
   const handleDeleteEverywhere = () => {
     Alert.alert(
@@ -143,6 +144,7 @@ export default function PostDetails() {
 
               // 4. Show success animation
               setIsDeletingAll(false);
+              setSuccessMessage('This post has been permanently removed from your history and all platforms.');
               setShowSuccessOverlay(true);
 
               Animated.timing(successOpacity, {
@@ -849,23 +851,23 @@ export default function PostDetails() {
                               const remainingPlatforms = platformList.filter((p: string) => p.toLowerCase() !== platformLower);
                               
                               if (remainingPlatforms.length === 0) {
-                                // Effectively deleted from everywhere -> remove from DB and show animation!
+                                // Effectively deleted from everywhere -> remove from DB
                                 await api.delete(`/api/v1/posts/${post._id}`);
                                 dispatch(removePost(post._id));
-                                setShowSuccessOverlay(true);
-                                Animated.timing(successOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start(() => {
-                                  setTimeout(() => {
-                                    Animated.timing(successOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
-                                      setShowSuccessOverlay(false);
-                                      navigation.goBack();
-                                    });
-                                  }, 2500);
-                                });
+                                setSuccessMessage('This post has been permanently removed from your history and all platforms.');
                               } else {
-                                Alert.alert('Deleted', `Post removed from ${platformName}.`, [
-                                  { text: 'OK', onPress: () => navigation.goBack() },
-                                ]);
+                                setSuccessMessage(`This post has been permanently manually un-published from ${platformName}.`);
                               }
+                              
+                              setShowSuccessOverlay(true);
+                              Animated.timing(successOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start(() => {
+                                setTimeout(() => {
+                                  Animated.timing(successOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+                                    setShowSuccessOverlay(false);
+                                    navigation.goBack();
+                                  });
+                                }, 2500);
+                              });
                             } catch (err: any) {
                               setDeletingPlatform(null);
                               const msg = err?.response?.data?.message || err?.message || 'Something went wrong.';
@@ -924,7 +926,7 @@ export default function PostDetails() {
               resizeMode="contain"
             />
             <Text style={{ fontSize: 24, fontWeight: '800', color: '#1c1b1b', marginBottom: 8, textAlign: 'center' }}>Deleted Successfully</Text>
-            <Text style={{ fontSize: 15, color: '#474554', textAlign: 'center', maxWidth: 280 }}>This post has been permanently removed from your history and all platforms.</Text>
+            <Text style={{ fontSize: 15, color: '#474554', textAlign: 'center', maxWidth: 280 }}>{successMessage}</Text>
           </View>
         </Animated.View>
       )}
