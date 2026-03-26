@@ -6,8 +6,18 @@ class SocketService {
   private socket: Socket | null = null;
   private connectedAccounts: Set<string> = new Set();
   
-  connect() {
+  async connect() {
     if (this.socket?.connected) return;
+
+    let token = '';
+    try {
+      const currentUser = getAuth().currentUser;
+      if (currentUser) {
+        token = await currentUser.getIdToken();
+      }
+    } catch (e) {
+      console.warn('Failed to get auth token for socket connection', e);
+    }
 
     this.socket = io(Config.API_BASE_URL, {
       transports: ['websocket'],
@@ -15,6 +25,7 @@ class SocketService {
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
+      auth: { token },
     });
 
     this.socket.on('connect', () => {

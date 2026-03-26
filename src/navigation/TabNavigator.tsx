@@ -42,8 +42,7 @@ export default function TabNavigator() {
           elevation: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontFamily: 'Inter', // Or system font
+          fontSize: 12,
           fontWeight: '700',
           marginTop: 4,
         },

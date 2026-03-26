@@ -87,6 +87,51 @@ import { APP_COLORS } from '../constants/colors';
 
 type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
+const CaptionEditor = React.memo(({ initialCaption, onChangeCaption }: { initialCaption: string, onChangeCaption: (val: string) => void }) => {
+  const [localText, setLocalText] = useState(initialCaption);
+
+  useEffect(() => {
+    if (initialCaption === '') {
+      setLocalText('');
+    }
+  }, [initialCaption]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onChangeCaption(localText);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [localText, onChangeCaption]);
+
+  return (
+    <View style={styles.captionContainer}>
+      <TextInput
+        style={styles.captionInput}
+        placeholder="What's on your mind?&#10;Capture your audience's attention..."
+        placeholderTextColor={APP_COLORS.outlineVariant}
+        multiline
+        numberOfLines={8}
+        maxLength={2200}
+        value={localText}
+        onChangeText={setLocalText}
+      />
+      <View style={styles.captionFooter}>
+        <View style={styles.captionTools}>
+          <TouchableOpacity style={styles.toolBtn}>
+            <Smile size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.toolBtn}>
+            <Text style={styles.boldIconText}>B</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.charCount}>
+          {localText.length} / 2200
+        </Text>
+      </View>
+    </View>
+  );
+});
+
 export default function CreatePostScreen() {
   const [caption, setCaption] = useState('');
   const [mediaItems, setMediaItems] = useState<AppMedia[]>([]);
@@ -98,6 +143,7 @@ export default function CreatePostScreen() {
 
   // Timing state
   const [isScheduled, setIsScheduled] = useState(false);
+  const [hasInteractedWithScheduler, setHasInteractedWithScheduler] = useState(false);
   const [scheduledDate, setScheduledDate] = useState(
     new Date(Date.now() + 3600000),
   ); // +1h
@@ -506,11 +552,31 @@ export default function CreatePostScreen() {
   };
 
   const handleSchedulePost = async () => {
-    setIsScheduled(true);
-    // Open date picker to confirm time before submitting. For simplicity in demo, we'll just submit if scheduledDate is already future, or open picker if we want to force user to pick.
-    // Given the UI shows both buttons, we'll assume the time is picked via advanced settings or we trigger it now.
-    // Let's open the picker flow
-    setShowDatePicker(true);
+    if (!hasInteractedWithScheduler) {
+      Alert.alert(
+        'Schedule Post',
+        'Please select a date and time before scheduling.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Select Date', 
+            onPress: () => {
+               setIsScheduled(true);
+               setShowDatePicker(true);
+               setHasInteractedWithScheduler(true);
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    if (scheduledDate < new Date()) {
+      Alert.alert('Invalid Time', 'Scheduled time must be in the future.');
+      return;
+    }
+
+    finalizeSchedule();
   };
 
   // Called when date/time flow finishes
@@ -659,8 +725,8 @@ export default function CreatePostScreen() {
 
           {/* Action Row right below title */}
           <View style={styles.heroActionsRow}>
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => Alert.alert('Coming Soon', 'Draft saving will be available in a future update.')}>
-              <Text style={styles.btnSecondaryText}>Save Draft</Text>
+            <TouchableOpacity style={styles.btnSecondary} onPress={handleSchedulePost} disabled={isSubmitting}>
+              <Text style={styles.btnSecondaryText}>Schedule</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.btnPrimary}
@@ -787,47 +853,10 @@ export default function CreatePostScreen() {
 
           {/* Caption Editor */}
           <View style={styles.section}>
-            <View style={styles.captionContainer}>
-              <TextInput
-                style={styles.captionInput}
-                placeholder="What's on your mind?&#10;Capture your audience's attention..."
-                placeholderTextColor={APP_COLORS.outlineVariant}
-                multiline
-                numberOfLines={8}
-                maxLength={2200}
-                value={caption}
-                onChangeText={setCaption}
-              />
-              <View style={styles.captionFooter}>
-                {/* TEMP DISABLED: Global Location Tagging
-                {location && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#e2e8f0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginBottom: 8, alignSelf: 'flex-start' }}>
-                    <MapPin size={12} color={APP_COLORS.primary} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 12, color: APP_COLORS.onSurface }}>{location.name.split(',')[0]}...</Text>
-                    <TouchableOpacity onPress={() => setLocation(null)} style={{ marginLeft: 6 }}>
-                      <X size={14} color={APP_COLORS.onSurfaceVariant} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                */}
-                <View style={styles.captionTools}>
-                  <TouchableOpacity style={styles.toolBtn}>
-                    <Smile size={20} color={APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
-                  </TouchableOpacity>
-                  {/* TEMP DISABLED: Global Location Button
-                  <TouchableOpacity style={styles.toolBtn} onPress={() => setLocationModalVisible(true)}>
-                    <MapPin size={20} color={location ? APP_COLORS.primary : APP_COLORS.onSurfaceVariant} strokeWidth={2.5} />
-                  </TouchableOpacity>
-                  */}
-                  <TouchableOpacity style={styles.toolBtn}>
-                    <Text style={styles.boldIconText}>B</Text>
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.charCount}>
-                  {caption.length} / 2200
-                </Text>
-              </View>
-            </View>
+            <CaptionEditor 
+              initialCaption={caption} 
+              onChangeCaption={setCaption} 
+            />
           </View>
 
           {/* Scheduling Section */}
@@ -844,6 +873,7 @@ export default function CreatePostScreen() {
                 onPress={() => {
                   setIsScheduled(true);
                   setShowDatePicker(true);
+                  setHasInteractedWithScheduler(true);
                 }}>
                 <View>
                   <Text style={styles.scheduleInputLabel}>PUBLISH DATE</Text>
@@ -859,6 +889,7 @@ export default function CreatePostScreen() {
                 onPress={() => {
                   setIsScheduled(true);
                   setShowTimePicker(true);
+                  setHasInteractedWithScheduler(true);
                 }}>
                 <View>
                   <Text style={styles.scheduleInputLabel}>OPTIMIZED TIME</Text>
