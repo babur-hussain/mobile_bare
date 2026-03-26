@@ -1,4 +1,4 @@
-package com.mobile_bare
+package com.postingautomation
 
 import android.app.Application
 import com.facebook.react.PackageList

@@ -1,4 +1,4 @@
-package com.mobile_bare
+package com.postingautomation
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

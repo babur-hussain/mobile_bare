@@ -163,7 +163,7 @@ export default function AccountsScreen() {
           url,
           'postingautomation://',
           {
-            ephemeralWebSession: true, // Bypass cached Safari Auth redirects
+            ephemeralWebSession: false, // Keep browser session/cookies for smoother login
             showTitle: true,
             enableUrlBarHiding: true,
             enableDefaultShare: false,
