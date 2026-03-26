@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import LottieView from 'lottie-react-native';
 import {
   View,
   Text,
@@ -309,12 +310,12 @@ export default function FacebookPostsScreen() {
 
         {/* Followers Badge */}
         <View style={{ alignItems: 'center', marginBottom: 32, paddingHorizontal: 16 }}>
-           <Text style={{ fontSize: 28, fontWeight: '800', color: APP_COLORS.onSurface }}>
-             {(accountAnalytics?.followers || 0).toLocaleString()}
-           </Text>
-           <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>
-             Total Followers
-           </Text>
+          <Text style={{ fontSize: 28, fontWeight: '800', color: APP_COLORS.onSurface }}>
+            {(accountAnalytics?.followers || 0).toLocaleString()}
+          </Text>
+          <Text style={{ fontSize: 13, color: APP_COLORS.onSurfaceVariant, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>
+            Total Followers
+          </Text>
         </View>
 
         {/* Analytics Dashboard */}
@@ -462,7 +463,12 @@ export default function FacebookPostsScreen() {
       <View style={{ flex: 1, backgroundColor: APP_COLORS.surfaceContainerLow }}>
         {loading ? (
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={APP_COLORS.primary} />
+            <LottieView
+              source={require('../LottieAnimations/Social Media Loading.lottie')}
+              autoPlay
+              loop
+              style={{ width: 120, height: 120 }}
+            />
             <Text style={{ marginTop: 12, color: APP_COLORS.onSurfaceVariant }}>Fetching posts...</Text>
           </View>
         ) : error ? (

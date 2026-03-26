@@ -164,7 +164,7 @@ export default function HomeScreen() {
       <View style={[styles.header, { paddingTop: insets.top, height: 60 + insets.top }]}>
         <View style={styles.headerLeft}>
           <View style={styles.headerIconContainer}>
-            <Share2 color={APP_COLORS.primary} size={24} />
+            <Share2 color="#b71029" size={24} />
           </View>
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
@@ -205,10 +205,10 @@ export default function HomeScreen() {
                     style={styles.connectedAvatarBtn}
                     onPress={() => {
                       const screenName = acc.platform === 'facebook' ? 'FacebookPosts' :
-                                         acc.platform === 'instagram' ? 'InstagramPosts' :
-                                         acc.platform === 'threads' ? 'ThreadsPosts' :
-                                         (acc.platform === 'twitter' || acc.platform === 'x') ? 'TwitterPosts' :
-                                         acc.platform === 'youtube' ? 'YouTubePosts' : 'PlatformPosts';
+                        acc.platform === 'instagram' ? 'InstagramPosts' :
+                          acc.platform === 'threads' ? 'ThreadsPosts' :
+                            (acc.platform === 'twitter' || acc.platform === 'x') ? 'TwitterPosts' :
+                              acc.platform === 'youtube' ? 'YouTubePosts' : 'PlatformPosts';
                       navigation.navigate(screenName, {
                         accountId: acc._id, // User accounts use _id in Redux 
                         platform: acc.platform,
@@ -241,13 +241,12 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.btnPrimary}
-              onPress={() => navigation.navigate('Create Post')}
+              onPress={() => navigation.navigate('Post')}
               activeOpacity={0.8}>
               <View style={styles.btnPrimaryIconRow}>
                 <Plus size={16} color={APP_COLORS.surfaceContainerLowest} strokeWidth={3} />
-                <Text style={styles.btnPrimaryText}>Create</Text>
+                <Text style={styles.btnPrimaryText}>Create Post</Text>
               </View>
-              <Text style={styles.btnPrimaryText}>Post</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -323,7 +322,7 @@ export default function HomeScreen() {
               <Text style={styles.emptyStateDesc}>Create your first post to get started!</Text>
               <TouchableOpacity
                 style={styles.emptyStateCTA}
-                onPress={() => navigation.navigate('Create Post')}
+                onPress={() => navigation.navigate('Post')}
                 activeOpacity={0.8}>
                 <Plus size={16} color={APP_COLORS.onPrimary} strokeWidth={3} />
                 <Text style={styles.emptyStateCTAText}>Create Post</Text>

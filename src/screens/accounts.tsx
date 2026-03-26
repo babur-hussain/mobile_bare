@@ -228,8 +228,8 @@ export default function AccountsScreen() {
           { paddingTop: insets.top, height: 64 + insets.top },
         ]}>
         <View style={styles.headerLeft}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{getInitials()}</Text>
+          <View style={styles.headerIconContainer}>
+            <Share2 color="#b71029" size={24} />
           </View>
           <Text style={styles.headerBrand}>PostOnce</Text>
         </View>
@@ -331,27 +331,19 @@ export default function AccountsScreen() {
                     <Text style={styles.pageRole}>Business Account</Text>
                   </View>
                 </View>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <TouchableOpacity
-                    style={[styles.disconnectButtonFull, { flex: 1, backgroundColor: APP_COLORS.surfaceContainer, borderWidth: 0 }]}
-                    activeOpacity={0.7}
-                    onPress={() => navigation.navigate('PlatformPosts', { accountId: instagramAccount._id, platform: 'Instagram', accountName: instagramAccount.accountName })}>
-                    <Text style={[styles.disconnectButtonText, { color: APP_COLORS.primary }]}>View History</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.disconnectButtonFull, { flex: 1 }]}
-                    activeOpacity={0.7}
-                    onPress={() =>
-                      handleDisconnect(
-                        instagramAccount._id,
-                        instagramAccount.accountName,
-                      )
-                    }>
-                    <Text style={styles.disconnectButtonText}>
-                      Disconnect
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={styles.disconnectButtonFull}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    handleDisconnect(
+                      instagramAccount._id,
+                      instagramAccount.accountName,
+                    )
+                  }>
+                  <Text style={styles.disconnectButtonText}>
+                    Disconnect Account
+                  </Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.cardFooterDisconnect}>
@@ -448,27 +440,19 @@ export default function AccountsScreen() {
                     <Text style={styles.pageRole}>Threads Profile</Text>
                   </View>
                 </View>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <TouchableOpacity
-                    style={[styles.disconnectButtonFull, { flex: 1, backgroundColor: APP_COLORS.surfaceContainer, borderWidth: 0 }]}
-                    activeOpacity={0.7}
-                    onPress={() => navigation.navigate('PlatformPosts', { accountId: threadsAccount._id, platform: 'Threads', accountName: threadsAccount.accountName })}>
-                    <Text style={[styles.disconnectButtonText, { color: APP_COLORS.primary }]}>View History</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.disconnectButtonFull, { flex: 1 }]}
-                    activeOpacity={0.7}
-                    onPress={() =>
-                      handleDisconnect(
-                        threadsAccount._id,
-                        threadsAccount.accountName,
-                      )
-                    }>
-                    <Text style={styles.disconnectButtonText}>
-                      Disconnect
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={styles.disconnectButtonFull}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    handleDisconnect(
+                      threadsAccount._id,
+                      threadsAccount.accountName,
+                    )
+                  }>
+                  <Text style={styles.disconnectButtonText}>
+                    Disconnect Account
+                  </Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.cardFooterDisconnect}>
@@ -574,24 +558,16 @@ export default function AccountsScreen() {
                         <Text style={styles.pageRole}>Page</Text>
                       </View>
                     </View>
-                    <View style={{ flexDirection: 'row', gap: 12 }}>
-                      <TouchableOpacity
-                        style={[styles.disconnectButtonFull, { flex: 1, backgroundColor: APP_COLORS.surfaceContainer, borderWidth: 0 }]}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('PlatformPosts', { accountId: account._id, platform: 'Facebook', accountName: account.accountName })}>
-                        <Text style={[styles.disconnectButtonText, { color: APP_COLORS.primary }]}>View History</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.disconnectButtonFull, { flex: 1 }]}
-                        activeOpacity={0.7}
-                        onPress={() =>
-                          handleDisconnect(account._id, account.accountName)
-                        }>
-                        <Text style={styles.disconnectButtonText}>
-                          Disconnect
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.disconnectButtonFull}
+                      activeOpacity={0.7}
+                      onPress={() =>
+                        handleDisconnect(account._id, account.accountName)
+                      }>
+                      <Text style={styles.disconnectButtonText}>
+                        Disconnect Account
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 ))}
               </View>
@@ -878,7 +854,13 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  headerIconContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   avatarCircle: {
     width: 32,
@@ -894,9 +876,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   headerBrand: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    color: APP_COLORS.onSurface,
+    color: '#b71029',
     letterSpacing: -0.5,
   },
   iconButton: {

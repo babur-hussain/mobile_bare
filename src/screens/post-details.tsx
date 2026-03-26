@@ -133,7 +133,7 @@ export default function PostDetails() {
               if (platList.includes('facebook')) promises.push(postsService.deleteFacebook(post._id));
               if (platList.includes('instagram')) promises.push(postsService.deleteInstagram(post._id));
               if (platList.includes('threads')) promises.push(postsService.deleteThreads(post._id));
-              
+
               await Promise.allSettled(promises);
 
               // 2. Delete from backend DB
@@ -162,7 +162,7 @@ export default function PostDetails() {
                     setShowSuccessOverlay(false);
                     navigation.goBack();
                   });
-                }, 2500); 
+                }, 2500);
               });
 
             } catch (err: any) {
@@ -846,10 +846,10 @@ export default function PostDetails() {
                                 await postsService.deleteThreads(post._id);
                               }
                               setDeletingPlatform(null);
-                              
+
                               // Check if we just deleted the LAST platform
                               const remainingPlatforms = platformList.filter((p: string) => p.toLowerCase() !== platformLower);
-                              
+
                               if (remainingPlatforms.length === 0) {
                                 // Effectively deleted from everywhere -> remove from DB
                                 await api.delete(`/api/v1/posts/${post._id}`);
@@ -858,7 +858,7 @@ export default function PostDetails() {
                               } else {
                                 setSuccessMessage(`This post has been permanently manually un-published from ${platformName}.`);
                               }
-                              
+
                               setShowSuccessOverlay(true);
                               Animated.timing(successOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start(() => {
                                 setTimeout(() => {
@@ -886,7 +886,7 @@ export default function PostDetails() {
                 </TouchableOpacity>
               );
             })}
-            
+
             {/* Delete Everywhere Master Button */}
             <TouchableOpacity
               disabled={isDeletingAll || !!deletingPlatform}
@@ -919,7 +919,7 @@ export default function PostDetails() {
         <Animated.View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(255,255,255,0.95)', justifyContent: 'center', alignItems: 'center', zIndex: 9999, opacity: successOpacity }]}>
           <View style={{ alignItems: 'center', padding: 24, width: '100%' }}>
             <LottieView
-              source={require('../Lottie Animations/Delete message.lottie')}
+              source={require('../LottieAnimations/DeleteMessage.lottie')}
               autoPlay
               loop={false}
               style={{ width: 250, height: 250, marginBottom: 16 }}

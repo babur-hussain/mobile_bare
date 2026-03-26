@@ -6,7 +6,12 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
+import { getAuth } from '@react-native-firebase/auth';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { mediaService } from '../services/media.service';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -18,15 +23,49 @@ import {
   MessageCircle,
   LogOut,
   UserCog,
+  Camera,
 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
-import { logoutUser, checkAuthStatus } from '../store/actions/auth.actions';
+import { logoutUser, checkAuthStatus, updateProfileUser } from '../store/actions/auth.actions';
 import { Colors } from '../constants/colors';
 
 export default function SettingsScreen({ navigation }: any) {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const fbUser = getAuth().currentUser;
+  const avatarUrl =
+    (user as any)?.picture || (user as any)?.profilePicture || fbUser?.photoURL || null;
+
+  const handlePickProfilePicture = async () => {
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        selectionLimit: 1,
+        quality: 0.8,
+      });
+
+      if (result.assets && result.assets[0]) {
+        setIsUploading(true);
+        const asset = result.assets[0];
+
+        const media = await mediaService.upload(asset, () => { });
+        if (media.s3Url) {
+          const res = await dispatch(updateProfileUser({ profilePicture: media.s3Url }));
+          if (updateProfileUser.fulfilled.match(res)) {
+            dispatch(checkAuthStatus());
+            Alert.alert('Success', 'Profile picture updated successfully!');
+          }
+        }
+      }
+    } catch (e: any) {
+      Alert.alert('Error', 'Failed to update profile picture. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Refresh profile every time the settings tab gains focus
   useFocusEffect(
@@ -73,9 +112,18 @@ export default function SettingsScreen({ navigation }: any) {
       ]}>
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
+        <TouchableOpacity style={styles.avatarContainer} onPress={handlePickProfilePicture} disabled={isUploading}>
+          {isUploading ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <Text style={styles.avatarText}>{initials}</Text>
+          )}
+          <View style={styles.editBadge}>
+            <Camera size={14} color={Colors.white} />
+          </View>
+        </TouchableOpacity>
         <Text style={styles.name}>{user?.name || 'User'}</Text>
         <Text style={styles.email}>{user?.email || ''}</Text>
         <View style={styles.planBadge}>
@@ -196,6 +244,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.white,
     letterSpacing: 1,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 22,
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: -6,
+    right: -6,
+    backgroundColor: Colors.primary,
+    padding: 6,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: Colors.white,
+    elevation: 3,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   name: {
     fontSize: 20,

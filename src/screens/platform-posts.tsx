@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import LottieView from 'lottie-react-native';
 import {
   View,
   Text,
@@ -376,7 +377,12 @@ export default function PlatformPostsScreen() {
       <View style={{ flex: 1, backgroundColor: APP_COLORS.surfaceContainerLow }}>
         {loading ? (
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={APP_COLORS.primary} />
+            <LottieView
+              source={require('../LottieAnimations/Social Media Loading.lottie')}
+              autoPlay
+              loop
+              style={{ width: 120, height: 120 }}
+            />
             <Text style={{ marginTop: 12, color: APP_COLORS.onSurfaceVariant }}>Fetching posts...</Text>
           </View>
         ) : error ? (

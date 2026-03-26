@@ -74,7 +74,7 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => <Users size={24} color={color} />,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Messages"
         component={MessagesScreen}
         options={{
@@ -83,7 +83,7 @@ export default function TabNavigator() {
             <MessageCircle size={24} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}

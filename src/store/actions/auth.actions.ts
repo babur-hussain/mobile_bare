@@ -181,7 +181,7 @@ export const logoutUser = createAsyncThunk(
 
 export const updateProfileUser = createAsyncThunk(
   'auth/updateProfile',
-  async (data: { name?: string }, { dispatch, getState, rejectWithValue }) => {
+  async (data: any, { dispatch, getState, rejectWithValue }) => {
     dispatch(setAuthLoading(true));
     try {
       const profile = await authService.updateProfile(data);
