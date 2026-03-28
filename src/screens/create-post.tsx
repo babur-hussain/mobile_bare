@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -38,13 +38,8 @@ export interface AppLocation {
   id?: string;
   address?: string;
 }
-import { LayoutAnimation, UIManager } from 'react-native';
+import { InteractionManager } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export interface PlatformConfig {
   mentions: string[];
@@ -128,6 +123,113 @@ const CaptionEditor = React.memo(({ initialCaption, onChangeCaption }: { initial
           {localText.length} / 2200
         </Text>
       </View>
+    </View>
+  );
+});
+
+
+const PLATFORM_FEATURES: Record<Platform_Type, { mentions: boolean; hashtags: boolean; location: boolean }> = {
+  instagram: { mentions: true, hashtags: true, location: false },
+  facebook: { mentions: true, hashtags: true, location: false },
+  threads: { mentions: true, hashtags: true, location: false },
+  x: { mentions: true, hashtags: true, location: false },
+  youtube: { mentions: false, hashtags: true, location: false },
+};
+
+const PlatformConfigPanel = React.memo(({
+  platform,
+  selectedPlatforms,
+  platformConfig,
+  removeChipFromConfig,
+  setActivePlatformInput,
+  setChipInputText,
+  setPlatformLocation,
+  setPlatformLocationModal,
+  setPlatformLocQuery,
+  setPlatformLocResults
+}: any) => {
+  if (!selectedPlatforms.has(platform)) return null;
+  const features = PLATFORM_FEATURES[platform];
+  const config = platformConfig[platform];
+
+  return (
+    <View style={pcStyles.panel}>
+      {/* Mentions */}
+      {features.mentions && (
+        <View style={pcStyles.fieldRow}>
+          <View style={pcStyles.fieldHeader}>
+            <AtSign size={14} color={APP_COLORS.primary} />
+            <Text style={pcStyles.fieldLabel}>Mentions</Text>
+          </View>
+          <View style={pcStyles.chipsWrap}>
+            {config.mentions.map((m: string, i: number) => (
+              <View key={i} style={pcStyles.chip}>
+                <Text style={pcStyles.chipText}>@{m}</Text>
+                <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'mentions', i)}>
+                  <X size={12} color={APP_COLORS.onSurfaceVariant} />
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity
+              style={pcStyles.addChipBtn}
+              onPress={() => { setActivePlatformInput({ platform, field: 'mentions' }); setChipInputText(''); }}>
+              <Text style={pcStyles.addChipText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Hashtags */}
+      {features.hashtags && (
+        <View style={pcStyles.fieldRow}>
+          <View style={pcStyles.fieldHeader}>
+            <Tag size={14} color="#f97316" />
+            <Text style={pcStyles.fieldLabel}>Hashtags</Text>
+          </View>
+          <View style={pcStyles.chipsWrap}>
+            {config.hashtags.map((h: string, i: number) => (
+              <View key={i} style={[pcStyles.chip, { backgroundColor: 'rgba(249,115,22,0.1)' }]} >
+                <Text style={[pcStyles.chipText, { color: '#f97316' }]}>#{h}</Text>
+                <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'hashtags', i)}>
+                  <X size={12} color="#f97316" />
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity
+              style={pcStyles.addChipBtn}
+              onPress={() => { setActivePlatformInput({ platform, field: 'hashtags' }); setChipInputText(''); }}>
+              <Text style={pcStyles.addChipText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Location */}
+      {features.location && (
+        <View style={pcStyles.fieldRow}>
+          <View style={pcStyles.fieldHeader}>
+            <MapPin size={14} color={APP_COLORS.primary} />
+            <Text style={pcStyles.fieldLabel}>Location</Text>
+          </View>
+          {config.location ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={[pcStyles.chip, { backgroundColor: 'rgba(83,65,205,0.08)' }]}>
+                <MapPin size={12} color={APP_COLORS.primary} />
+                <Text style={[pcStyles.chipText, { color: APP_COLORS.primary }]}>{config.location.name.split(',')[0]}</Text>
+                <TouchableOpacity onPress={() => setPlatformLocation(platform, undefined)}>
+                  <X size={12} color={APP_COLORS.primary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={pcStyles.addChipBtn}
+              onPress={() => { setPlatformLocationModal(platform); setPlatformLocQuery(''); setPlatformLocResults([]); }}>
+              <Text style={pcStyles.addChipText}>Search Location</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </View>
   );
 });
@@ -364,7 +466,6 @@ export default function CreatePostScreen() {
 
   const togglePlatform = useCallback((platform: Platform_Type) => {
     setPlatformSelectionError(false);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedPlatforms(prev => {
       const next = new Set(prev);
       if (next.has(platform)) {
@@ -451,100 +552,6 @@ export default function CreatePostScreen() {
     }, 600);
   }, []);
 
-  const PLATFORM_FEATURES: Record<Platform_Type, { mentions: boolean; hashtags: boolean; location: boolean }> = {
-    instagram: { mentions: true, hashtags: true, location: false },
-    facebook: { mentions: true, hashtags: true, location: false },
-    threads: { mentions: true, hashtags: true, location: false },
-    x: { mentions: true, hashtags: true, location: false },
-    youtube: { mentions: false, hashtags: true, location: false },
-  };
-
-  const renderPlatformConfigPanel = (platform: Platform_Type) => {
-    if (!selectedPlatforms.has(platform)) return null;
-    const features = PLATFORM_FEATURES[platform];
-    const config = platformConfig[platform];
-
-    return (
-      <View style={pcStyles.panel}>
-        {/* Mentions */}
-        {features.mentions && (
-          <View style={pcStyles.fieldRow}>
-            <View style={pcStyles.fieldHeader}>
-              <AtSign size={14} color={APP_COLORS.primary} />
-              <Text style={pcStyles.fieldLabel}>Mentions</Text>
-            </View>
-            <View style={pcStyles.chipsWrap}>
-              {config.mentions.map((m, i) => (
-                <View key={i} style={pcStyles.chip}>
-                  <Text style={pcStyles.chipText}>@{m}</Text>
-                  <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'mentions', i)}>
-                    <X size={12} color={APP_COLORS.onSurfaceVariant} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity
-                style={pcStyles.addChipBtn}
-                onPress={() => { setActivePlatformInput({ platform, field: 'mentions' }); setChipInputText(''); }}>
-                <Text style={pcStyles.addChipText}>+ Add</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Hashtags */}
-        {features.hashtags && (
-          <View style={pcStyles.fieldRow}>
-            <View style={pcStyles.fieldHeader}>
-              <Tag size={14} color="#f97316" />
-              <Text style={pcStyles.fieldLabel}>Hashtags</Text>
-            </View>
-            <View style={pcStyles.chipsWrap}>
-              {config.hashtags.map((h, i) => (
-                <View key={i} style={[pcStyles.chip, { backgroundColor: 'rgba(249,115,22,0.1)' }]}>
-                  <Text style={[pcStyles.chipText, { color: '#f97316' }]}>#{h}</Text>
-                  <TouchableOpacity onPress={() => removeChipFromConfig(platform, 'hashtags', i)}>
-                    <X size={12} color="#f97316" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity
-                style={pcStyles.addChipBtn}
-                onPress={() => { setActivePlatformInput({ platform, field: 'hashtags' }); setChipInputText(''); }}>
-                <Text style={pcStyles.addChipText}>+ Add</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Location */}
-        {features.location && (
-          <View style={pcStyles.fieldRow}>
-            <View style={pcStyles.fieldHeader}>
-              <MapPin size={14} color={APP_COLORS.primary} />
-              <Text style={pcStyles.fieldLabel}>Location</Text>
-            </View>
-            {config.location ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={[pcStyles.chip, { backgroundColor: 'rgba(83,65,205,0.08)' }]}>
-                  <MapPin size={12} color={APP_COLORS.primary} />
-                  <Text style={[pcStyles.chipText, { color: APP_COLORS.primary }]}>{config.location.name.split(',')[0]}</Text>
-                  <TouchableOpacity onPress={() => setPlatformLocation(platform, undefined)}>
-                    <X size={12} color={APP_COLORS.primary} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={pcStyles.addChipBtn}
-                onPress={() => { setPlatformLocationModal(platform); setPlatformLocQuery(''); setPlatformLocResults([]); }}>
-                <Text style={pcStyles.addChipText}>Search Location</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </View>
-    );
-  };
 
   const handlePostNow = async () => {
     setIsScheduled(false);
@@ -558,12 +565,12 @@ export default function CreatePostScreen() {
         'Please select a date and time before scheduling.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Select Date', 
+          {
+            text: 'Select Date',
             onPress: () => {
-               setIsScheduled(true);
-               setShowDatePicker(true);
-               setHasInteractedWithScheduler(true);
+              setIsScheduled(true);
+              setShowDatePicker(true);
+              setHasInteractedWithScheduler(true);
             }
           }
         ]
@@ -713,7 +720,8 @@ export default function CreatePostScreen() {
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={Platform.OS === 'android'}>
         {/* Context / Breadcrumb & Title */}
         <View style={styles.heroSection}>
           <Text style={styles.breadcrumb}>CONTENT STUDIO</Text>
@@ -853,9 +861,9 @@ export default function CreatePostScreen() {
 
           {/* Caption Editor */}
           <View style={styles.section}>
-            <CaptionEditor 
-              initialCaption={caption} 
-              onChangeCaption={setCaption} 
+            <CaptionEditor
+              initialCaption={caption}
+              onChangeCaption={setCaption}
             />
           </View>
 
@@ -910,62 +918,63 @@ export default function CreatePostScreen() {
           </View>
         </View>
 
-        {/* Location Search Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={locationModalVisible}
-          onRequestClose={() => setLocationModalVisible(false)}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { height: '80%' }]}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Search Location</Text>
-                <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
-                  <X size={24} color={APP_COLORS.onSurface} />
-                </TouchableOpacity>
+        {/* Location Search Modal — lazy mounted */}
+        {locationModalVisible && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={locationModalVisible}
+            onRequestClose={() => setLocationModalVisible(false)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalOverlay}>
+              <View style={[styles.modalContent, { height: '80%' }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Search Location</Text>
+                  <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
+                    <X size={24} color={APP_COLORS.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.tagInputContainer}>
+                  <Search size={20} color={APP_COLORS.onSurfaceVariant} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                    placeholder="Search places..."
+                    placeholderTextColor={APP_COLORS.onSurfaceVariant}
+                    value={locationSearchQuery}
+                    onChangeText={(text) => {
+                      setLocationSearchQuery(text);
+                      searchLocations(text);
+                    }}
+                    autoFocus
+                  />
+                </View>
+                {isSearchingLocation ? (
+                  <ActivityIndicator style={{ marginTop: 20 }} color={APP_COLORS.primary} />
+                ) : (
+                  <ScrollView style={{ marginTop: 16 }}>
+                    {locationResults.map((loc, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' }}
+                        onPress={() => {
+                          setLocation(loc);
+                          setLocationModalVisible(false);
+                          setLocationSearchQuery('');
+                          setLocationResults([]);
+                        }}>
+                        <Text style={{ fontSize: 16, color: APP_COLORS.onSurface, fontWeight: '500' }}>{loc.name.split(',')[0]}</Text>
+                        <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant, marginTop: 2 }}>{loc.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
               </View>
-              <View style={styles.tagInputContainer}>
-                <Search size={20} color={APP_COLORS.onSurfaceVariant} style={{ marginRight: 8 }} />
-                <TextInput
-                  style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
-                  placeholder="Search places..."
-                  placeholderTextColor={APP_COLORS.onSurfaceVariant}
-                  value={locationSearchQuery}
-                  onChangeText={(text) => {
-                    setLocationSearchQuery(text);
-                    searchLocations(text);
-                  }}
-                  autoFocus
-                />
-              </View>
-              {isSearchingLocation ? (
-                <ActivityIndicator style={{ marginTop: 20 }} color={APP_COLORS.primary} />
-              ) : (
-                <ScrollView style={{ marginTop: 16 }}>
-                  {locationResults.map((loc, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' }}
-                      onPress={() => {
-                        setLocation(loc);
-                        setLocationModalVisible(false);
-                        setLocationSearchQuery('');
-                        setLocationResults([]);
-                      }}>
-                      <Text style={{ fontSize: 16, color: APP_COLORS.onSurface, fontWeight: '500' }}>{loc.name.split(',')[0]}</Text>
-                      <Text style={{ fontSize: 12, color: APP_COLORS.onSurfaceVariant, marginTop: 2 }}>{loc.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </View>
-          </KeyboardAvoidingView>
-        </Modal>
+            </KeyboardAvoidingView>
+          </Modal>)}
 
-        {/* Chip Input Modal (Mentions / Hashtags) */}
-        <Modal
+        {/* Chip Input Modal (Mentions / Hashtags) — lazy mounted */}
+        {!!activePlatformInput && (<Modal
           animationType="slide"
           transparent={true}
           visible={!!activePlatformInput}
@@ -1117,7 +1126,7 @@ export default function CreatePostScreen() {
               </TouchableOpacity>
             </View>
           </KeyboardAvoidingView>
-        </Modal>
+        </Modal>)}
 
         {/* Per-Platform Location Search Modal */}
         <Modal
@@ -1185,45 +1194,47 @@ export default function CreatePostScreen() {
 
         {/* Date/Time Pickers */}
         {Platform.OS === 'ios' ? (
-          <Modal transparent animationType="slide" visible={showDatePicker || showTimePicker}>
-            <View style={styles.pickerModalOverlay}>
-              <View style={styles.pickerModalContent}>
-                <View style={styles.pickerModalHeader}>
-                  <TouchableOpacity onPress={() => {
-                    if (showDatePicker) setShowDatePicker(false);
-                    if (showTimePicker) setShowTimePicker(false);
-                  }}>
-                    <Text style={styles.pickerDoneText}>Done</Text>
-                  </TouchableOpacity>
+          (showDatePicker || showTimePicker) && (
+            <Modal transparent animationType="slide" visible={true}>
+              <View style={styles.pickerModalOverlay}>
+                <View style={styles.pickerModalContent}>
+                  <View style={styles.pickerModalHeader}>
+                    <TouchableOpacity onPress={() => {
+                      if (showDatePicker) setShowDatePicker(false);
+                      if (showTimePicker) setShowTimePicker(false);
+                    }}>
+                      <Text style={styles.pickerDoneText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={scheduledDate}
+                      mode="date"
+                      display="inline"
+                      themeVariant="light"
+                      textColor={APP_COLORS.onSurface}
+                      minimumDate={new Date()}
+                      onChange={(_, date) => {
+                        if (date) setScheduledDate(date);
+                      }}
+                    />
+                  )}
+                  {showTimePicker && (
+                    <DateTimePicker
+                      value={scheduledDate}
+                      mode="time"
+                      display="spinner"
+                      themeVariant="light"
+                      textColor={APP_COLORS.onSurface}
+                      onChange={(_, date) => {
+                        if (date) setScheduledDate(date);
+                      }}
+                    />
+                  )}
                 </View>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={scheduledDate}
-                    mode="date"
-                    display="inline"
-                    themeVariant="light"
-                    textColor={APP_COLORS.onSurface}
-                    minimumDate={new Date()}
-                    onChange={(_, date) => {
-                      if (date) setScheduledDate(date);
-                    }}
-                  />
-                )}
-                {showTimePicker && (
-                  <DateTimePicker
-                    value={scheduledDate}
-                    mode="time"
-                    display="spinner"
-                    themeVariant="light"
-                    textColor={APP_COLORS.onSurface}
-                    onChange={(_, date) => {
-                      if (date) setScheduledDate(date);
-                    }}
-                  />
-                )}
               </View>
-            </View>
-          </Modal>
+            </Modal>
+          )
         ) : (
           <>
             {showDatePicker && (
@@ -1295,7 +1306,18 @@ export default function CreatePostScreen() {
                 thumbColor="#ffffff"
               />
             </TouchableOpacity>
-            {renderPlatformConfigPanel('instagram')}
+            <PlatformConfigPanel
+              platform="instagram"
+              selectedPlatforms={selectedPlatforms}
+              platformConfig={platformConfig}
+              removeChipFromConfig={removeChipFromConfig}
+              setActivePlatformInput={setActivePlatformInput}
+              setChipInputText={setChipInputText}
+              setPlatformLocation={setPlatformLocation}
+              setPlatformLocationModal={setPlatformLocationModal}
+              setPlatformLocQuery={setPlatformLocQuery}
+              setPlatformLocResults={setPlatformLocResults}
+            />
 
             <TouchableOpacity
               style={[
@@ -1324,7 +1346,18 @@ export default function CreatePostScreen() {
                 thumbColor="#ffffff"
               />
             </TouchableOpacity>
-            {renderPlatformConfigPanel('facebook')}
+            <PlatformConfigPanel
+              platform="facebook"
+              selectedPlatforms={selectedPlatforms}
+              platformConfig={platformConfig}
+              removeChipFromConfig={removeChipFromConfig}
+              setActivePlatformInput={setActivePlatformInput}
+              setChipInputText={setChipInputText}
+              setPlatformLocation={setPlatformLocation}
+              setPlatformLocationModal={setPlatformLocationModal}
+              setPlatformLocQuery={setPlatformLocQuery}
+              setPlatformLocResults={setPlatformLocResults}
+            />
 
             <TouchableOpacity
               style={[
@@ -1353,7 +1386,18 @@ export default function CreatePostScreen() {
                 thumbColor="#ffffff"
               />
             </TouchableOpacity>
-            {renderPlatformConfigPanel('threads')}
+            <PlatformConfigPanel
+              platform="threads"
+              selectedPlatforms={selectedPlatforms}
+              platformConfig={platformConfig}
+              removeChipFromConfig={removeChipFromConfig}
+              setActivePlatformInput={setActivePlatformInput}
+              setChipInputText={setChipInputText}
+              setPlatformLocation={setPlatformLocation}
+              setPlatformLocationModal={setPlatformLocationModal}
+              setPlatformLocQuery={setPlatformLocQuery}
+              setPlatformLocResults={setPlatformLocResults}
+            />
 
             <TouchableOpacity
               style={[
@@ -1382,7 +1426,18 @@ export default function CreatePostScreen() {
                 thumbColor="#ffffff"
               />
             </TouchableOpacity>
-            {renderPlatformConfigPanel('x')}
+            <PlatformConfigPanel
+              platform="x"
+              selectedPlatforms={selectedPlatforms}
+              platformConfig={platformConfig}
+              removeChipFromConfig={removeChipFromConfig}
+              setActivePlatformInput={setActivePlatformInput}
+              setChipInputText={setChipInputText}
+              setPlatformLocation={setPlatformLocation}
+              setPlatformLocationModal={setPlatformLocationModal}
+              setPlatformLocQuery={setPlatformLocQuery}
+              setPlatformLocResults={setPlatformLocResults}
+            />
 
             <TouchableOpacity
               style={[
@@ -1411,7 +1466,18 @@ export default function CreatePostScreen() {
                 thumbColor="#ffffff"
               />
             </TouchableOpacity>
-            {renderPlatformConfigPanel('youtube')}
+            <PlatformConfigPanel
+              platform="youtube"
+              selectedPlatforms={selectedPlatforms}
+              platformConfig={platformConfig}
+              removeChipFromConfig={removeChipFromConfig}
+              setActivePlatformInput={setActivePlatformInput}
+              setChipInputText={setChipInputText}
+              setPlatformLocation={setPlatformLocation}
+              setPlatformLocationModal={setPlatformLocationModal}
+              setPlatformLocQuery={setPlatformLocQuery}
+              setPlatformLocResults={setPlatformLocResults}
+            />
           </View>
           {platformSelectionError && (
             <Text style={styles.platformErrorText}>
@@ -1420,13 +1486,13 @@ export default function CreatePostScreen() {
           )}
         </View>
 
-        <View style={{ marginBottom: 24 }}>
+        <View style={styles.publishBtnContainer}>
           <TouchableOpacity style={styles.btnPrimary} onPress={handlePostNow} disabled={isSubmitting}>
             <Text style={styles.btnPrimaryText}>Publish Now</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 160 }} />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* Beautiful Loading Overlay */}
@@ -1443,31 +1509,35 @@ export default function CreatePostScreen() {
       }
 
       {/* YouTube Warning Modal */}
-      <Modal transparent animationType="fade" visible={showYoutubeWarning}>
-        <View style={styles.warningOverlay}>
-          <View style={styles.warningCard}>
-            <LottieView
-              source={require('../LottieAnimations/Incorrect.lottie')}
-              autoPlay
-              loop={false}
-              style={{ width: 120, height: 120, alignSelf: 'center' }}
-            />
-            <Text style={styles.warningTitle}>YouTube Limitation</Text>
-            <Text style={styles.warningDesc}>
-              YouTube does not support posting static images. Please remove the image or deselect YouTube to continue.
-            </Text>
-            <TouchableOpacity style={styles.warningBtn} onPress={() => setShowYoutubeWarning(false)}>
-              <Text style={styles.warningBtnText}>Got it</Text>
-            </TouchableOpacity>
+      {showYoutubeWarning && (
+        <Modal transparent animationType="fade" visible={true}>
+          <View style={styles.warningOverlay}>
+            <View style={styles.warningCard}>
+              <LottieView
+                source={require('../LottieAnimations/Incorrect.lottie')}
+                autoPlay
+                loop={false}
+                style={{ width: 120, height: 120, alignSelf: 'center' }}
+              />
+              <Text style={styles.warningTitle}>YouTube Limitation</Text>
+              <Text style={styles.warningDesc}>
+                YouTube does not support posting static images. Please remove the image or deselect YouTube to continue.
+              </Text>
+              <TouchableOpacity style={styles.warningBtn} onPress={() => setShowYoutubeWarning(false)}>
+                <Text style={styles.warningBtnText}>Got it</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
     </KeyboardAvoidingView >
   );
 }
 
 const styles = StyleSheet.create({
+  publishBtnContainer: { marginBottom: 24 },
+  bottomSpacer: { height: 160 },
   container: {
     flex: 1,
     backgroundColor: APP_COLORS.surface,
@@ -1841,11 +1911,6 @@ const styles = StyleSheet.create({
     padding: 24,
     borderWidth: 1,
     borderColor: 'rgba(200, 196, 215, 0.15)', // invisible border to match others
-    shadowColor: '#1c1b1b',
-    shadowOpacity: 0.02,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
   },
   captionInput: {
     fontSize: 18,

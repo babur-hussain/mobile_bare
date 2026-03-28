@@ -486,14 +486,9 @@ export default function YouTubePostsScreen() {
                             <Text style={styles.statLabel}>Comments</Text>
                           </View>
                           <View style={styles.analyticStatBox}>
-                            <Share2 size={24} color="#f39c12" />
-                            <Text style={styles.statValue}>{analytics.shares.toLocaleString()}</Text>
-                            <Text style={styles.statLabel}>Shares</Text>
-                          </View>
-                          <View style={styles.analyticStatBox}>
                             <Eye size={24} color="#9b59b6" />
-                            <Text style={styles.statValue}>{analytics.reach.toLocaleString()}</Text>
-                            <Text style={styles.statLabel}>Reach</Text>
+                            <Text style={styles.statValue}>{(analytics.views || analytics.reach || 0).toLocaleString()}</Text>
+                            <Text style={styles.statLabel}>Views</Text>
                           </View>
                         </View>
                       ) : null}
