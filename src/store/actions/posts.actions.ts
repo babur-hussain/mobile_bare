@@ -10,7 +10,7 @@ export const fetchAllPosts = createAsyncThunk(
       const response = await postsService.getAll(page);
       const formattedPosts = response.posts.map((p: any) => ({
         ...p,
-        mediaUrl: p.mediaUrl || null,
+        mediaUrl: p.mediaUrl || (p.mediaUrls && p.mediaUrls.length > 0 ? p.mediaUrls[0] : null),
         scheduledTime: p.scheduledTime || p.scheduledAt || null,
       }));
       dispatch(setPosts(formattedPosts));
@@ -48,7 +48,11 @@ export const createNewPost = createAsyncThunk(
         platformConfig: data.platformConfig,
       });
       // #32: Insert new post directly into Redux store instead of re-fetching the entire list
-      dispatch(addPost(response));
+      const postWithMediaUrl = {
+        ...response,
+        mediaUrl: response.mediaUrl || (response.mediaUrls && response.mediaUrls.length > 0 ? response.mediaUrls[0] : null)
+      };
+      dispatch(addPost(postWithMediaUrl));
       return response;
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create post';

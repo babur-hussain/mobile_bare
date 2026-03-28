@@ -82,33 +82,35 @@ import { APP_COLORS } from '../constants/colors';
 
 type Platform_Type = 'instagram' | 'facebook' | 'youtube' | 'threads' | 'x';
 
+// Lightweight counter — only this tiny component re-renders on keystroke
+const CharCounter = React.memo(({ count }: { count: number }) => (
+  <Text style={styles.charCount}>{count} / 2200</Text>
+));
+
 const CaptionEditor = React.memo(({ initialCaption, onChangeCaption }: { initialCaption: string, onChangeCaption: (val: string) => void }) => {
-  const [localText, setLocalText] = useState(initialCaption);
+  const textRef = useRef(initialCaption);
+  const [charCount, setCharCount] = useState(initialCaption.length);
+  const charCountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (initialCaption === '') {
-      setLocalText('');
-    }
-  }, [initialCaption]);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onChangeCaption(localText);
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [localText, onChangeCaption]);
+  const handleChangeText = useCallback((text: string) => {
+    textRef.current = text;
+    onChangeCaption(text);
+    // Debounce char count updates to avoid re-rendering CaptionEditor on every keystroke
+    if (charCountTimer.current) clearTimeout(charCountTimer.current);
+    charCountTimer.current = setTimeout(() => setCharCount(text.length), 500);
+  }, [onChangeCaption]);
 
   return (
     <View style={styles.captionContainer}>
       <TextInput
         style={styles.captionInput}
-        placeholder="What's on your mind?&#10;Capture your audience's attention..."
+        placeholder={"What's on your mind?\nCapture your audience's attention..."}
         placeholderTextColor={APP_COLORS.outlineVariant}
         multiline
         numberOfLines={8}
         maxLength={2200}
-        value={localText}
-        onChangeText={setLocalText}
+        defaultValue={initialCaption}
+        onChangeText={handleChangeText}
       />
       <View style={styles.captionFooter}>
         <View style={styles.captionTools}>
@@ -119,9 +121,7 @@ const CaptionEditor = React.memo(({ initialCaption, onChangeCaption }: { initial
             <Text style={styles.boldIconText}>B</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.charCount}>
-          {localText.length} / 2200
-        </Text>
+        <CharCounter count={charCount} />
       </View>
     </View>
   );
@@ -147,7 +147,7 @@ const PlatformConfigPanel = React.memo(({
   setPlatformLocationModal,
   setPlatformLocQuery,
   setPlatformLocResults
-}: any) => {
+}: { platform: Platform_Type;[key: string]: any }) => {
   if (!selectedPlatforms.has(platform)) return null;
   const features = PLATFORM_FEATURES[platform];
   const config = platformConfig[platform];
@@ -235,7 +235,9 @@ const PlatformConfigPanel = React.memo(({
 });
 
 export default function CreatePostScreen() {
-  const [caption, setCaption] = useState('');
+  const captionRef = useRef('');
+  const [editorKey, setEditorKey] = useState(0);
+  const handleCaptionChange = useCallback((val: string) => { captionRef.current = val; }, []);
   const [mediaItems, setMediaItems] = useState<AppMedia[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<
     Set<Platform_Type>
@@ -606,7 +608,7 @@ export default function CreatePostScreen() {
       }
     }
 
-    if (!caption.trim() && mediaItems.length === 0) {
+    if (!captionRef.current.trim() && mediaItems.length === 0) {
       Alert.alert('Error', 'Please add a caption or media');
       return;
     }
@@ -645,7 +647,7 @@ export default function CreatePostScreen() {
       const newPost = await dispatch(
         createNewPost({
           mediaUrls: urls,
-          caption: caption.trim(),
+          caption: captionRef.current.trim(),
           platforms: Array.from(selectedPlatforms),
           scheduledTime: submitAsScheduled
             ? scheduledDate.toISOString()
@@ -657,7 +659,8 @@ export default function CreatePostScreen() {
       ).unwrap();
 
       // Reset form silently before navigating
-      setCaption('');
+      captionRef.current = '';
+      setEditorKey(k => k + 1);
       setMediaItems([]);
       setSelectedPlatforms(new Set());
       setPlatformConfig({
@@ -862,8 +865,9 @@ export default function CreatePostScreen() {
           {/* Caption Editor */}
           <View style={styles.section}>
             <CaptionEditor
-              initialCaption={caption}
-              onChangeCaption={setCaption}
+              key={editorKey}
+              initialCaption={captionRef.current}
+              onChangeCaption={handleCaptionChange}
             />
           </View>
 
@@ -1636,11 +1640,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     gap: 12,
-    shadowColor: '#1c1b1b',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+
     marginTop: -20, // To pull it up slightly as per design absolute positioning
   },
   draftBadgeTitle: {
@@ -1698,11 +1698,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(200, 196, 215, 0.15)',
-    shadowColor: '#1c1b1b',
-    shadowOpacity: 0.02,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+
     gap: 8,
   },
   platformRow: {
