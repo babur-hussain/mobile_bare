@@ -200,7 +200,7 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>PostingAutomation v1.0.0</Text>
+      <Text style={styles.version}>Post Once v1.0.0</Text>
     </ScrollView>
   );
 }
