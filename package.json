@@ -7,10 +7,11 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "node -e \"const fs=require('fs'),src='node_modules/@react-native-async-storage/async-storage/ios/PrivacyInfo.xcprivacy',dst='node_modules/@react-native-async-storage/async-storage/apple/PrivacyInfo.xcprivacy';if(fs.existsSync(src)){fs.mkdirSync(require('path').dirname(dst),{recursive:true});fs.copyFileSync(src,dst);console.log('Copied AsyncStorage PrivacyInfo.xcprivacy to apple/')}else{console.warn('AsyncStorage PrivacyInfo.xcprivacy not found in ios/')};\""
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^3.0.1",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/datetimepicker": "^8.6.0",
     "@react-native-firebase/app": "^23.8.6",
     "@react-native-firebase/auth": "^23.8.6",
@@ -30,7 +31,7 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-safe-area-context": "~4.8.2",
     "react-native-screens": "~3.29.0",
-    "react-native-svg": "^15.15.3",
+    "react-native-svg": "^14.1.0",
     "react-native-vector-icons": "^10.3.0",
     "react-redux": "^9.2.0",
     "socket.io-client": "^4.8.3"

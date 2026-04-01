@@ -480,8 +480,9 @@ export default function PostDetails() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.errorTitle}>Publishing Failed</Text>
                 <Text style={styles.errorDescription}>
-                  {post.errorReason ||
-                    'The server could not publish this post. Please check your account connections or try again later.'}
+                  {post.publishResults?.find((r: any) => !r.success && r.error)?.error || 
+                   post.errorReason ||
+                   'The server could not publish this post. Please check your account connections or try again later.'}
                 </Text>
               </View>
             </View>

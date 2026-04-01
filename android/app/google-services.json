@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "208100625363",
+    "project_id": "postingautomation-9b258",
+    "storage_bucket": "postingautomation-9b258.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208100625363:android:4f34328b85006f29cdbd26",
+        "android_client_info": {
+          "package_name": "com.postingautomation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "208100625363-gq9qa2rgvnphdq4cls7ecpq7cs1dl371.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT1iyE8SifvO6KN_JNbwpzv5peTw8TdGQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "208100625363-gq9qa2rgvnphdq4cls7ecpq7cs1dl371.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "208100625363-5gb0dd86nvgkmbpifqe41142rq7l2h6b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sarvrachna.postingautomation"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
