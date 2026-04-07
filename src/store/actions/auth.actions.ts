@@ -90,6 +90,10 @@ export const googleLoginUser = createAsyncThunk(
       );
       return profile;
     } catch (error: any) {
+      console.error('=== Google Sign-In Error ===');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Full error:', JSON.stringify(error, null, 2));
       let message = error.message || 'Google Login failed';
       dispatch(setAuthError(message));
       return rejectWithValue(message);

@@ -312,6 +312,45 @@ export default function PostDetails() {
     return post.platforms && Array.isArray(post.platforms) ? post.platforms : [];
   }, [post.publishResults, post.platforms]);
 
+  // Build list of successfully published platforms with their post URLs
+  const publishedPlatformLinks = useMemo(() => {
+    if (!post.publishResults || !Array.isArray(post.publishResults)) return [];
+    return post.publishResults
+      .filter((r: any) => r.success && r.platformPostId)
+      .map((r: any) => {
+        const platform = (r.platform || '').toLowerCase();
+        let url: string | null = r.permalink || null;
+        const postId = r.platformPostId;
+
+        if (!url) {
+          switch (platform) {
+            case 'instagram':
+              url = `https://www.instagram.com/p/${postId}/`;
+              break;
+            case 'facebook':
+              // Facebook post IDs are typically pageId_postId
+              url = `https://www.facebook.com/${postId}`;
+              break;
+            case 'threads':
+              url = `https://www.threads.net/post/${postId}`;
+              break;
+            case 'youtube':
+              url = `https://www.youtube.com/watch?v=${postId}`;
+              break;
+            case 'x':
+            case 'twitter':
+              url = `https://x.com/i/status/${postId}`;
+              break;
+            default:
+              url = null;
+          }
+        }
+
+        return { platform: r.platform, url };
+      })
+      .filter((item: any) => item.url !== null);
+  }, [post.publishResults]);
+
   const displayAnalytics = useMemo(() => platformList.map((platformName: string) => {
     const actual = analytics.find(
       (a: any) =>
@@ -480,9 +519,9 @@ export default function PostDetails() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.errorTitle}>Publishing Failed</Text>
                 <Text style={styles.errorDescription}>
-                  {post.publishResults?.find((r: any) => !r.success && r.error)?.error || 
-                   post.errorReason ||
-                   'The server could not publish this post. Please check your account connections or try again later.'}
+                  {post.publishResults?.find((r: any) => !r.success && r.error)?.error ||
+                    post.errorReason ||
+                    'The server could not publish this post. Please check your account connections or try again later.'}
                 </Text>
               </View>
             </View>
@@ -515,6 +554,44 @@ export default function PostDetails() {
           <Text style={styles.label}>CAPTION</Text>
           <Text style={styles.captionText}>{post.caption || post.title || 'No Caption'}</Text>
         </View>
+
+        {/* Open on Platform Buttons — only for successfully published platforms */}
+        {isPublished && publishedPlatformLinks.length > 0 && (
+          <View style={styles.openPlatformCard}>
+            <Text style={styles.label}>VIEW ON PLATFORM</Text>
+            <View style={styles.openPlatformButtons}>
+              {publishedPlatformLinks.map((item: any) => {
+                const pLower = (item.platform || '').toLowerCase();
+                const brandColors: Record<string, string> = {
+                  instagram: '#E1306C',
+                  facebook: '#1877F2',
+                  threads: '#000000',
+                  youtube: '#FF0000',
+                  x: '#000000',
+                  twitter: '#1DA1F2',
+                };
+                const bgColor = brandColors[pLower] || APP_COLORS.primary;
+
+                return (
+                  <TouchableOpacity
+                    key={item.platform}
+                    style={[styles.openPlatformBtn, { backgroundColor: bgColor }]}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      Linking.openURL(item.url).catch(err =>
+                        console.error('Could not open URL', err),
+                      );
+                    }}>
+                    <ExternalLink size={16} color="#fff" />
+                    <Text style={styles.openPlatformBtnText}>
+                      {item.platform}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Analytics Section (Only for Published Posts) */}
         {isPublished && (
@@ -1665,5 +1742,36 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  }
+  },
+  openPlatformCard: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+    elevation: 4,
+    marginBottom: 24,
+  },
+  openPlatformButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 14,
+  },
+  openPlatformBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 50,
+  },
+  openPlatformBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
 });
