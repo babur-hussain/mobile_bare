@@ -65,10 +65,16 @@ export const googleLoginUser = createAsyncThunk(
     dispatch(setAuthLoading(true));
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      
       const response = await GoogleSignin.signIn();
+      
+      if (response.type === 'cancelled') {
+        throw new Error('User cancelled log in process');
+      }
+
       const idToken = response.data?.idToken;
       if (!idToken) {
-        throw new Error('No ID token obtained from Google');
+        throw new Error('No ID token obtained from Google. Response: ' + JSON.stringify(response.data || response));
       }
 
       const googleCredential = GoogleAuthProvider.credential(idToken);
