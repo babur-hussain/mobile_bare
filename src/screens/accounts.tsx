@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,11 @@ import {
   Platform,
   Linking,
   RefreshControl,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  AppState,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
@@ -24,15 +29,22 @@ import {
   Instagram,
   Youtube,
   Twitter,
+  CheckCircle,
+  Clock,
+  ExternalLink,
 } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootState, AppDispatch } from '../store';
 import {
   fetchAllAccounts,
   disconnectSocialAccount,
 } from '../store/actions/accounts.actions';
 import { socialService } from '../services/social.service';
+import { betaService } from '../services/beta.service';
+
+const getBetaStatusKey = (userId: string) => `@postonce_beta_status_${userId}`;
 
 const APP_COLORS = {
   primary: '#5341cd',
@@ -64,12 +76,214 @@ export default function AccountsScreen() {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
 
+  const [isBetaModalVisible, setIsBetaModalVisible] = useState(false);
+  const [betaStatus, setBetaStatus] = useState<'none' | 'pending' | 'approved'>('none');
+  const [isSubmittingBeta, setIsSubmittingBeta] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [hasOpenedInvite, setHasOpenedInvite] = useState(false);
+  const [hasThreadsUrl, setHasThreadsUrl] = useState(false);
+  const [betaForm, setBetaForm] = useState({
+    instagramUrl: '',
+    facebookUrl: '',
+    threadsUrl: '',
+  });
+
+  const submitBetaRequest = async () => {
+    try {
+      const payload: any = {};
+
+      const instagram = betaForm.instagramUrl.trim();
+      const facebook = betaForm.facebookUrl.trim();
+      const threads = betaForm.threadsUrl.trim();
+
+      if (!instagram && !facebook && !threads) {
+        Alert.alert('Submission Error', 'Please provide at least one profile URL.');
+        return;
+      }
+
+      if (instagram) payload.instagramUrl = instagram;
+      if (facebook) payload.facebookUrl = facebook;
+      if (threads) payload.threadsUrl = threads;
+
+      setIsSubmittingBeta(true);
+      await betaService.submitBetaRequest(payload);
+      // Persist to AsyncStorage + update state immediately
+      if (user?.id) await AsyncStorage.setItem(getBetaStatusKey(user.id), 'pending');
+      setBetaStatus('pending');
+      setIsBetaModalVisible(false);
+      Alert.alert('Success', 'Your beta request has been submitted successfully!');
+      setBetaForm({ instagramUrl: '', facebookUrl: '', threadsUrl: '' });
+    } catch (error: any) {
+      // Handle duplicate submission (409 Conflict) — user already submitted
+      if (error?.response?.status === 409) {
+        if (user?.id) await AsyncStorage.setItem(getBetaStatusKey(user.id), 'pending');
+        setBetaStatus('pending');
+        setIsBetaModalVisible(false);
+        Alert.alert('Already Submitted', 'You have already submitted a beta request. Please wait for approval.');
+        return;
+      }
+      let message = error?.response?.data?.message || 'Failed to submit beta request.';
+      if (Array.isArray(message)) {
+        message = message.join('\n');
+      } else if (typeof message !== 'string') {
+        message = JSON.stringify(message);
+      }
+      Alert.alert('Submission Error', message);
+    } finally {
+      setIsSubmittingBeta(false);
+    }
+  };
+
+  // Helper to update beta status in both state and AsyncStorage
+  const updateBetaStatus = async (newStatus: 'none' | 'pending' | 'approved') => {
+    setBetaStatus(newStatus);
+    if (user?.id) await AsyncStorage.setItem(getBetaStatusKey(user.id), newStatus);
+  };
+
+  // Fetch beta status from the API and cache it
+  const fetchBetaStatus = async () => {
+    try {
+      const result = await betaService.checkBetaStatus();
+      const status = result?.status;
+      setHasThreadsUrl(!!result?.threadsUrl);
+      // Only update if API returned a valid status string
+      if (status === 'none' || status === 'pending' || status === 'approved') {
+        await updateBetaStatus(status);
+      }
+    } catch (error) {
+      // API failed — don't reset, keep whatever we have cached
+      console.log('[BetaStatus] API check failed:', error);
+    }
+  };
+
+  // On mount or user change: load cached status, then verify with API
   useEffect(() => {
     dispatch(fetchAllAccounts());
-  }, []);
+
+    // Reset state for the current user (prevents stale data from previous account)
+    setBetaStatus('none');
+    setHasOpenedInvite(false);
+    setIsCheckingStatus(true);
+
+    const init = async () => {
+      try {
+        // 1. Load cached status for instant UI (no network wait)
+        const cached = user?.id ? await AsyncStorage.getItem(getBetaStatusKey(user.id)) : null;
+        if (cached === 'pending' || cached === 'approved') {
+          setBetaStatus(cached);
+        }
+        // Load hasOpenedInvite from AsyncStorage
+        if (user?.id) {
+          const opened = await AsyncStorage.getItem(`@postonce_invite_opened_${user.id}`);
+          if (opened === 'true') setHasOpenedInvite(true);
+        }
+        // 2. Verify with API (now reads from MongoDB — fast & reliable)
+        await fetchBetaStatus();
+      } catch (error) {
+        console.log('[BetaStatus] Init error:', error);
+      } finally {
+        setIsCheckingStatus(false);
+      }
+    };
+    init();
+  }, [user?.id]);
+
+  // Poll for beta status every 30 seconds when pending
+  useEffect(() => {
+    if (betaStatus !== 'pending') return;
+
+    const interval = setInterval(() => fetchBetaStatus(), 30000);
+    return () => clearInterval(interval);
+  }, [betaStatus]);
+
+  // Also re-check on app foregrounding when pending
+  useEffect(() => {
+    if (betaStatus !== 'pending') return;
+
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        fetchBetaStatus();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [betaStatus]);
 
   const onRefresh = () => {
     dispatch(fetchAllAccounts());
+    fetchBetaStatus();
+  };
+
+  // Open Instagram manage access page in in-app browser (same style as connect account)
+  const handleAcceptTesterInvite = async () => {
+    const url = 'https://www.instagram.com/accounts/manage_access/';
+    try {
+      if (await InAppBrowser.isAvailable()) {
+        if (Platform.OS === 'android') {
+          await InAppBrowser.open(url, {
+            showTitle: true,
+            enableUrlBarHiding: true,
+            enableDefaultShare: false,
+          });
+        } else {
+          await InAppBrowser.openAuth(
+            url,
+            'postingautomation://',
+            {
+              ephemeralWebSession: false,
+              showTitle: true,
+              enableUrlBarHiding: true,
+              enableDefaultShare: false,
+            },
+          );
+        }
+      } else {
+        await Linking.openURL(url);
+      }
+      // Mark invite as opened — collapse the card next time
+      setHasOpenedInvite(true);
+      if (user?.id) {
+        await AsyncStorage.setItem(`@postonce_invite_opened_${user.id}`, 'true');
+      }
+    } catch (error) {
+      console.error('[AcceptInvite] Error opening browser:', error);
+      Alert.alert('Error', 'Could not open the browser. Please try again.');
+    }
+  };
+
+  const handleAcceptThreadsTesterInvite = async () => {
+    const url = 'https://www.threads.com/settings/website_permissions';
+    try {
+      if (await InAppBrowser.isAvailable()) {
+        if (Platform.OS === 'android') {
+          await InAppBrowser.open(url, {
+            showTitle: true,
+            enableUrlBarHiding: true,
+            enableDefaultShare: false,
+          });
+        } else {
+          await InAppBrowser.openAuth(
+            url,
+            'postingautomation://',
+            {
+              ephemeralWebSession: false,
+              showTitle: true,
+              enableUrlBarHiding: true,
+              enableDefaultShare: false,
+            },
+          );
+        }
+      } else {
+        await Linking.openURL(url);
+      }
+      setHasOpenedInvite(true);
+      if (user?.id) {
+        await AsyncStorage.setItem(`@postonce_invite_opened_${user.id}`, 'true');
+      }
+    } catch (error) {
+      console.error('[AcceptInvite] Error opening browser:', error);
+      Alert.alert('Error', 'Could not open the browser. Please try again.');
+    }
   };
 
   const getInitials = () => {
@@ -88,6 +302,11 @@ export default function AccountsScreen() {
     (event: { url: string }) => {
       const url = event.url;
       if (url.startsWith('postingautomation://social-auth-callback')) {
+        // Close the browser on Android since we're using standard .open() there to prevent crashes
+        if (Platform.OS === 'android') {
+          InAppBrowser.close();
+        }
+
         // Parse query params manually (Hermes doesn't support URLSearchParams.get)
         const rawQueryString = url.split('?')[1] || '';
         const queryString = rawQueryString.split('#')[0]; // Strip hash fragments like #_
@@ -159,21 +378,31 @@ export default function AccountsScreen() {
       }
 
       if (await InAppBrowser.isAvailable()) {
-        const result = await InAppBrowser.openAuth(
-          url,
-          'postingautomation://',
-          {
-            ephemeralWebSession: false, // Keep browser session/cookies for smoother login
+        if (Platform.OS === 'android') {
+          // Use open() on Android — openAuth() crashes due to redirect activity issues
+          // Deep link callback is handled by Linking event listener
+          await InAppBrowser.open(url, {
             showTitle: true,
             enableUrlBarHiding: true,
             enableDefaultShare: false,
-          },
-        );
+          });
+        } else {
+          const result = await InAppBrowser.openAuth(
+            url,
+            'postingautomation://',
+            {
+              ephemeralWebSession: false, // Keep browser session/cookies for smoother login
+              showTitle: true,
+              enableUrlBarHiding: true,
+              enableDefaultShare: false,
+            },
+          );
 
-        if (result.type === 'success' && result.url) {
-          handleDeepLink({ url: result.url });
-        } else if (result.type === 'cancel') {
-          console.log('[SocialConnect] User cancelled OAuth flow');
+          if (result.type === 'success' && result.url) {
+            handleDeepLink({ url: result.url });
+          } else if (result.type === 'cancel') {
+            console.log('[SocialConnect] User cancelled OAuth flow');
+          }
         }
       } else {
         await Linking.openURL(url);
@@ -248,6 +477,139 @@ export default function AccountsScreen() {
             tintColor={APP_COLORS.primary}
           />
         }>
+        {/* Beta Status */}
+        {betaStatus === 'approved' ? (
+          <>
+            {hasOpenedInvite ? (
+              /* Collapsed: Invite was already opened — show compact approved banner with small button */
+              <View style={[styles.betaBanner, styles.betaBannerApproved]}>
+                <View style={styles.betaBannerContent}>
+                  <View style={styles.betaStatusRow}>
+                    <CheckCircle size={18} color={APP_COLORS.success} />
+                    <Text style={[styles.betaBannerTitle, { color: APP_COLORS.success }]}>Approved</Text>
+                  </View>
+                  <Text style={[styles.betaBannerDesc, { color: '#059669' }]}>
+                    Beta access active.
+                  </Text>
+                </View>
+                <View style={{ gap: 8, alignItems: 'flex-start' }}>
+                  <TouchableOpacity
+                    style={styles.bannerInviteButton}
+                    activeOpacity={0.8}
+                    onPress={handleAcceptTesterInvite}>
+                    <Instagram size={14} color={APP_COLORS.onPrimary} />
+                    <Text style={styles.bannerInviteButtonText}>Instagram Invite</Text>
+                  </TouchableOpacity>
+                  {hasThreadsUrl && (
+                    <TouchableOpacity
+                      style={styles.bannerInviteButton}
+                      activeOpacity={0.8}
+                      onPress={handleAcceptThreadsTesterInvite}>
+                      <AtSign size={14} color={APP_COLORS.onPrimary} />
+                      <Text style={styles.bannerInviteButtonText}>Threads Invite</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            ) : (
+              /* Full view: First time — show approved banner + full green tester invite card */
+              <>
+                <View style={[styles.betaBanner, styles.betaBannerApproved]}>
+                  <View style={styles.betaBannerContent}>
+                    <View style={styles.betaStatusRow}>
+                      <CheckCircle size={18} color={APP_COLORS.success} />
+                      <Text style={[styles.betaBannerTitle, { color: APP_COLORS.success }]}>Approved</Text>
+                    </View>
+                    <Text style={[styles.betaBannerDesc, { color: '#059669' }]}>
+                      Your beta access has been approved! Accept the tester invite below.
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Accept Tester Invite Card — Green themed */}
+                <View style={styles.testerInviteCard}>
+                  <View style={styles.testerInviteHeader}>
+                    <View style={styles.testerInviteIconBox}>
+                      <Instagram size={28} color={APP_COLORS.success} />
+                    </View>
+                    <View style={styles.testerInviteInfo}>
+                      <Text style={styles.testerInviteTitle}>Accept Tester Invitation</Text>
+                      <Text style={[styles.testerInvitePlatform, { color: APP_COLORS.success }]}>Instagram</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.testerInviteDesc}>
+                    Tap below to accept the tester invite on Instagram. Make sure you're logged into your Instagram account.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.acceptInviteButton}
+                    activeOpacity={0.8}
+                    onPress={handleAcceptTesterInvite}>
+                    <Instagram size={18} color={APP_COLORS.onPrimary} />
+                    <Text style={styles.acceptInviteButtonText}>Accept Invite</Text>
+                    <ExternalLink size={16} color={APP_COLORS.onPrimary} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Accept Tester Invite Card — Threads */}
+                {hasThreadsUrl && (
+                  <View style={[styles.testerInviteCard, { marginTop: 16 }]}>
+                    <View style={styles.testerInviteHeader}>
+                      <View style={styles.testerInviteIconBox}>
+                        <AtSign size={28} color={APP_COLORS.success} />
+                      </View>
+                      <View style={styles.testerInviteInfo}>
+                        <Text style={styles.testerInviteTitle}>Accept Tester Invitation</Text>
+                        <Text style={[styles.testerInvitePlatform, { color: APP_COLORS.success }]}>Threads</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.testerInviteDesc}>
+                      Tap below to accept the tester invite on Threads. Make sure you're logged into your Threads account.
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.acceptInviteButton}
+                      activeOpacity={0.8}
+                      onPress={handleAcceptThreadsTesterInvite}>
+                      <AtSign size={18} color={APP_COLORS.onPrimary} />
+                      <Text style={styles.acceptInviteButtonText}>Accept Invite</Text>
+                      <ExternalLink size={16} color={APP_COLORS.onPrimary} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </>
+            )}
+          </>
+        ) : betaStatus === 'pending' ? (
+          <View style={[styles.betaBanner, styles.betaBannerPending]}>
+            <View style={styles.betaBannerContent}>
+              <View style={styles.betaStatusRow}>
+                <CheckCircle size={18} color={APP_COLORS.success} />
+                <Text style={[styles.betaBannerTitle, { color: APP_COLORS.success }]}>Submitted</Text>
+              </View>
+              <View style={styles.betaWaitRow}>
+                <Clock size={14} color="#059669" />
+                <Text style={[styles.betaBannerDesc, { color: '#059669' }]}>
+                  Please wait, it may take up to 30 minutes to get approved.
+                </Text>
+              </View>
+            </View>
+          </View>
+        ) : !isCheckingStatus ? (
+          <View style={styles.betaBanner}>
+            <View style={styles.betaBannerContent}>
+              <Text style={styles.betaBannerTitle}>Welcome to the beta!</Text>
+              <Text style={styles.betaBannerDesc}>
+                Get early access by filling out our preview form.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.betaBannerButton}
+              activeOpacity={0.8}
+              onPress={() => setIsBetaModalVisible(true)}>
+              <Text style={styles.betaBannerButtonText}>Fill Form</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         {/* Header Section */}
         <View style={styles.heroSection}>
           <Text style={styles.title}>Connected Pages</Text>
@@ -828,12 +1190,76 @@ export default function AccountsScreen() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={[styles.fab, { bottom: Platform.OS === 'ios' ? 100 : 96 }]}
-        activeOpacity={0.8}>
-        <Plus size={32} color={APP_COLORS.onPrimary} />
-      </TouchableOpacity>
+      {/* Beta Access Modal */}
+      <Modal
+        visible={isBetaModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsBetaModalVisible(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Beta Access Form</Text>
+              <TouchableOpacity onPress={() => setIsBetaModalVisible(false)}>
+                <Text style={styles.modalCloseText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.modalDesc}>
+                Please provide the URLs for the profiles you plan to use with PostOnce. This helps us grant you access.
+              </Text>
+
+              <Text style={styles.inputLabel}>Instagram Profile URL</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="https://instagram.com/yourprofile"
+                placeholderTextColor={APP_COLORS.outlineVariant}
+                value={betaForm.instagramUrl}
+                onChangeText={(text) => setBetaForm(prev => ({ ...prev, instagramUrl: text }))}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <Text style={styles.inputLabel}>Facebook Profile URL</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="https://facebook.com/yourprofile"
+                placeholderTextColor={APP_COLORS.outlineVariant}
+                value={betaForm.facebookUrl}
+                onChangeText={(text) => setBetaForm(prev => ({ ...prev, facebookUrl: text }))}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <Text style={styles.inputLabel}>Threads Profile URL</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="https://threads.net/@yourprofile"
+                placeholderTextColor={APP_COLORS.outlineVariant}
+                value={betaForm.threadsUrl}
+                onChangeText={(text) => setBetaForm(prev => ({ ...prev, threadsUrl: text }))}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <TouchableOpacity
+                style={[styles.submitButton, isSubmittingBeta && styles.submitButtonDisabled]}
+                onPress={submitBetaRequest}
+                disabled={isSubmittingBeta}
+              >
+                {isSubmittingBeta ? (
+                  <ActivityIndicator color={APP_COLORS.onPrimary} />
+                ) : (
+                  <Text style={styles.submitButtonText}>Submit Request</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -1130,5 +1556,214 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
     zIndex: 100,
+  },
+  betaBanner: {
+    backgroundColor: APP_COLORS.primaryContainer,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  betaBannerContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  betaBannerTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: APP_COLORS.onPrimaryContainer,
+    marginBottom: 4,
+  },
+  betaBannerDesc: {
+    fontSize: 13,
+    color: '#e0dafa',
+    lineHeight: 18,
+  },
+  betaBannerButton: {
+    backgroundColor: APP_COLORS.onPrimaryContainer,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  betaBannerButtonText: {
+    color: APP_COLORS.primaryContainer,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: APP_COLORS.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    minHeight: '60%',
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: APP_COLORS.outlineVariant,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: APP_COLORS.onSurface,
+  },
+  modalCloseText: {
+    fontSize: 15,
+    color: APP_COLORS.primary,
+    fontWeight: '600',
+  },
+  modalBody: {
+    padding: 24,
+  },
+  modalDesc: {
+    fontSize: 14,
+    color: APP_COLORS.onSurfaceVariant,
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: APP_COLORS.onSurface,
+    marginBottom: 8,
+  },
+  inputField: {
+    backgroundColor: APP_COLORS.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: APP_COLORS.outlineVariant,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: APP_COLORS.onSurface,
+    marginBottom: 16,
+  },
+  submitButton: {
+    backgroundColor: APP_COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: APP_COLORS.onPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  betaBannerPending: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  betaBannerApproved: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  betaStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  betaWaitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  testerInviteCard: {
+    backgroundColor: 'rgba(16, 185, 129, 0.06)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+    shadowColor: APP_COLORS.success,
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
+  testerInviteHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 12,
+  },
+  testerInviteIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  testerInviteInfo: {
+    flex: 1,
+  },
+  testerInviteTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: APP_COLORS.onSurface,
+    marginBottom: 2,
+  },
+  testerInvitePlatform: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: APP_COLORS.onSurfaceVariant,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  testerInviteDesc: {
+    fontSize: 13,
+    color: '#059669',
+    lineHeight: 19,
+    marginBottom: 16,
+  },
+  acceptInviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: APP_COLORS.success,
+    paddingVertical: 14,
+    borderRadius: 14,
+    shadowColor: APP_COLORS.success,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  acceptInviteButtonText: {
+    color: APP_COLORS.onPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  bannerInviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: APP_COLORS.success,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  bannerInviteButtonText: {
+    color: APP_COLORS.onPrimary,
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

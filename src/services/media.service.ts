@@ -13,6 +13,7 @@ export const mediaService = {
   async upload(
     asset: Asset,
     onUploadProgress?: (progressEvent: any) => void,
+    signal?: AbortSignal,
   ): Promise<MediaItem> {
     const formData = new FormData();
 
@@ -31,11 +32,16 @@ export const mediaService = {
         headers: {'Content-Type': 'multipart/form-data'},
         timeout: 120000, // 2 min for large files
         onUploadProgress,
+        signal,
       });
       return response.data.data;
     } catch (e: any) {
-      const errMsg = e.response?.data?.message || e.message;
-      console.error('[MediaService] Upload failed:', errMsg);
+      if (e.name === 'CanceledError' || e.code === 'ERR_CANCELED') {
+        console.log('[MediaService] Upload cancelled');
+      } else {
+        const errMsg = e.response?.data?.message || e.message;
+        console.error('[MediaService] Upload failed:', errMsg);
+      }
       throw e;
     }
   },
@@ -45,6 +51,7 @@ export const mediaService = {
     filePath: string,
     mimeType = 'image/jpeg',
     onUploadProgress?: (progressEvent: any) => void,
+    signal?: AbortSignal,
   ): Promise<MediaItem> {
     const formData = new FormData();
     const filename = filePath.split('/').pop() || 'thumbnail.jpg';
@@ -54,10 +61,15 @@ export const mediaService = {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 60000,
         onUploadProgress,
+        signal,
       });
       return response.data.data;
     } catch (e: any) {
-      console.error('[MediaService] Thumbnail upload failed:', e?.response?.data?.message || e.message);
+      if (e.name === 'CanceledError' || e.code === 'ERR_CANCELED') {
+        console.log('[MediaService] Thumbnail upload cancelled');
+      } else {
+        console.error('[MediaService] Thumbnail upload failed:', e?.response?.data?.message || e.message);
+      }
       throw e;
     }
   },

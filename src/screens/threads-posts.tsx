@@ -342,24 +342,77 @@ export default function ThreadsPostsScreen() {
           </View>
         )}
 
-        {/* Account Analytics Row */}
+        {/* Account Analytics Dashboard */}
         {accountAnalyticsLoading ? (
           <ActivityIndicator size="small" color={APP_COLORS.primary} style={{ marginVertical: 16 }} />
-        ) : renderAnalytics.length > 0 ? (
+        ) : accountAnalytics ? (
           <View style={styles.analyticsSection}>
-            <Text style={styles.analyticsSectionTitle}>ACCOUNT ANALYTICS</Text>
-            {accountAnalytics?.category && (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ fontSize: 13, color: APP_COLORS.primary, fontWeight: '600', textTransform: 'uppercase' }}>{accountAnalytics.category}</Text>
-              </View>
-            )}
+            <Text style={styles.analyticsSectionTitle}>ACCOUNT INSIGHTS 📊</Text>
             <View style={styles.analyticsStatsGrid}>
-              {renderAnalytics.map(([key, val]) => (
-                <View key={key} style={styles.analyticsStatCard}>
-                  <Text style={styles.analyticsStatValue}>{(val as number).toLocaleString()}</Text>
-                  <Text style={styles.analyticsStatLabel}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</Text>
+
+              {/* Followers */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Users size={16} color="#27ae60" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Followers</Text>
                 </View>
-              ))}
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.followers || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Total Threads */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <AtSign size={16} color="#000" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Total Threads</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_threads || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Views */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Eye size={16} color="#3498db" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Views</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_views || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Likes */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Heart size={16} color="#e74c3c" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Likes</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_likes || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Replies */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <MessageCircle size={16} color="#8e44ad" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Replies</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_replies || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Reposts */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Share2 size={16} color="#f39c12" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Reposts</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_reposts || 0).toLocaleString()}</Text>
+              </View>
+
+              {/* Quotes */}
+              <View style={styles.analyticsStatCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <ExternalLink size={16} color="#16a085" />
+                  <Text style={[styles.analyticsStatLabel, { marginTop: 0, marginLeft: 6 }]}>Quotes</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_quotes || 0).toLocaleString()}</Text>
+              </View>
+
             </View>
           </View>
         ) : null}

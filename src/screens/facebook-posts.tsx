@@ -414,6 +414,29 @@ export default function FacebookPostsScreen() {
                 <Text style={styles.analyticsStatValue}>{(accountAnalytics?.page_posts_impressions_unique || 0).toLocaleString()}</Text>
               </View>
 
+              {/* Aggregated Post Stats (shown when available from post-level fallback) */}
+              <View style={styles.analyticsStatCard}>
+                <View style={styles.analyticsStatHeaderRow}>
+                  <Heart size={16} color="#e74c3c" />
+                  <Text style={styles.analyticsStatLabel}>Total Likes</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_likes || 0).toLocaleString()}</Text>
+              </View>
+              <View style={styles.analyticsStatCard}>
+                <View style={styles.analyticsStatHeaderRow}>
+                  <MessageCircle size={16} color="#3498db" />
+                  <Text style={styles.analyticsStatLabel}>Total Comments</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_comments || 0).toLocaleString()}</Text>
+              </View>
+              <View style={styles.analyticsStatCard}>
+                <View style={styles.analyticsStatHeaderRow}>
+                  <Share2 size={16} color="#f39c12" />
+                  <Text style={styles.analyticsStatLabel}>Total Shares</Text>
+                </View>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.total_shares || 0).toLocaleString()}</Text>
+              </View>
+
               {/* Follows */}
               <View style={styles.analyticsStatCard}>
                 <View style={styles.analyticsStatHeaderRow}>

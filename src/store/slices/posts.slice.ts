@@ -1,9 +1,10 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Post {
   _id: string;
   caption: string;
   mediaUrl: string | null;
+  thumbnailUrl?: string | null;
   platforms: string[];
   status: 'pending' | 'processing' | 'published' | 'failed';
   scheduledTime: string | null;

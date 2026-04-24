@@ -382,7 +382,7 @@ export default function InstagramPostsScreen() {
                   <Eye size={16} color="#3498db" />
                   <Text style={styles.analyticsStatLabel}>Views</Text>
                 </View>
-                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.views || 0).toLocaleString()}</Text>
+                <Text style={styles.analyticsStatValue}>{(accountAnalytics?.lifetime_views || accountAnalytics?.views || 0).toLocaleString()}</Text>
               </View>
 
               {/* Engagement Core */}

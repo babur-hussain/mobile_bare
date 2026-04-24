@@ -107,6 +107,7 @@ export default function PostDetails() {
   const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<any | null>(null);
   const [deletingPlatform, setDeletingPlatform] = useState<string | null>(null);
+  const [deletedPlatforms, setDeletedPlatforms] = useState<Set<string>>(new Set());
 
   const dispatch = useDispatch();
   const [isDeletingAll, setIsDeletingAll] = useState(false);
@@ -306,11 +307,15 @@ export default function PostDetails() {
   }, [post?._id, isPublished, post?.platforms]);
 
   const platformList = useMemo(() => {
+    let list: string[] = [];
     if (post.publishResults && Array.isArray(post.publishResults) && post.publishResults.some((r: any) => r.success)) {
-      return post.publishResults.filter((r: any) => r.success).map((r: any) => r.platform);
+      list = post.publishResults.filter((r: any) => r.success).map((r: any) => r.platform);
+    } else {
+      list = post.platforms && Array.isArray(post.platforms) ? post.platforms : [];
     }
-    return post.platforms && Array.isArray(post.platforms) ? post.platforms : [];
-  }, [post.publishResults, post.platforms]);
+    // Exclude platforms the user already deleted in this session
+    return list.filter((p: string) => !deletedPlatforms.has(p.toLowerCase()));
+  }, [post.publishResults, post.platforms, deletedPlatforms]);
 
   // Build list of successfully published platforms with their post URLs
   const publishedPlatformLinks = useMemo(() => {
@@ -348,8 +353,8 @@ export default function PostDetails() {
 
         return { platform: r.platform, url };
       })
-      .filter((item: any) => item.url !== null);
-  }, [post.publishResults]);
+      .filter((item: any) => item.url !== null && !deletedPlatforms.has((item.platform || '').toLowerCase()));
+  }, [post.publishResults, deletedPlatforms]);
 
   const displayAnalytics = useMemo(() => platformList.map((platformName: string) => {
     const actual = analytics.find(
@@ -924,6 +929,8 @@ export default function PostDetails() {
                                 await postsService.deleteThreads(post._id);
                               }
                               setDeletingPlatform(null);
+                              // Track this platform as deleted so the button hides immediately
+                              setDeletedPlatforms(prev => new Set(prev).add(platformLower));
 
                               // Check if we just deleted the LAST platform
                               const remainingPlatforms = platformList.filter((p: string) => p.toLowerCase() !== platformLower);

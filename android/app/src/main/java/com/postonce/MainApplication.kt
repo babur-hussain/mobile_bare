@@ -1,4 +1,4 @@
-package com.postingautomation
+package com.postonce
 
 import android.app.Application
 import com.facebook.react.PackageList

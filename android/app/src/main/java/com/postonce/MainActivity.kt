@@ -1,4 +1,4 @@
-package com.postingautomation
+package com.postonce
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

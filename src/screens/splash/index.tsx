@@ -1,10 +1,11 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Animated,
   ImageBackground,
+  Image,
   Dimensions,
   Platform,
 } from 'react-native';
@@ -32,19 +33,20 @@ import {
   Send,
   Check,
 } from 'lucide-react-native';
-import {Colors} from '../../constants/colors';
+import { Colors } from '../../constants/colors';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-// Colors extracted from HTML
+// Colors — Exact Light Orange Theme from image
 const CUSTOM_COLORS = {
-  primary: '#5341cd',
-  secondary: '#0058bd',
-  tertiary: '#b2004b',
-  onBackground: '#1c1b1b',
-  onSurfaceVariant: '#474554',
+  primary: '#ff6700',        // Vibrant orange
+  secondary: '#ff9248',      // Medium orange
+  tertiary: '#ffb38a',       // Light orange
+  onBackground: '#431407',   // Deep brown for contrast
+  onSurfaceVariant: '#7C3D12',
   onPrimary: '#ffffff',
-  surface: '#fcf9f8',
+  surface: '#ffd7b5',        // Lightest orange (background)
+  surfaceDeep: '#ffb38a',    // Deeper orange for contrast
 };
 
 const SplashScreen = () => {
@@ -95,12 +97,7 @@ const SplashScreen = () => {
   }, [floatAnim, pulseAnim1, pulseAnim2, pulseAnim3]);
 
   return (
-    <ImageBackground
-      source={{
-        uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDj8ZrasD9DHXVWRRQPI3PAXlIXwIaUAk2S6zlmJUcvJxklb_se2p7ttiNMnuAzvMigOEFLOPqMPOMBW-lJHYMvYZ0LecXd8tMXnuufQnBj0TW6aRERAJwPE16THRp8fPJmGKFwJqYouy1KwvrGNddSe_CUrMJ4AvPKu2YTCfLPlOTetA2FdqBM-4wA4npUR0_KLlWbPzlqyn9hpFcJESXgxekdpllGAY-avPbBeNeB6bpN26wacAiaDzlgTHynM4aHGozDZKc3IO8x',
-      }}
-      style={styles.backgroundImage}
-      resizeMode="cover">
+    <View style={styles.backgroundImage}>
       {/* Subtle Glass Overlays (Simulated via translucent layer) */}
       <View style={styles.glassOverlay} />
 
@@ -113,22 +110,12 @@ const SplashScreen = () => {
         <Animated.View
           style={[
             styles.logoContainer,
-            {transform: [{translateY: floatAnim}]},
+            { transform: [{ translateY: floatAnim }] },
           ]}>
-          <ImageBackground
-            source={{
-              // Simple gradient fallback using base64 or a small image is ideal,
-              // but we are using styling over image to simulate gradient container for now,
-              // or using an image from the prompt to substitute the mesh gradient logomark.
-              uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvikKCF7RmH3aoMS2B0cE7gGJ4LKEp2FJ7rxJ7009h-M2U5N8LIdggrJmqnFUFPo-OcOBjiO-zdE2AeJ8caOzyT5VMLs48DjQiBQyi5nUhDfEhqNOS1sLe_RdYwkHuUTUlLW32RZCtWdTbC-Usmr0YObJJZf3MLudA-0iaeyvVL_FVHAvY2jGaaHM3YoMYZ9V1gHY8UEkUX6FzZCPpdvCUZzmN40vWahsyeBlUD68ExBZVT1Q19l6PTuEZnLM5Kmre90jFAuAz9BK9',
-            }}
-            style={styles.logoBackground}
-            imageStyle={styles.logoImageStyle}>
-            {/* If we strictly need the Material symbol inside the gradient block */}
-            <View style={styles.logoInner}>
-              <Send size={40} color={CUSTOM_COLORS.onPrimary} />
-            </View>
-          </ImageBackground>
+          <Image
+            source={require('../../Logos/PostOnce_AppIcon.jpg')}
+            style={styles.logoImageStyle}
+          />
         </Animated.View>
 
         {/* Brand Name */}
@@ -142,7 +129,7 @@ const SplashScreen = () => {
           <Animated.View
             style={[
               styles.loadingDot,
-              {backgroundColor: CUSTOM_COLORS.primary, opacity: pulseAnim1},
+              { backgroundColor: CUSTOM_COLORS.primary, opacity: pulseAnim1 },
               {
                 transform: [
                   {
@@ -158,7 +145,7 @@ const SplashScreen = () => {
           <Animated.View
             style={[
               styles.loadingDot,
-              {backgroundColor: CUSTOM_COLORS.secondary, opacity: pulseAnim2},
+              { backgroundColor: CUSTOM_COLORS.secondary, opacity: pulseAnim2 },
               {
                 transform: [
                   {
@@ -174,7 +161,7 @@ const SplashScreen = () => {
           <Animated.View
             style={[
               styles.loadingDot,
-              {backgroundColor: CUSTOM_COLORS.tertiary, opacity: pulseAnim3},
+              { backgroundColor: CUSTOM_COLORS.tertiary, opacity: pulseAnim3 },
               {
                 transform: [
                   {
@@ -190,11 +177,8 @@ const SplashScreen = () => {
         </View>
       </View>
 
-      {/* Bottom Footer Credit */}
-      <View style={styles.footerContainer}>
-        <Text style={styles.footerText}>EDITORIAL STUDIO V1.0</Text>
-      </View>
-    </ImageBackground>
+
+    </View>
   );
 };
 
@@ -205,27 +189,27 @@ const styles = StyleSheet.create({
     height: height,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: CUSTOM_COLORS.surface,
+    backgroundColor: '#ffd7b5',   // exact palette: lightest orange
   },
   glassOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(252, 249, 248, 0.4)', // surface/40
+    backgroundColor: 'transparent', // no tint — use pure palette colors
   },
   decorativeCircle: {
     position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
+    width: 340,
+    height: 340,
+    borderRadius: 170,
   },
   circleTopLeft: {
-    top: -80,
-    left: -80,
-    backgroundColor: 'rgba(83, 65, 205, 0.2)', // primary/20
+    top: -90,
+    left: -90,
+    backgroundColor: '#ffb38a',   // exact palette: light orange
   },
   circleBottomRight: {
-    bottom: -80,
-    right: -80,
-    backgroundColor: 'rgba(178, 0, 75, 0.2)', // tertiary/20
+    bottom: -90,
+    right: -90,
+    backgroundColor: '#ff9248',   // exact palette: medium orange
   },
   contentContainer: {
     flex: 1,
@@ -245,13 +229,9 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
-  logoBackground: {
+  logoImageStyle: {
     width: 96,
     height: 96,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoImageStyle: {
     borderRadius: 32,
   },
   logoInner: {
@@ -262,6 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0)', // Ensure transparent inner mostly
   },
   brandTitle: {
+    fontFamily: 'Nano Banana Pro',
     fontSize: Platform.OS === 'ios' ? 48 : 40,
     fontWeight: '800',
     color: CUSTOM_COLORS.onBackground,
@@ -269,6 +250,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   tagline: {
+    fontFamily: 'Nano Banana Pro',
     fontSize: 14,
     fontWeight: '600',
     color: CUSTOM_COLORS.onSurfaceVariant,

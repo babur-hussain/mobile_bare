@@ -7,17 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:208100625363:android:4f34328b85006f29cdbd26",
+        "mobilesdk_app_id": "1:208100625363:android:c609029e70492a20cdbd26",
         "android_client_info": {
-          "package_name": "com.postingautomation"
+          "package_name": "com.postonce"
         }
       },
       "oauth_client": [
         {
-          "client_id": "208100625363-qecn9c57i55uomv4d4l98oa72tpv997l.apps.googleusercontent.com",
+          "client_id": "208100625363-npf8uh1mb135vl5sqbe7cjnldtbe1gis.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.postingautomation",
+            "package_name": "com.postonce",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "208100625363-ppo43fpm8j3j9dfjfd09bqqkm0bkeqjm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.postonce",
             "certificate_hash": "9ab05ae20b22a7d8c2baf84eac09ecf62a627616"
           }
         },

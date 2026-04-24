@@ -1,0 +1,1763 @@
+diff --git a/node_modules/react-native-screens/android/.classpath b/node_modules/react-native-screens/android/.classpath
+new file mode 100644
+index 0000000..bbe97e5
+--- /dev/null
++++ b/node_modules/react-native-screens/android/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17/"/>
++	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
++	<classpathentry kind="output" path="bin/default"/>
++</classpath>
+diff --git a/node_modules/react-native-screens/android/.project b/node_modules/react-native-screens/android/.project
+new file mode 100644
+index 0000000..e036954
+--- /dev/null
++++ b/node_modules/react-native-screens/android/.project
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>react-native-screens</name>
++	<comment>Project react-native-screens created by Buildship.</comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++		<buildCommand>
++			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
++		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
++	</natures>
++	<filteredResources>
++		<filter>
++			<id>1775058429942</id>
++			<name></name>
++			<type>30</type>
++			<matcher>
++				<id>org.eclipse.core.resources.regexFilterMatcher</id>
++				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
++			</matcher>
++		</filter>
++	</filteredResources>
++</projectDescription>
+diff --git a/node_modules/react-native-screens/android/.settings/org.eclipse.buildship.core.prefs b/node_modules/react-native-screens/android/.settings/org.eclipse.buildship.core.prefs
+new file mode 100644
+index 0000000..1675490
+--- /dev/null
++++ b/node_modules/react-native-screens/android/.settings/org.eclipse.buildship.core.prefs
+@@ -0,0 +1,2 @@
++connection.project.dir=../../../android
++eclipse.preferences.version=1
+diff --git a/node_modules/react-native-screens/android/.settings/org.eclipse.jdt.core.prefs b/node_modules/react-native-screens/android/.settings/org.eclipse.jdt.core.prefs
+new file mode 100644
+index 0000000..626e0e1
+--- /dev/null
++++ b/node_modules/react-native-screens/android/.settings/org.eclipse.jdt.core.prefs
+@@ -0,0 +1,4 @@
++eclipse.preferences.version=1
++org.eclipse.jdt.core.compiler.codegen.targetPlatform=17
++org.eclipse.jdt.core.compiler.compliance=17
++org.eclipse.jdt.core.compiler.source=17
+diff --git a/node_modules/react-native-screens/android/build/generated/source/buildConfig/release/com/swmansion/rnscreens/BuildConfig.java b/node_modules/react-native-screens/android/build/generated/source/buildConfig/release/com/swmansion/rnscreens/BuildConfig.java
+new file mode 100644
+index 0000000..55d3f4b
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/generated/source/buildConfig/release/com/swmansion/rnscreens/BuildConfig.java
+@@ -0,0 +1,12 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.swmansion.rnscreens;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = false;
++  public static final String LIBRARY_PACKAGE_NAME = "com.swmansion.rnscreens";
++  public static final String BUILD_TYPE = "release";
++  // Field from default config.
++  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = false;
++}
+diff --git a/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/AndroidManifest.xml b/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..8ed1577
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.swmansion.rnscreens" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/output-metadata.json b/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/output-metadata.json
+new file mode 100644
+index 0000000..ed5ebcd
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/aapt_friendly_merged_manifests/release/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.swmansion.rnscreens",
++  "variantName": "release",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/aar_metadata/release/aar-metadata.properties b/node_modules/react-native-screens/android/build/intermediates/aar_metadata/release/aar-metadata.properties
+new file mode 100644
+index 0000000..776557e
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/aar_metadata/release/aar-metadata.properties
+@@ -0,0 +1,5 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
+diff --git a/node_modules/react-native-screens/android/build/intermediates/annotation_processor_list/release/annotationProcessors.json b/node_modules/react-native-screens/android/build/intermediates/annotation_processor_list/release/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/annotation_processor_list/release/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/compile_library_classes_jar/release/classes.jar b/node_modules/react-native-screens/android/build/intermediates/compile_library_classes_jar/release/classes.jar
+new file mode 100644
+index 0000000..26b56c8
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/compile_library_classes_jar/release/classes.jar differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/compile_r_class_jar/release/R.jar b/node_modules/react-native-screens/android/build/intermediates/compile_r_class_jar/release/R.jar
+new file mode 100644
+index 0000000..8dbd280
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/compile_r_class_jar/release/R.jar differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/compile_symbol_list/release/R.txt b/node_modules/react-native-screens/android/build/intermediates/compile_symbol_list/release/R.txt
+new file mode 100644
+index 0000000..de46535
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/compile_symbol_list/release/R.txt
+@@ -0,0 +1,23 @@
++int anim rns_default_enter_in 0x0
++int anim rns_default_enter_out 0x0
++int anim rns_default_exit_in 0x0
++int anim rns_default_exit_out 0x0
++int anim rns_fade_from_bottom 0x0
++int anim rns_fade_in 0x0
++int anim rns_fade_out 0x0
++int anim rns_fade_to_bottom 0x0
++int anim rns_no_animation_20 0x0
++int anim rns_no_animation_250 0x0
++int anim rns_no_animation_350 0x0
++int anim rns_no_animation_medium 0x0
++int anim rns_slide_in_from_bottom 0x0
++int anim rns_slide_in_from_left 0x0
++int anim rns_slide_in_from_left_ios 0x0
++int anim rns_slide_in_from_right 0x0
++int anim rns_slide_in_from_right_ios 0x0
++int anim rns_slide_out_to_bottom 0x0
++int anim rns_slide_out_to_left 0x0
++int anim rns_slide_out_to_left_ios 0x0
++int anim rns_slide_out_to_right 0x0
++int anim rns_slide_out_to_right_ios 0x0
++int anim rns_standard_accelerate_interpolator 0x0
+diff --git a/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseJniLibFolders/merger.xml b/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..0040131
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/jniLibs"/></dataSet><dataSet config="release" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/release/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseShaders/merger.xml b/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseShaders/merger.xml
+new file mode 100644
+index 0000000..e6d1312
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/incremental/mergeReleaseShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/shaders"/></dataSet><dataSet config="release" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/release/shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/incremental/packageReleaseAssets/merger.xml b/node_modules/react-native-screens/android/build/intermediates/incremental/packageReleaseAssets/merger.xml
+new file mode 100644
+index 0000000..e1e78aa
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/incremental/packageReleaseAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/assets"/></dataSet><dataSet config="release" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/release/assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/shader_assets/release/out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties b/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties
+new file mode 100644
+index 0000000..ecd2813
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties
+@@ -0,0 +1,28 @@
++#Sat Apr 18 16:03:52 IST 2026
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_no_animation_250.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_250.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_in_from_bottom.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_bottom.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_no_animation_medium.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_medium.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_in_from_right.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_out_to_bottom.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_bottom.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_fade_in.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_in.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_default_exit_in.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_in.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_no_animation_20.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_20.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_default_exit_out.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_out.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_in_from_left.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_fade_to_bottom.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_to_bottom.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_out_to_left_ios.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left_ios.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_out_to_left.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_default_enter_in.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_in.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_default_enter_out.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_out.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_fade_from_bottom.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_from_bottom.xml
++com.swmansion.rnscreens.react-native-screens-res-6\:/anim-v33/rns_default_exit_in.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_in.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_in_from_left_ios.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left_ios.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_in_from_right_ios.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right_ios.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_no_animation_350.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_350.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_fade_out.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_out.xml
++com.swmansion.rnscreens.react-native-screens-res-6\:/anim-v33/rns_default_exit_out.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_out.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_out_to_right.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right.xml
++com.swmansion.rnscreens.react-native-screens-res-6\:/anim-v33/rns_default_enter_in.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_in.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_slide_out_to_right_ios.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right_ios.xml
++com.swmansion.rnscreens.react-native-screens-res-5\:/anim/rns_standard_accelerate_interpolator.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_standard_accelerate_interpolator.xml
++com.swmansion.rnscreens.react-native-screens-res-6\:/anim-v33/rns_default_enter_out.xml=/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_out.xml
+diff --git a/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml b/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml
+new file mode 100644
+index 0000000..3091a9c
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base"/><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base"><file name="rns_slide_in_from_right" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right.xml" qualifiers="" type="anim"/><file name="rns_fade_in" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_fade_in.xml" qualifiers="" type="anim"/><file name="rns_slide_in_from_left_ios" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_left_ios.xml" qualifiers="" type="anim"/><file name="rns_slide_out_to_right" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_right.xml" qualifiers="" type="anim"/><file name="rns_slide_out_to_left" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_left.xml" qualifiers="" type="anim"/><file name="rns_default_enter_out" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_default_enter_out.xml" qualifiers="" type="anim"/><file name="rns_slide_in_from_bottom" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_bottom.xml" qualifiers="" type="anim"/><file name="rns_no_animation_medium" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_no_animation_medium.xml" qualifiers="" type="anim"/><file name="rns_default_exit_out" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_default_exit_out.xml" qualifiers="" type="anim"/><file name="rns_no_animation_20" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_no_animation_20.xml" qualifiers="" type="anim"/><file name="rns_fade_from_bottom" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_fade_from_bottom.xml" qualifiers="" type="anim"/><file name="rns_no_animation_350" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_no_animation_350.xml" qualifiers="" type="anim"/><file name="rns_fade_out" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_fade_out.xml" qualifiers="" type="anim"/><file name="rns_standard_accelerate_interpolator" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_standard_accelerate_interpolator.xml" qualifiers="" type="anim"/><file name="rns_fade_to_bottom" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_fade_to_bottom.xml" qualifiers="" type="anim"/><file name="rns_slide_in_from_left" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_left.xml" qualifiers="" type="anim"/><file name="rns_slide_out_to_left_ios" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_left_ios.xml" qualifiers="" type="anim"/><file name="rns_slide_in_from_right_ios" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right_ios.xml" qualifiers="" type="anim"/><file name="rns_default_exit_in" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_default_exit_in.xml" qualifiers="" type="anim"/><file name="rns_no_animation_250" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_no_animation_250.xml" qualifiers="" type="anim"/><file name="rns_default_enter_in" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_default_enter_in.xml" qualifiers="" type="anim"/><file name="rns_slide_out_to_bottom" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_bottom.xml" qualifiers="" type="anim"/><file name="rns_slide_out_to_right_ios" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_right_ios.xml" qualifiers="" type="anim"/></source><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33"><file name="rns_default_enter_out" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33/anim-v33/rns_default_enter_out.xml" qualifiers="v33" type="anim"/><file name="rns_default_exit_out" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33/anim-v33/rns_default_exit_out.xml" qualifiers="v33" type="anim"/><file name="rns_default_exit_in" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33/anim-v33/rns_default_exit_in.xml" qualifiers="v33" type="anim"/><file name="rns_default_enter_in" path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/res/v33/anim-v33/rns_default_enter_in.xml" qualifiers="v33" type="anim"/></source></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release" generated-set="release$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/generated/res/resValues/release"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/build/generated/res/resValues/release"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/java_res/release/out/META-INF/react-native-screens_release.kotlin_module b/node_modules/react-native-screens/android/build/intermediates/java_res/release/out/META-INF/react-native-screens_release.kotlin_module
+new file mode 100644
+index 0000000..1e9f2ca
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/java_res/release/out/META-INF/react-native-screens_release.kotlin_module differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerDelegate.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerDelegate.class
+new file mode 100644
+index 0000000..75c4cf3
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerDelegate.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerInterface.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerInterface.class
+new file mode 100644
+index 0000000..064c711
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenManagerInterface.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerDelegate.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerDelegate.class
+new file mode 100644
+index 0000000..d67fddc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerDelegate.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerInterface.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerInterface.class
+new file mode 100644
+index 0000000..4017390
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderConfigManagerInterface.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerDelegate.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerDelegate.class
+new file mode 100644
+index 0000000..08fb5e0
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerDelegate.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerInterface.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerInterface.class
+new file mode 100644
+index 0000000..0a122ab
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackHeaderSubviewManagerInterface.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerDelegate.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerDelegate.class
+new file mode 100644
+index 0000000..b03cd0d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerDelegate.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerInterface.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerInterface.class
+new file mode 100644
+index 0000000..6ae1a37
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/facebook/react/viewmanagers/RNSScreenStackManagerInterface.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/swmansion/rnscreens/BuildConfig.class b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/swmansion/rnscreens/BuildConfig.class
+new file mode 100644
+index 0000000..313b143
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/javac/release/classes/com/swmansion/rnscreens/BuildConfig.class differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/local_only_symbol_list/release/R-def.txt b/node_modules/react-native-screens/android/build/intermediates/local_only_symbol_list/release/R-def.txt
+new file mode 100644
+index 0000000..c9a7da7
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/local_only_symbol_list/release/R-def.txt
+@@ -0,0 +1,25 @@
++R_DEF: Internal format may change without notice
++local
++anim rns_default_enter_in
++anim rns_default_enter_out
++anim rns_default_exit_in
++anim rns_default_exit_out
++anim rns_fade_from_bottom
++anim rns_fade_in
++anim rns_fade_out
++anim rns_fade_to_bottom
++anim rns_no_animation_20
++anim rns_no_animation_250
++anim rns_no_animation_350
++anim rns_no_animation_medium
++anim rns_slide_in_from_bottom
++anim rns_slide_in_from_left
++anim rns_slide_in_from_left_ios
++anim rns_slide_in_from_right
++anim rns_slide_in_from_right_ios
++anim rns_slide_out_to_bottom
++anim rns_slide_out_to_left
++anim rns_slide_out_to_left_ios
++anim rns_slide_out_to_right
++anim rns_slide_out_to_right_ios
++anim rns_standard_accelerate_interpolator
+diff --git a/node_modules/react-native-screens/android/build/intermediates/manifest_merge_blame_file/release/manifest-merger-blame-release-report.txt b/node_modules/react-native-screens/android/build/intermediates/manifest_merge_blame_file/release/manifest-merger-blame-release-report.txt
+new file mode 100644
+index 0000000..2ec7397
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/manifest_merge_blame_file/release/manifest-merger-blame-release-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.swmansion.rnscreens" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7</manifest>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/merged_manifest/release/AndroidManifest.xml b/node_modules/react-native-screens/android/build/intermediates/merged_manifest/release/AndroidManifest.xml
+new file mode 100644
+index 0000000..8ed1577
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/merged_manifest/release/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.swmansion.rnscreens" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/navigation_json/release/navigation.json b/node_modules/react-native-screens/android/build/intermediates/navigation_json/release/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/navigation_json/release/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_in.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_in.xml
+new file mode 100644
+index 0000000..654c80b
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_in.xml
+@@ -0,0 +1,38 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++
++    <alpha
++        android:fromAlpha="0.0"
++        android:toAlpha="1.0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:anim/linear_interpolator"
++        android:startOffset="50"
++        android:duration="83" />
++
++    <translate
++        android:fromXDelta="10%"
++        android:toXDelta="0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:startOffset="0"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:duration="450" />
++
++    <extend
++        android:fromExtendLeft="10%"
++        android:fromExtendTop="0"
++        android:fromExtendRight="0"
++        android:fromExtendBottom="0"
++        android:toExtendLeft="10%"
++        android:toExtendTop="0"
++        android:toExtendRight="0"
++        android:toExtendBottom="0"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_out.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_out.xml
+new file mode 100644
+index 0000000..c3ff70f
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_enter_out.xml
+@@ -0,0 +1,38 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++
++    <alpha
++        android:fromAlpha="1.0"
++        android:toAlpha="0.0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@anim/rns_standard_accelerate_interpolator"
++        android:startOffset="0"
++        android:duration="83" />
++
++    <translate
++        android:fromXDelta="0"
++        android:toXDelta="-10%"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++
++    <extend
++        android:fromExtendLeft="0"
++        android:fromExtendTop="0"
++        android:fromExtendRight="10%"
++        android:fromExtendBottom="0"
++        android:toExtendLeft="0"
++        android:toExtendTop="0"
++        android:toExtendRight="10%"
++        android:toExtendBottom="0"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_in.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_in.xml
+new file mode 100644
+index 0000000..949ebb7
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_in.xml
+@@ -0,0 +1,38 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++
++    <alpha
++        android:fromAlpha="1.0"
++        android:toAlpha="1.0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:interpolator/linear"
++        android:startOffset="0"
++        android:duration="450" />
++
++    <translate
++        android:fromXDelta="-10%"
++        android:toXDelta="0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++
++    <extend
++        android:fromExtendLeft="0"
++        android:fromExtendTop="0"
++        android:fromExtendRight="10%"
++        android:fromExtendBottom="0"
++        android:toExtendLeft="0"
++        android:toExtendTop="0"
++        android:toExtendRight="10%"
++        android:toExtendBottom="0"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_out.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_out.xml
+new file mode 100644
+index 0000000..ba4d84d
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim-v33/rns_default_exit_out.xml
+@@ -0,0 +1,38 @@
++<?xml version="1.0" encoding="utf-8"?>
++
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++
++    <alpha
++        android:fromAlpha="1.0"
++        android:toAlpha="0.0"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:interpolator/linear"
++        android:startOffset="35"
++        android:duration="83" />
++
++    <translate
++        android:fromXDelta="0"
++        android:toXDelta="10%"
++        android:fillEnabled="true"
++        android:fillBefore="true"
++        android:fillAfter="true"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++
++    <extend
++        android:fromExtendLeft="10%"
++        android:fromExtendTop="0"
++        android:fromExtendRight="0"
++        android:fromExtendBottom="0"
++        android:toExtendLeft="10%"
++        android:toExtendTop="0"
++        android:toExtendRight="0"
++        android:toExtendBottom="0"
++        android:interpolator="@android:interpolator/fast_out_extra_slow_in"
++        android:startOffset="0"
++        android:duration="450" />
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_in.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_in.xml
+new file mode 100644
+index 0000000..4398c7e
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_in.xml
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="utf-8"?>
++<set xmlns:android="http://schemas.android.com/apk/res/android">
++    <alpha
++        android:interpolator="@android:interpolator/accelerate_decelerate"
++        android:fromAlpha="0"
++        android:toAlpha="1.0"
++        android:startOffset="100"
++        android:duration="100"/>
++    <scale
++        android:interpolator="@android:interpolator/accelerate_decelerate"
++        android:fromXScale="0.85"
++        android:toXScale="1"
++        android:fromYScale="0.85"
++        android:toYScale="1"
++        android:pivotX="50%"
++        android:pivotY="50%"
++        android:duration="200"/>
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_out.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_out.xml
+new file mode 100644
+index 0000000..84c9175
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_enter_out.xml
+@@ -0,0 +1,19 @@
++<?xml version="1.0" encoding="utf-8"?>
++<set xmlns:android="http://schemas.android.com/apk/res/android">
++    <alpha
++        android:fromAlpha="1"
++        android:toAlpha="0.4"
++        android:startOffset="100"
++        android:duration="100"
++        android:interpolator="@android:interpolator/accelerate_decelerate" />
++
++    <scale
++        android:interpolator="@android:interpolator/accelerate_decelerate"
++        android:fromXScale="1"
++        android:toXScale="1.15"
++        android:fromYScale="1"
++        android:toYScale="1.15"
++        android:pivotX="50%"
++        android:pivotY="50%"
++        android:duration="200"/>
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_in.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_in.xml
+new file mode 100644
+index 0000000..6d6fa02
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_in.xml
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="utf-8"?>
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++    <alpha
++        android:fromAlpha="0.0"
++        android:toAlpha="1"
++        android:startOffset="50"
++        android:duration="100"/>
++    <scale
++        android:fromXScale="1.15"
++        android:toXScale="1"
++        android:fromYScale="1.15"
++        android:toYScale="1"
++        android:pivotX="50%"
++        android:pivotY="50%"
++        android:duration="200"/>
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_out.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_out.xml
+new file mode 100644
+index 0000000..b20a184
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_default_exit_out.xml
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="utf-8"?>
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false"
++    android:zAdjustment="top">
++    <alpha
++        android:fromAlpha="1"
++        android:toAlpha="0.0"
++        android:startOffset="50"
++        android:duration="100"/>
++    <scale
++        android:fromXScale="1"
++        android:toXScale="0.85"
++        android:fromYScale="1"
++        android:toYScale="0.85"
++        android:pivotX="50%"
++        android:pivotY="50%"
++        android:duration="200"/>
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_from_bottom.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_from_bottom.xml
+new file mode 100644
+index 0000000..c7a8abc
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_from_bottom.xml
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--Android Nougat open animation-->
++<!--http://aosp.opersys.com/xref/android-7.1.2_r37/xref/frameworks/base/core/res/res/anim/activity_open_enter.xml-->
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
++        android:interpolator="@android:interpolator/decelerate_quint"
++        android:duration="210"/>
++    <translate android:fromYDelta="8%" android:toYDelta="0"
++        android:interpolator="@android:interpolator/decelerate_quint"
++        android:duration="350"/> <!--we use rns_no_animation_350.xml as the other animation for
++        this transition since we want both of them to end at the same time. Remember to change
++        duration in both files when modifying it-->
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_in.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_in.xml
+new file mode 100644
+index 0000000..c78ea61
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_in.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--Duration taken from debugging source code-->
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="0.0"
++    android:toAlpha="1.0"
++    android:duration="150"
++    />  <!--Remember to change duration in the corresponding xml when modifying it-->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_out.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_out.xml
+new file mode 100644
+index 0000000..334e63f
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_out.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--Duration taken from debugging source code-->
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="1.0"
++    android:toAlpha="0.0"
++    android:duration="150"
++    />  <!--Remember to change duration in the corresponding xml when modifying it-->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_to_bottom.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_to_bottom.xml
+new file mode 100644
+index 0000000..2334521
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_fade_to_bottom.xml
+@@ -0,0 +1,15 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--Android Nougat exit animation-->
++<!--http://aosp.opersys.com/xref/android-7.1.2_r37/xref/frameworks/base/core/res/res/anim/activity_close_exit.xml-->
++<set xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shareInterpolator="false">
++    <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
++        android:interpolator="@android:interpolator/linear"
++        android:startOffset="100"
++        android:duration="150"/>
++    <translate android:fromYDelta="0%" android:toYDelta="8%"
++        android:interpolator="@android:interpolator/accelerate_quint"
++        android:duration="250"/>  <!--we use rns_no_animation_250.xml as the other animation for
++        this transition since we want both of them to end at the same time. Remember to change
++        duration in both files when modifying it-->
++</set>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_20.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_20.xml
+new file mode 100644
+index 0000000..5cc0d23
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_20.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="1.0"
++    android:toAlpha="1.0"
++    android:duration="20"
++    />  <!-- non-zero duration ensures transition events are triggered correctly -->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_250.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_250.xml
+new file mode 100644
+index 0000000..bd082a3
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_250.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="1.0"
++    android:toAlpha="1.0"
++    android:duration="250"
++    />  <!--Remember to change duration in the corresponding xml when modifying it-->
++
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_350.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_350.xml
+new file mode 100644
+index 0000000..003dcd1
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_350.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="1.0"
++    android:toAlpha="1.0"
++    android:duration="350"
++    />  <!--Remember to change duration in the corresponding xml when modifying it-->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_medium.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_medium.xml
+new file mode 100644
+index 0000000..560eda6
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_no_animation_medium.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<alpha xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromAlpha="1.0"
++    android:toAlpha="1.0"
++    android:duration="@android:integer/config_mediumAnimTime"
++    />  <!--Remember to change duration in the corresponding xml when modifying it-->
++
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_bottom.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_bottom.xml
+new file mode 100644
+index 0000000..052fe15
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_bottom.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromYDelta="100%"
++    android:toYDelta="0%"
++    android:duration="@android:integer/config_mediumAnimTime" />  <!--we use
++        rns_no_animation_medium.xml as the other animation for this transition since we want both of
++        them to end at the same time. Remember to change duration in both files when modifying it-->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left.xml
+new file mode 100644
+index 0000000..939110f
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_mediumAnimTime"
++    android:fromXDelta="-100%"
++    android:toXDelta="0%" />
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left_ios.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left_ios.xml
+new file mode 100644
+index 0000000..66a611f
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_left_ios.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_shortAnimTime"
++    android:fromXDelta="-30%"
++    android:toXDelta="0%" />
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right.xml
+new file mode 100644
+index 0000000..428eb9b
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_mediumAnimTime"
++    android:fromXDelta="100%"
++    android:toXDelta="0%" />
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right_ios.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right_ios.xml
+new file mode 100644
+index 0000000..e687584
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_in_from_right_ios.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_shortAnimTime"
++    android:interpolator="@android:interpolator/accelerate_decelerate"
++    android:fromXDelta="100%"
++    android:toXDelta="0%" />
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_bottom.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_bottom.xml
+new file mode 100644
+index 0000000..6b75d25
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_bottom.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:fromYDelta="0%"
++    android:toYDelta="100%"
++    android:duration="@android:integer/config_mediumAnimTime" />  <!--we use
++        rns_no_animation_medium.xml as the other animation for this transition since we want both of
++        them to end at the same time. Remember to change duration in both files when modifying it-->
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left.xml
+new file mode 100644
+index 0000000..400a202
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_mediumAnimTime"
++    android:fromXDelta="0%"
++    android:toXDelta="-100%"/>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left_ios.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left_ios.xml
+new file mode 100644
+index 0000000..0789fbe
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_left_ios.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_shortAnimTime"
++    android:fromXDelta="0%"
++    android:toXDelta="-30%"/>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right.xml
+new file mode 100644
+index 0000000..a00332b
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_mediumAnimTime"
++    android:fromXDelta="0%"
++    android:toXDelta="100%"/>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right_ios.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right_ios.xml
+new file mode 100644
+index 0000000..1073ae6
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_slide_out_to_right_ios.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<translate xmlns:android="http://schemas.android.com/apk/res/android"
++    android:duration="@android:integer/config_shortAnimTime"
++    android:interpolator="@android:interpolator/accelerate_decelerate"
++    android:fromXDelta="0%"
++    android:toXDelta="100%"/>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_standard_accelerate_interpolator.xml b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_standard_accelerate_interpolator.xml
+new file mode 100644
+index 0000000..60c57e5
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/packaged_res/release/anim/rns_standard_accelerate_interpolator.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
++    android:controlX1="0.3"
++    android:controlY1="0"
++    android:controlX2="1"
++    android:controlY2="1"/>
+diff --git a/node_modules/react-native-screens/android/build/intermediates/runtime_library_classes_jar/release/classes.jar b/node_modules/react-native-screens/android/build/intermediates/runtime_library_classes_jar/release/classes.jar
+new file mode 100644
+index 0000000..587d854
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/intermediates/runtime_library_classes_jar/release/classes.jar differ
+diff --git a/node_modules/react-native-screens/android/build/intermediates/symbol_list_with_package_name/release/package-aware-r.txt b/node_modules/react-native-screens/android/build/intermediates/symbol_list_with_package_name/release/package-aware-r.txt
+new file mode 100644
+index 0000000..f28e08c
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/intermediates/symbol_list_with_package_name/release/package-aware-r.txt
+@@ -0,0 +1,24 @@
++com.swmansion.rnscreens
++anim rns_default_enter_in
++anim rns_default_enter_out
++anim rns_default_exit_in
++anim rns_default_exit_out
++anim rns_fade_from_bottom
++anim rns_fade_in
++anim rns_fade_out
++anim rns_fade_to_bottom
++anim rns_no_animation_20
++anim rns_no_animation_250
++anim rns_no_animation_350
++anim rns_no_animation_medium
++anim rns_slide_in_from_bottom
++anim rns_slide_in_from_left
++anim rns_slide_in_from_left_ios
++anim rns_slide_in_from_right
++anim rns_slide_in_from_right_ios
++anim rns_slide_out_to_bottom
++anim rns_slide_out_to_left
++anim rns_slide_out_to_left_ios
++anim rns_slide_out_to_right
++anim rns_slide_out_to_right_ios
++anim rns_standard_accelerate_interpolator
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
+new file mode 100644
+index 0000000..a90f84f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
+new file mode 100644
+index 0000000..f9d2cd1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
+new file mode 100644
+index 0000000..aedeb62
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len
+new file mode 100644
+index 0000000..41d6c24
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
+new file mode 100644
+index 0000000..e5fe242
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
+new file mode 100644
+index 0000000..4134ac1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
+new file mode 100644
+index 0000000..9084ee2
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
+new file mode 100644
+index 0000000..f117f78
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len
+new file mode 100644
+index 0000000..5b134ad
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len
+new file mode 100644
+index 0000000..68c8906
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
+new file mode 100644
+index 0000000..6623408
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
+new file mode 100644
+index 0000000..2113bfa
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
+new file mode 100644
+index 0000000..b5a2268
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..f117f78
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..5b134ad
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len
+new file mode 100644
+index 0000000..68c8906
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..52837a7
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
+new file mode 100644
+index 0000000..2113bfa
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab
+new file mode 100644
+index 0000000..e2d0818
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream
+new file mode 100644
+index 0000000..f51cac4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len
+new file mode 100644
+index 0000000..724fe3d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len
+new file mode 100644
+index 0000000..c14ff15
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at
+new file mode 100644
+index 0000000..3df9d91
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i
+new file mode 100644
+index 0000000..7cfe419
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
+new file mode 100644
+index 0000000..50143bd
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..ada1922
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..b02d5db
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len
+new file mode 100644
+index 0000000..49c7f00
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..418f512
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
+new file mode 100644
+index 0000000..3c978cc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab
+new file mode 100644
+index 0000000..f43bacb
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream
+new file mode 100644
+index 0000000..bf79f5d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream.len
+new file mode 100644
+index 0000000..7d80ba0
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.values.at
+new file mode 100644
+index 0000000..c0e2961
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i
+new file mode 100644
+index 0000000..7ed32f4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/java-sources-proto-map.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
+new file mode 100644
+index 0000000..3cbf213
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
+new file mode 100644
+index 0000000..d3e695b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len
+new file mode 100644
+index 0000000..1d7ff8d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len
+new file mode 100644
+index 0000000..be2ce70
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values
+new file mode 100644
+index 0000000..bb0fe93
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
+new file mode 100644
+index 0000000..250ffff
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s
+new file mode 100644
+index 0000000..60f4630
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.s
+@@ -0,0 +1 @@
++ÊÐÖ¢ýÍ
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
+new file mode 100644
+index 0000000..0673985
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
+new file mode 100644
+index 0000000..0afc547
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
+new file mode 100644
+index 0000000..5dd9105
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
+new file mode 100644
+index 0000000..d60c324
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len
+new file mode 100644
+index 0000000..31ed51e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
+new file mode 100644
+index 0000000..cce61e7
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
+new file mode 100644
+index 0000000..b5f6511
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
+new file mode 100644
+index 0000000..920606b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
+new file mode 100644
+index 0000000..b88fc75
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len
+new file mode 100644
+index 0000000..1921787
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len
+new file mode 100644
+index 0000000..be9fd94
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
+new file mode 100644
+index 0000000..bcb89c6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
+new file mode 100644
+index 0000000..a87c9fe
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
+new file mode 100644
+index 0000000..b882d19
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
+new file mode 100644
+index 0000000..526b842
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len
+new file mode 100644
+index 0000000..877ec07
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len
+new file mode 100644
+index 0000000..9001288
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
+new file mode 100644
+index 0000000..4a3917d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
+new file mode 100644
+index 0000000..424e15e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/counters.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/counters.tab
+new file mode 100644
+index 0000000..e4d487e
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/counters.tab
+@@ -0,0 +1,2 @@
++71
++0
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
+new file mode 100644
+index 0000000..1aa8844
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
+new file mode 100644
+index 0000000..54f7ccc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
+new file mode 100644
+index 0000000..aedeb62
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len
+new file mode 100644
+index 0000000..41d6c24
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
+new file mode 100644
+index 0000000..7ad3ca4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
+new file mode 100644
+index 0000000..cf40cea
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
+new file mode 100644
+index 0000000..05ceaa6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
+new file mode 100644
+index 0000000..9dd24d2
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
+new file mode 100644
+index 0000000..dca805e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
+new file mode 100644
+index 0000000..04a2552
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
+new file mode 100644
+index 0000000..bda64d4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
+new file mode 100644
+index 0000000..f4a5a1c
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab
+new file mode 100644
+index 0000000..5612f9e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
+new file mode 100644
+index 0000000..4205694
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
+new file mode 100644
+index 0000000..0843762
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
+new file mode 100644
+index 0000000..8afb7f3
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values
+new file mode 100644
+index 0000000..393fdb7
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
+new file mode 100644
+index 0000000..31e319f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
+new file mode 100644
+index 0000000..aa6f9d4
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
+@@ -0,0 +1 @@
++ãŠÞÇÎ›
+\ No newline at end of file
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
+new file mode 100644
+index 0000000..b1004db
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
+new file mode 100644
+index 0000000..4424406
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/last-build.bin b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/last-build.bin
+new file mode 100644
+index 0000000..85525c8
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/cacheable/last-build.bin differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
+new file mode 100644
+index 0000000..e7372ea
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin differ
+diff --git a/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/local-state/build-history.bin b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/local-state/build-history.bin
+new file mode 100644
+index 0000000..ae4b70f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/kotlin/compileReleaseKotlin/local-state/build-history.bin differ
+diff --git a/node_modules/react-native-screens/android/build/outputs/logs/manifest-merger-release-report.txt b/node_modules/react-native-screens/android/build/outputs/logs/manifest-merger-release-report.txt
+new file mode 100644
+index 0000000..e23e03e
+--- /dev/null
++++ b/node_modules/react-native-screens/android/build/outputs/logs/manifest-merger-release-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml:2:1-5:12
++INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml:2:1-5:12
++	package
++		ADDED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml:3:11-44
++		INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml:2:11-69
++uses-sdk
++INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml
++INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/baburhussain/PostingAutomation/mobile_bare/node_modules/react-native-screens/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/react-native-screens/android/build/tmp/compileReleaseJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-screens/android/build/tmp/compileReleaseJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..dc33c7d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/compileReleaseJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/META-INF/react-native-screens_release.kotlin_module b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/META-INF/react-native-screens_release.kotlin_module
+new file mode 100644
+index 0000000..1e9f2ca
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/META-INF/react-native-screens_release.kotlin_module differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView$mOnBackPressedCallback$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView$mOnBackPressedCallback$1.class
+new file mode 100644
+index 0000000..51a19f6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView$mOnBackPressedCallback$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView.class
+new file mode 100644
+index 0000000..9f86740
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomSearchView.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomToolbar.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomToolbar.class
+new file mode 100644
+index 0000000..c1659f1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/CustomToolbar.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FabricEnabledViewGroup.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FabricEnabledViewGroup.class
+new file mode 100644
+index 0000000..e77d6fc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FabricEnabledViewGroup.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentBackPressOverrider.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentBackPressOverrider.class
+new file mode 100644
+index 0000000..ddd8212
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentBackPressOverrider.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentHolder.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentHolder.class
+new file mode 100644
+index 0000000..616a0a5
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/FragmentHolder.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/RNScreensPackage.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/RNScreensPackage.class
+new file mode 100644
+index 0000000..49c20ce
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/RNScreensPackage.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ActivityState.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ActivityState.class
+new file mode 100644
+index 0000000..b5e4f06
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ActivityState.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ReplaceAnimation.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ReplaceAnimation.class
+new file mode 100644
+index 0000000..d85a747
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$ReplaceAnimation.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackAnimation.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackAnimation.class
+new file mode 100644
+index 0000000..9e4a0ae
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackAnimation.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackPresentation.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackPresentation.class
+new file mode 100644
+index 0000000..2f38b49
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$StackPresentation.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$WindowTraits.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$WindowTraits.class
+new file mode 100644
+index 0000000..c69c494
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$WindowTraits.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$updateScreenSizePaper$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$updateScreenSizePaper$1.class
+new file mode 100644
+index 0000000..cf50a53
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen$updateScreenSizePaper$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen.class
+new file mode 100644
+index 0000000..b28b0aa
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/Screen.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer$mLayoutCallback$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer$mLayoutCallback$1.class
+new file mode 100644
+index 0000000..c30aabd
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer$mLayoutCallback$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer.class
+new file mode 100644
+index 0000000..7d7068a
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainer.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager$Companion.class
+new file mode 100644
+index 0000000..f7d0072
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager.class
+new file mode 100644
+index 0000000..5ed77c0
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenContainerViewManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenEventDispatcher.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenEventDispatcher.class
+new file mode 100644
+index 0000000..b77adcf
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenEventDispatcher.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$Companion.class
+new file mode 100644
+index 0000000..0a1cb95
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreenLifecycleEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreenLifecycleEvent.class
+new file mode 100644
+index 0000000..5541bf7
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreenLifecycleEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreensFrameLayout.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreensFrameLayout.class
+new file mode 100644
+index 0000000..9d1276f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$ScreensFrameLayout.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$WhenMappings.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$WhenMappings.class
+new file mode 100644
+index 0000000..bab2243
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment$WhenMappings.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment.class
+new file mode 100644
+index 0000000..f8f045b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragment.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragmentWrapper.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragmentWrapper.class
+new file mode 100644
+index 0000000..61d5792
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenFragmentWrapper.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$Companion.class
+new file mode 100644
+index 0000000..24194e4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$DrawingOp.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$DrawingOp.class
+new file mode 100644
+index 0000000..906b504
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$DrawingOp.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$WhenMappings.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$WhenMappings.class
+new file mode 100644
+index 0000000..66ee02b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack$WhenMappings.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack.class
+new file mode 100644
+index 0000000..9b000c1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStack.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensAnimation.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensAnimation.class
+new file mode 100644
+index 0000000..d9467b1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensAnimation.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout$mAnimationListener$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout$mAnimationListener$1.class
+new file mode 100644
+index 0000000..1aee6a1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout$mAnimationListener$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout.class
+new file mode 100644
+index 0000000..b9388eb
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment$ScreensCoordinatorLayout.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment.class
+new file mode 100644
+index 0000000..0f66234
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragment.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragmentWrapper.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragmentWrapper.class
+new file mode 100644
+index 0000000..44dc134
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackFragmentWrapper.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$DebugMenuToolbar.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$DebugMenuToolbar.class
+new file mode 100644
+index 0000000..811f942
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$DebugMenuToolbar.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$WhenMappings.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$WhenMappings.class
+new file mode 100644
+index 0000000..7de62fa
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig$WhenMappings.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig.class
+new file mode 100644
+index 0000000..08ecee5
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfig.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager$Companion.class
+new file mode 100644
+index 0000000..28564a5
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.class
+new file mode 100644
+index 0000000..481cb53
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview$Type.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview$Type.class
+new file mode 100644
+index 0000000..fb62f6e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview$Type.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview.class
+new file mode 100644
+index 0000000..8ff3b61
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubview.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager$Companion.class
+new file mode 100644
+index 0000000..4cf4a14
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager.class
+new file mode 100644
+index 0000000..e33ec85
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackHeaderSubviewManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager$Companion.class
+new file mode 100644
+index 0000000..e4b3091
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager.class
+new file mode 100644
+index 0000000..fff5d56
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenStackViewManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager$Companion.class
+new file mode 100644
+index 0000000..aded7a1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager.class
+new file mode 100644
+index 0000000..74cce44
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenViewManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$WhenMappings.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$WhenMappings.class
+new file mode 100644
+index 0000000..6e0af07
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$WhenMappings.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setColor$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setColor$1.class
+new file mode 100644
+index 0000000..d285a62
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setColor$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setTranslucent$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setTranslucent$1.class
+new file mode 100644
+index 0000000..afa99f3
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits$setTranslucent$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits.class
+new file mode 100644
+index 0000000..a6b01dc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreenWindowTraits.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreensShadowNode.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreensShadowNode.class
+new file mode 100644
+index 0000000..cf9f3cc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/ScreensShadowNode.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager$Companion.class
+new file mode 100644
+index 0000000..566865b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager.class
+new file mode 100644
+index 0000000..28e6c5b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarManager.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarAutoCapitalize.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarAutoCapitalize.class
+new file mode 100644
+index 0000000..fd88fc1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarAutoCapitalize.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$EMAIL.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$EMAIL.class
+new file mode 100644
+index 0000000..2a38f39
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$EMAIL.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$NUMBER.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$NUMBER.class
+new file mode 100644
+index 0000000..006d0fc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$NUMBER.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$PHONE.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$PHONE.class
+new file mode 100644
+index 0000000..0a9dd46
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$PHONE.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT$WhenMappings.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT$WhenMappings.class
+new file mode 100644
+index 0000000..340b9d8
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT$WhenMappings.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT.class
+new file mode 100644
+index 0000000..86f3a52
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes$TEXT.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes.class
+new file mode 100644
+index 0000000..2058344
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$SearchBarInputTypes.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$onAttachedToWindow$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$onAttachedToWindow$1.class
+new file mode 100644
+index 0000000..584e56e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$onAttachedToWindow$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$setSearchViewListeners$1.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$setSearchViewListeners$1.class
+new file mode 100644
+index 0000000..0866e2f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView$setSearchViewListeners$1.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView.class
+new file mode 100644
+index 0000000..9074987
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchBarView.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchViewFormatter.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchViewFormatter.class
+new file mode 100644
+index 0000000..b2a7a88
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/SearchViewFormatter.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent$Companion.class
+new file mode 100644
+index 0000000..3c9f4a6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent.class
+new file mode 100644
+index 0000000..15264b5
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderAttachedEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent$Companion.class
+new file mode 100644
+index 0000000..4da8435
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent.class
+new file mode 100644
+index 0000000..b565e1a
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderBackButtonClickedEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent$Companion.class
+new file mode 100644
+index 0000000..103bd66
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent.class
+new file mode 100644
+index 0000000..bc4dc6b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderDetachedEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent$Companion.class
+new file mode 100644
+index 0000000..bb4318f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent.class
+new file mode 100644
+index 0000000..163263e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/HeaderHeightChangeEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent$Companion.class
+new file mode 100644
+index 0000000..44d9cdf
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent.class
+new file mode 100644
+index 0000000..d6bbab6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenAppearEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent$Companion.class
+new file mode 100644
+index 0000000..66b177b
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent.class
+new file mode 100644
+index 0000000..77fa5b4
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDisappearEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent$Companion.class
+new file mode 100644
+index 0000000..b938aac
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent.class
+new file mode 100644
+index 0000000..9dc8623
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenDismissedEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent$Companion.class
+new file mode 100644
+index 0000000..f8ee904
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent.class
+new file mode 100644
+index 0000000..30a7e5a
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenTransitionProgressEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent$Companion.class
+new file mode 100644
+index 0000000..86d2a53
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent.class
+new file mode 100644
+index 0000000..19f8abc
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillAppearEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent$Companion.class
+new file mode 100644
+index 0000000..52e400d
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent.class
+new file mode 100644
+index 0000000..e60336f
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/ScreenWillDisappearEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent$Companion.class
+new file mode 100644
+index 0000000..09e7207
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent.class
+new file mode 100644
+index 0000000..72c1b29
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarBlurEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent$Companion.class
+new file mode 100644
+index 0000000..be90b98
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent.class
+new file mode 100644
+index 0000000..b51a263
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarChangeTextEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent$Companion.class
+new file mode 100644
+index 0000000..7a877c6
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent.class
+new file mode 100644
+index 0000000..f2e8abf
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarCloseEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent$Companion.class
+new file mode 100644
+index 0000000..23a19b1
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent.class
+new file mode 100644
+index 0000000..333133a
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarFocusEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent$Companion.class
+new file mode 100644
+index 0000000..9804a5e
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent.class
+new file mode 100644
+index 0000000..13a0786
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarOpenEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent$Companion.class
+new file mode 100644
+index 0000000..0bceb69
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent.class
+new file mode 100644
+index 0000000..63e6a49
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/SearchBarSearchButtonPressEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent$Companion.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent$Companion.class
+new file mode 100644
+index 0000000..d3a5d5a
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent$Companion.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent.class
+new file mode 100644
+index 0000000..53ae3b3
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/events/StackFinishTransitioningEvent.class differ
+diff --git a/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/utils/DeviceUtils.class b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/utils/DeviceUtils.class
+new file mode 100644
+index 0000000..9999fcb
+Binary files /dev/null and b/node_modules/react-native-screens/android/build/tmp/kotlin-classes/release/com/swmansion/rnscreens/utils/DeviceUtils.class differ
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
+index 46d86c8..2088006 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
+@@ -312,7 +312,7 @@ class ScreenStack(context: Context?) : ScreenContainer(context) {
+     }
+ 
+     private fun obtainDrawingOp(): DrawingOp =
+-        if (drawingOpPool.isEmpty()) DrawingOp() else drawingOpPool.removeLast()
++        if (drawingOpPool.isEmpty()) DrawingOp() else drawingOpPool.removeAt(drawingOpPool.lastIndex)
+ 
+     private inner class DrawingOp {
+         var canvas: Canvas? = null

@@ -46,3 +46,11 @@
 # Lottie
 -dontwarn com.airbnb.lottie.**
 -keep class com.airbnb.lottie.** { *; }
+
+# InAppBrowser (react-native-inappbrowser-reborn)
+-keep class com.proyecto26.inappbrowser.** { *; }
+-dontwarn com.proyecto26.inappbrowser.**
+
+# AndroidX Browser (Chrome Custom Tabs)
+-keep class androidx.browser.** { *; }
+-dontwarn androidx.browser.**

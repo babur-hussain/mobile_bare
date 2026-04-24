@@ -15,6 +15,7 @@ import {
   Switch,
   Animated,
   Easing,
+  AppState,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
@@ -24,10 +25,13 @@ import { createThumbnail } from 'react-native-create-thumbnail';
 export interface AppMedia {
   asset: Asset;
   displayUri: string;
+  isProcessing?: boolean;
   isUploading: boolean;
   progress: number;
   s3Url?: string;
   thumbnailS3Url?: string; // uploaded thumbnail URL for videos
+  mediaId?: string; // backend DB ID for deletion
+  thumbnailMediaId?: string; // backend DB ID for deletion
   hasError: boolean;
 }
 
@@ -258,6 +262,9 @@ export default function CreatePostScreen() {
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const [tagsModalVisible, setTagsModalVisible] = useState(false);
   const [advancedModalVisible, setAdvancedModalVisible] = useState(false);
+  const [uploadErrorModalVisible, setUploadErrorModalVisible] = useState(false);
+  const [uploadErrorMessage, setUploadErrorMessage] = useState('');
+  const [isPickingMedia, setIsPickingMedia] = useState(false);
 
   // Location Search State
   const [location, setLocation] = useState<AppLocation | null>(null);
@@ -299,12 +306,33 @@ export default function CreatePostScreen() {
     });
   }, []);
 
+  // Cleanup on unmount or background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        // Cancel all active uploads when app is backgrounded/closed
+        Object.values(uploadControllers.current).forEach(controller => controller.abort());
+        uploadControllers.current = {};
+      }
+    });
+
+    return () => {
+      subscription.remove();
+      // Also abort on component unmount
+      Object.values(uploadControllers.current).forEach(controller => controller.abort());
+      uploadControllers.current = {};
+    };
+  }, []);
+
   // Advanced Settings State
   const [hideLikes, setHideLikes] = useState(false);
   const [turnOffComments, setTurnOffComments] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingAny = useMemo(() => mediaItems.some(m => m.isUploading), [mediaItems]);
+  
+  // Track active upload requests for cancellation
+  const uploadControllers = useRef<Record<string, AbortController>>({});
 
   // Animation state for loading screen — useRef to avoid leaking Animated nodes
   const pulseValue = useRef(new Animated.Value(1)).current;
@@ -374,97 +402,161 @@ export default function CreatePostScreen() {
   }, []);
 
   const pickMedia = async () => {
+    setIsPickingMedia(true);
     const result = await launchImageLibrary({
       mediaType: 'mixed',
       selectionLimit: 10,
       quality: 0.8,
     });
 
+    if (result.didCancel || !result.assets) {
+      setIsPickingMedia(false);
+      return;
+    }
+
     if (result.assets) {
       const newItems: AppMedia[] = result.assets.map(asset => ({
         asset,
         displayUri: asset.uri || '',
-        isUploading: true,
+        isProcessing: true,
+        isUploading: false,
         progress: 0,
         hasError: false,
       }));
       setMediaItems(prev => [...prev, ...newItems]);
+      setIsPickingMedia(false);
+      setTimeout(() => {
+        newItems.forEach(async item => {
+          let displayUri = item.asset.uri || '';
+          let thumbnailLocalPath: string | null = null;
 
-      newItems.forEach(async item => {
-        let displayUri = item.asset.uri || '';
-        let thumbnailLocalPath: string | null = null;
-
-        if (item.asset.type?.startsWith('video/')) {
-          try {
-            const thumb = await createThumbnail({
-              url: displayUri,
-              timeStamp: 1000,
-            });
-            thumbnailLocalPath = thumb.path;
-            displayUri = thumb.path;
-          } catch (e) {
-            console.log('Thumbnail error', e);
-          }
-        }
-
-        setMediaItems(current =>
-          current.map(m =>
-            m.asset.uri === item.asset.uri ? { ...m, displayUri } : m,
-          ),
-        );
-
-        try {
-          // Upload main media
-          const media = await mediaService.upload(item.asset, progressEvent => {
-            if (progressEvent.total) {
-              const progress = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-              );
-              setMediaItems(current =>
-                current.map(m =>
-                  m.asset.uri === item.asset.uri ? { ...m, progress } : m,
-                ),
-              );
-            }
-          });
-
-          // Upload thumbnail to S3 so it's stored server-side and cross-device
-          let thumbnailS3Url: string | undefined;
-          if (thumbnailLocalPath) {
+          if (item.asset.type?.startsWith('video/')) {
             try {
-              const thumbMedia = await mediaService.uploadFromPath(thumbnailLocalPath);
-              thumbnailS3Url = thumbMedia.s3Url;
-            } catch (thumbErr) {
-              console.log('Thumbnail S3 upload failed (non-critical):', thumbErr);
+              const thumb = await createThumbnail({
+                url: displayUri,
+                timeStamp: 1000,
+              });
+              thumbnailLocalPath = thumb.path;
+              displayUri = thumb.path;
+            } catch (e) {
+              console.log('Thumbnail error', e);
             }
           }
 
           setMediaItems(current =>
             current.map(m =>
-              m.asset.uri === item.asset.uri
-                ? { ...m, isUploading: false, progress: 100, s3Url: media.s3Url, thumbnailS3Url }
-                : m,
+              m.asset.uri === item.asset.uri ? { ...m, displayUri, isProcessing: false, isUploading: true } : m,
             ),
           );
-        } catch (e: any) {
-          // #41: Show user-friendly error message
-          const errMsg = e?.response?.data?.message || 'Upload failed. Please check your connection and try again.';
-          Alert.alert('Upload Error', errMsg);
-          setMediaItems(current =>
-            current.map(m =>
-              m.asset.uri === item.asset.uri
-                ? { ...m, isUploading: false, hasError: true }
-                : m,
-            ),
-          );
-        }
-      });
+
+          const controller = new AbortController();
+          uploadControllers.current[item.asset.uri || ''] = controller;
+
+          try {
+            // Upload main media
+            const media = await mediaService.upload(item.asset, progressEvent => {
+              if (progressEvent.total) {
+                const progress = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total,
+                );
+                setMediaItems(current =>
+                  current.map(m =>
+                    m.asset.uri === item.asset.uri ? { ...m, progress } : m,
+                  ),
+                );
+              }
+            }, controller.signal);
+
+            // Upload thumbnail to S3 so it's stored server-side and cross-device
+            let thumbnailS3Url: string | undefined;
+            let thumbnailMediaId: string | undefined;
+            if (thumbnailLocalPath) {
+              try {
+                const thumbMedia = await mediaService.uploadFromPath(
+                  thumbnailLocalPath,
+                  'image/jpeg',
+                  undefined,
+                  controller.signal
+                );
+                thumbnailS3Url = thumbMedia.s3Url;
+                thumbnailMediaId = thumbMedia._id;
+              } catch (thumbErr) {
+                console.log('Thumbnail S3 upload failed (non-critical):', thumbErr);
+              }
+            }
+
+            setMediaItems(current =>
+              current.map(m =>
+                m.asset.uri === item.asset.uri
+                  ? { 
+                      ...m, 
+                      isUploading: false, 
+                      progress: 100, 
+                      s3Url: media.s3Url, 
+                      mediaId: media._id, 
+                      thumbnailS3Url,
+                      thumbnailMediaId
+                    }
+                  : m,
+              ),
+            );
+          } catch (e: any) {
+            if (e.name === 'CanceledError' || e.code === 'ERR_CANCELED') {
+              console.log('Upload task cancelled for', item.asset.uri);
+              return;
+            }
+            // #41: Show user-friendly error message
+            let errMsg = 'Upload failed. Please check your connection and try again.';
+            if (e?.response?.status === 413) {
+              errMsg = 'File is too large. The maximum allowed size is 1GB.';
+            } else if (e?.response?.data?.message) {
+              const serverMsg = e.response.data.message;
+              errMsg = Array.isArray(serverMsg) ? serverMsg[0] : serverMsg;
+            }
+            setUploadErrorMessage(errMsg);
+            setUploadErrorModalVisible(true);
+            setMediaItems(current =>
+              current.map(m =>
+                m.asset.uri === item.asset.uri
+                  ? { ...m, isUploading: false, hasError: true }
+                  : m,
+              ),
+            );
+          } finally {
+            delete uploadControllers.current[item.asset.uri || ''];
+          }
+        });
+      }, 100);
     }
   };
 
-  const removeMedia = useCallback((index: number) => {
+  const removeMedia = useCallback(async (index: number) => {
+    const item = mediaItems[index];
+    if (!item) return;
+
+    // 1. Cancel active upload if any
+    const uri = item.asset.uri || '';
+    if (uploadControllers.current[uri]) {
+      console.log('[RemoveMedia] Cancelling active upload:', uri);
+      uploadControllers.current[uri].abort();
+      delete uploadControllers.current[uri];
+    }
+
+    // 2. Delete from S3 if already uploaded to save space
+    if (item.mediaId) {
+      console.log('[RemoveMedia] Deleting uploaded media:', item.mediaId);
+      mediaService.delete(item.mediaId).catch(err => 
+        console.error('[RemoveMedia] S3 cleanup failed:', err?.response?.data || err.message)
+      );
+    }
+    if (item.thumbnailMediaId) {
+      mediaService.delete(item.thumbnailMediaId).catch(err => 
+        console.error('[RemoveMedia] S3 thumbnail cleanup failed:', err?.response?.data || err.message)
+      );
+    }
+
     setMediaItems(items => items.filter((_, i) => i !== index));
-  }, []);
+  }, [mediaItems]);
 
   const togglePlatform = useCallback((platform: Platform_Type) => {
     setPlatformSelectionError(false);
@@ -766,6 +858,20 @@ export default function CreatePostScreen() {
                     <View style={styles.mediaOverlay}>
                       <Edit2 size={32} color={APP_COLORS.onPrimary} />
                     </View>
+                    {mediaItems[0].isProcessing && (
+                      <View
+                        style={[
+                          styles.mediaOverlay,
+                          { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+                        ]}>
+                        <LottieView
+                          source={require('../LottieAnimations/Liquid 4 Dot Loader.lottie')}
+                          autoPlay
+                          loop
+                          style={{ width: 80, height: 80 }}
+                        />
+                      </View>
+                    )}
                     {mediaItems[0].isUploading && (
                       <View
                         style={[
@@ -801,6 +907,20 @@ export default function CreatePostScreen() {
                           source={{ uri: item.displayUri }}
                           style={styles.sideMedia}
                         />
+                        {item.isProcessing && (
+                          <View
+                            style={[
+                              styles.mediaOverlay,
+                              { opacity: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+                            ]}>
+                            <LottieView
+                              source={require('../LottieAnimations/Liquid 4 Dot Loader.lottie')}
+                              autoPlay
+                              loop
+                              style={{ width: 40, height: 40 }}
+                            />
+                          </View>
+                        )}
                         {item.isUploading && (
                           <View
                             style={[
@@ -846,6 +966,18 @@ export default function CreatePostScreen() {
                     )}
                   </View>
                 </>
+              ) : isPickingMedia ? (
+                /* Loading State while Native Picker Compresses Video */
+                <View style={styles.dropZoneEmptyBox}>
+                  <LottieView
+                    source={require('../LottieAnimations/Liquid 4 Dot Loader.lottie')}
+                    autoPlay
+                    loop
+                    style={{ width: 80, height: 80 }}
+                  />
+                  <Text style={styles.dropZoneTitle}>Preparing Media...</Text>
+                  <Text style={styles.dropZoneSub}>Please wait while we process your selection</Text>
+                </View>
               ) : (
                 /* Empty Dropzone State */
                 <TouchableOpacity
@@ -1529,6 +1661,33 @@ export default function CreatePostScreen() {
               </Text>
               <TouchableOpacity style={styles.warningBtn} onPress={() => setShowYoutubeWarning(false)}>
                 <Text style={styles.warningBtnText}>Got it</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Upload Error Modal with Lottie */}
+      {uploadErrorModalVisible && (
+        <Modal
+          visible={uploadErrorModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setUploadErrorModalVisible(false)}>
+          <View style={styles.warningOverlay}>
+            <View style={styles.warningCard}>
+              <LottieView
+                source={require('../LottieAnimations/Uploading.lottie')}
+                autoPlay
+                loop
+                style={{ width: 150, height: 150, alignSelf: 'center' }}
+              />
+              <Text style={styles.warningTitle}>Upload Error</Text>
+              <Text style={styles.warningDesc}>{uploadErrorMessage}</Text>
+              <TouchableOpacity
+                style={styles.warningBtn}
+                onPress={() => setUploadErrorModalVisible(false)}>
+                <Text style={styles.warningBtnText}>OK</Text>
               </TouchableOpacity>
             </View>
           </View>

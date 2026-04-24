@@ -1,6 +1,6 @@
 {
   "name": "mobile_bare",
-  "version": "0.0.1",
+  "version": "1.6.3",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "node -e \"const fs=require('fs'),src='node_modules/@react-native-async-storage/async-storage/ios/PrivacyInfo.xcprivacy',dst='node_modules/@react-native-async-storage/async-storage/apple/PrivacyInfo.xcprivacy';if(fs.existsSync(src)){fs.mkdirSync(require('path').dirname(dst),{recursive:true});fs.copyFileSync(src,dst);console.log('Copied AsyncStorage PrivacyInfo.xcprivacy to apple/')}else{console.warn('AsyncStorage PrivacyInfo.xcprivacy not found in ios/')};\""
+    "postinstall": "patch-package && node -e \"const fs=require('fs'),src='node_modules/@react-native-async-storage/async-storage/ios/PrivacyInfo.xcprivacy',dst='node_modules/@react-native-async-storage/async-storage/apple/PrivacyInfo.xcprivacy';if(fs.existsSync(src)){fs.mkdirSync(require('path').dirname(dst),{recursive:true});fs.copyFileSync(src,dst);console.log('Copied AsyncStorage PrivacyInfo.xcprivacy to apple/')}else{console.warn('AsyncStorage PrivacyInfo.xcprivacy not found in ios/')};\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
@@ -50,6 +50,7 @@
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
+    "patch-package": "^8.0.1",
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",
     "typescript": "5.0.4"

@@ -2,8 +2,8 @@ buildscript {
     ext {
         buildToolsVersion = "34.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 34
-        targetSdkVersion = 34
+        compileSdkVersion = 35
+        targetSdkVersion = 35
         ndkVersion = "25.1.8937393"
         kotlinVersion = "1.9.24"
         firebaseBomVersion = "32.7.4"
@@ -20,8 +20,8 @@ buildscript {
     }
 }
 
-// Force all 3rd-party React Native packages to use SDK 34,
-// preventing them from secretly requesting SDK 35 and crashing the AGP 8.1 compiler.
+// Force all 3rd-party React Native packages to use SDK 35,
+// preventing them from secretly requesting SDK 36 and crashing the AGP 8.1 compiler.
 // Suppress Kotlin compiler metadata version panic when Google Play APIs enforce newer kotlin-stdlib jars (2.1/2.2) against our locked RN 1.8.0 compiler.
 allprojects {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
@@ -42,7 +42,7 @@ subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
-                compileSdkVersion 34
+                compileSdkVersion 35
             }
         }
     }

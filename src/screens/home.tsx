@@ -137,6 +137,59 @@ export default function HomeScreen() {
     });
   }, [posts]);
 
+  // --- Growth Insight: Best Day to Post (from published posts) ---
+  const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const DAY_FULL = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+
+  const postsByDay = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+    posts.forEach(p => {
+      if (p.status !== 'published') return;
+      const dateStr = p.scheduledTime || p.createdAt;
+      if (!dateStr) return;
+      const day = new Date(dateStr).getDay();
+      counts[day]++;
+    });
+    return counts;
+  }, [posts]);
+
+  const peakDayIndex = useMemo(() => {
+    let maxIdx = 0;
+    postsByDay.forEach((c, i) => { if (c > postsByDay[maxIdx]) maxIdx = i; });
+    return maxIdx;
+  }, [postsByDay]);
+
+  const maxDayCount = useMemo(() => Math.max(...postsByDay, 1), [postsByDay]);
+
+  const bestDayText = useMemo(() => {
+    const total = postsByDay.reduce((a, b) => a + b, 0);
+    if (total === 0) return 'Start posting to see your best day!';
+    return `Your most active posting day is ${DAY_FULL[peakDayIndex]} with ${postsByDay[peakDayIndex]} published post${postsByDay[peakDayIndex] !== 1 ? 's' : ''}.`;
+  }, [postsByDay, peakDayIndex]);
+
+  // --- Content Mix: Image / Video / Text ---
+  const contentMix = useMemo(() => {
+    let images = 0, videos = 0, textOnly = 0;
+    posts.forEach(p => {
+      if (p.status !== 'published') return;
+      const hasMedia = p.mediaUrl || ((p as any).mediaUrls && (p as any).mediaUrls.length > 0);
+      if ((p as any).thumbnailUrl) {
+        videos++;
+      } else if (hasMedia) {
+        images++;
+      } else {
+        textOnly++;
+      }
+    });
+    const total = images + videos + textOnly || 1;
+    return {
+      images: Math.round((images / total) * 100),
+      videos: Math.round((videos / total) * 100),
+      textOnly: Math.round((textOnly / total) * 100),
+      hasData: images + videos + textOnly > 0,
+    };
+  }, [posts]);
+
 
   const firstName = useMemo(() => {
     if (user?.name) return user.name.split(' ')[0];
@@ -172,7 +225,7 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('SocialHub')}>
             <Text style={{ fontSize: 18, color: APP_COLORS.primary, fontWeight: '800' }}>@</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Settings')}>
             {avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={styles.profileAvatar} />
             ) : (
@@ -383,43 +436,76 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Growth Insight — Coming Soon (#34) */}
+        {/* Growth Insight */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Growth Insight</Text>
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
-          </View>
         </View>
         <View style={styles.insightCard}>
           <TrendingUp size={28} color={APP_COLORS.surfaceContainerLowest} strokeWidth={3} style={styles.insightIcon} />
-          <Text style={styles.insightTitle}>Best Time to Post</Text>
-          <Text style={styles.insightDesc}>Your audience is most active on Tuesdays between 6:00 PM and 8:00 PM EST.</Text>
+          <Text style={styles.insightTitle}>Best Day to Post</Text>
+          <Text style={styles.insightDesc}>{bestDayText}</Text>
 
           <View style={styles.chartArea}>
-            <View style={[styles.bar, { height: '30%', backgroundColor: 'rgba(255,255,255,0.2)' }]} />
-            <View style={[styles.bar, { height: '40%', backgroundColor: 'rgba(255,255,255,0.2)' }]} />
-            <View style={[styles.bar, { height: '50%', backgroundColor: 'rgba(255,255,255,0.4)' }]} />
-            <View style={[styles.barActive, { height: '90%' }]} />
-            <View style={[styles.bar, { height: '45%', backgroundColor: 'rgba(255,255,255,0.2)' }]} />
-            <View style={[styles.bar, { height: '35%', backgroundColor: 'rgba(255,255,255,0.2)' }]} />
+            {postsByDay.map((count, i) => {
+              const heightPct = maxDayCount > 0 ? Math.max((count / maxDayCount) * 90, 5) : 5;
+              const isActive = i === peakDayIndex && count > 0;
+              return (
+                <View key={DAY_LABELS[i]} style={{ alignItems: 'center', flex: 1 }}>
+                  <View
+                    style={[
+                      isActive ? styles.barActive : styles.bar,
+                      {
+                        height: `${heightPct}%`,
+                        backgroundColor: isActive ? undefined : 'rgba(255,255,255,0.2)',
+                      },
+                    ]}
+                  />
+                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, marginTop: 4, fontWeight: isActive ? '800' : '500' }}>{DAY_LABELS[i]}</Text>
+                </View>
+              );
+            })}
           </View>
-          <Text style={styles.chartLabel}>ENGAGEMENT FLUX</Text>
+          <Text style={styles.chartLabel}>POSTING ACTIVITY</Text>
         </View>
 
         <View style={styles.mixCard}>
           <Text style={styles.mixTitle}>Content Mix</Text>
 
-          <View style={styles.mixRow}>
-            <View style={styles.mixLabelRow}><View style={[styles.mixDot, { backgroundColor: APP_COLORS.primary, shadowColor: APP_COLORS.primary, shadowOpacity: 0.5, shadowRadius: 4 }]} /><Text style={styles.mixLabelText}>Images</Text></View>
-            <Text style={styles.mixValText}>64%</Text>
-          </View>
-          <View style={styles.progressBarBG}><View style={[styles.progressBarFill, { width: '64%', backgroundColor: APP_COLORS.primary }]} /></View>
+          {!contentMix.hasData ? (
+            <Text style={{ color: APP_COLORS.onSurfaceVariant, fontSize: 13, opacity: 0.7, marginTop: 8 }}>Publish posts to see your content breakdown.</Text>
+          ) : (
+            <>
+              {contentMix.images > 0 && (
+                <>
+                  <View style={styles.mixRow}>
+                    <View style={styles.mixLabelRow}><View style={[styles.mixDot, { backgroundColor: APP_COLORS.primary, shadowColor: APP_COLORS.primary, shadowOpacity: 0.5, shadowRadius: 4 }]} /><Text style={styles.mixLabelText}>Images</Text></View>
+                    <Text style={styles.mixValText}>{contentMix.images}%</Text>
+                  </View>
+                  <View style={styles.progressBarBG}><View style={[styles.progressBarFill, { width: `${contentMix.images}%`, backgroundColor: APP_COLORS.primary }]} /></View>
+                </>
+              )}
 
-          <View style={styles.mixRow}>
-            <View style={styles.mixLabelRow}><View style={[styles.mixDot, { backgroundColor: APP_COLORS.secondary }]} /><Text style={styles.mixLabelText}>Videos</Text></View>
-            <Text style={styles.mixValText}>28%</Text>
-          </View>
-          <View style={styles.progressBarBG}><View style={[styles.progressBarFill, { width: '28%', backgroundColor: APP_COLORS.secondary }]} /></View>
+              {contentMix.videos > 0 && (
+                <>
+                  <View style={styles.mixRow}>
+                    <View style={styles.mixLabelRow}><View style={[styles.mixDot, { backgroundColor: APP_COLORS.secondary }]} /><Text style={styles.mixLabelText}>Videos</Text></View>
+                    <Text style={styles.mixValText}>{contentMix.videos}%</Text>
+                  </View>
+                  <View style={styles.progressBarBG}><View style={[styles.progressBarFill, { width: `${contentMix.videos}%`, backgroundColor: APP_COLORS.secondary }]} /></View>
+                </>
+              )}
+
+              {contentMix.textOnly > 0 && (
+                <>
+                  <View style={styles.mixRow}>
+                    <View style={styles.mixLabelRow}><View style={[styles.mixDot, { backgroundColor: APP_COLORS.outlineVariant }]} /><Text style={styles.mixLabelText}>Text Only</Text></View>
+                    <Text style={styles.mixValText}>{contentMix.textOnly}%</Text>
+                  </View>
+                  <View style={styles.progressBarBG}><View style={[styles.progressBarFill, { width: `${contentMix.textOnly}%`, backgroundColor: APP_COLORS.outlineVariant }]} /></View>
+                </>
+              )}
+            </>
+          )}
         </View>
 
         {/* Padding for Bottom Nav */}
