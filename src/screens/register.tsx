@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState, AppDispatch} from '../store';
 import {registerUser, googleLoginUser} from '../store/actions/auth.actions';
+import {setAuthError} from '../store/slices/auth.slice';
 import {Colors} from '../constants/colors';
 
 export default function RegisterScreen() {
@@ -31,7 +32,7 @@ export default function RegisterScreen() {
     }
 
     if (password !== confirmPassword) {
-      // Manually show error
+      dispatch(setAuthError('Passwords do not match'));
       return;
     }
 

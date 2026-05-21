@@ -314,10 +314,12 @@ export default function HomeScreen() {
             </View>
             <View style={styles.mainCardBottom}>
               <Text style={styles.hugeText}>{publishedCount}</Text>
-              <View style={styles.trendRow}>
-                <TrendingUp size={16} color={APP_COLORS.tertiary} strokeWidth={3} />
-                <Text style={styles.trendText}>+12% <Text style={styles.trendTextLight}>this month</Text></Text>
-              </View>
+              {publishedCount > 0 && (
+                <View style={styles.trendRow}>
+                  <TrendingUp size={16} color={APP_COLORS.tertiary} strokeWidth={3} />
+                  <Text style={styles.trendText}>{publishedCount} <Text style={styles.trendTextLight}>published</Text></Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -360,7 +362,7 @@ export default function HomeScreen() {
         {/* Recent Posts List */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Recent Posts</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Posts')}>
+          <TouchableOpacity onPress={() => { /* Posts list screen - future feature */ }}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>

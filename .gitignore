@@ -34,6 +34,12 @@ local.properties
 *.keystore
 !debug.keystore
 
+# Sensitive / environment
+google-services.json
+.env
+.env.*
+!.env.example
+
 # node.js
 #
 node_modules/

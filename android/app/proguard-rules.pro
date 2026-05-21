@@ -54,3 +54,31 @@
 # AndroidX Browser (Chrome Custom Tabs)
 -keep class androidx.browser.** { *; }
 -dontwarn androidx.browser.**
+
+# Google Play Billing / In-App Purchases (react-native-iap)
+-keep class com.android.vending.billing.** { *; }
+-keep class com.dooboolab.rniap.** { *; }
+-dontwarn com.dooboolab.rniap.**
+
+# react-native-image-picker
+-keep class com.imagepicker.** { *; }
+-dontwarn com.imagepicker.**
+
+# @react-native-async-storage/async-storage
+-keep class com.reactnativecommunity.asyncstorage.** { *; }
+-dontwarn com.reactnativecommunity.asyncstorage.**
+
+# react-native-svg
+-keep public class com.horcrux.svg.** { *; }
+
+# react-native-linear-gradient
+-keep class com.BV.LinearGradient.** { *; }
+
+# react-native-screens
+-keep class com.swmansion.rnscreens.** { *; }
+-dontwarn com.swmansion.rnscreens.**
+
+# react-native-safe-area-context
+-keep class com.th3rdwave.safeareacontext.** { *; }
+-dontwarn com.th3rdwave.safeareacontext.**
+

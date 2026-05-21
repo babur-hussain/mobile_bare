@@ -26,6 +26,7 @@ import InstagramPostsScreen from '../screens/instagram-posts';
 import ThreadsPostsScreen from '../screens/threads-posts';
 import TwitterPostsScreen from '../screens/twitter-posts';
 import YouTubePostsScreen from '../screens/youtube-posts';
+import SubscriptionScreen from '../screens/SubscriptionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -81,6 +82,7 @@ export default function RootNavigator() {
             <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} />
             <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
             <Stack.Screen name="ContactUs" component={ContactUsScreen} />
+            <Stack.Screen name="Subscription" component={SubscriptionScreen} />
           </>
         ) : (
           <>

@@ -1,6 +1,8 @@
 import axios, {AxiosInstance, InternalAxiosRequestConfig} from 'axios';
 import {getAuth, signOut, getIdToken} from '@react-native-firebase/auth';
 import {Config} from '../constants/config';
+import {store} from '../store';
+import {logout} from '../store/slices/auth.slice';
 
 /**
  * Axios instance with Firebase Auth token interceptor
@@ -35,8 +37,6 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isSigningOut) {
       isSigningOut = true;
       try {
-        const {store} = require('../store');
-        const {logout} = require('../store/slices/auth.slice');
         store.dispatch(logout());
         await signOut(getAuth());
       } catch (e) {

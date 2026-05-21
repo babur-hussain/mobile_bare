@@ -8,11 +8,13 @@ import {
     TextInput,
     Alert,
     ActivityIndicator,
+    Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from '@react-native-firebase/auth';
-import { ChevronLeft, Lock, Eye, EyeOff, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, Lock, Eye, EyeOff, Trash2, ExternalLink, FileText, Shield as ShieldIcon } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
+import { Config } from '../../constants/config';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../store';
 import { logoutUser } from '../../store/actions/auth.actions';
@@ -186,6 +188,33 @@ export default function PrivacySecurityScreen({ navigation }: any) {
                         <Text style={styles.deleteDesc}>Permanently delete your account and all data</Text>
                     </View>
                 </TouchableOpacity>
+
+                <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Legal</Text>
+                <TouchableOpacity
+                    style={styles.legalCard}
+                    onPress={() => Linking.openURL(Config.PRIVACY_POLICY_URL)}>
+                    <View style={styles.legalIcon}>
+                        <ShieldIcon size={20} color={Colors.info} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.legalTitle}>Privacy Policy</Text>
+                        <Text style={styles.legalDesc}>Learn how we handle your data</Text>
+                    </View>
+                    <ExternalLink size={16} color={Colors.textMuted} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.legalCard}
+                    onPress={() => Linking.openURL(Config.TERMS_OF_SERVICE_URL)}>
+                    <View style={styles.legalIcon}>
+                        <FileText size={20} color={Colors.accent} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.legalTitle}>Terms of Service</Text>
+                        <Text style={styles.legalDesc}>Our terms and conditions</Text>
+                    </View>
+                    <ExternalLink size={16} color={Colors.textMuted} />
+                </TouchableOpacity>
             </ScrollView>
         </View>
     );
@@ -276,4 +305,28 @@ const styles = StyleSheet.create({
     },
     deleteTitle: { fontSize: 15, fontWeight: '600', color: Colors.error },
     deleteDesc: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
+    legalCard: {
+        backgroundColor: Colors.white,
+        borderRadius: 16,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        marginBottom: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 1,
+    },
+    legalIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 10,
+        backgroundColor: `${Colors.info}10`,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    legalTitle: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
+    legalDesc: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
 });

@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { logoutUser, checkAuthStatus, updateProfileUser } from '../store/actions/auth.actions';
 import { Colors } from '../constants/colors';
+import { Config } from '../constants/config';
 
 export default function SettingsScreen({ navigation }: any) {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -140,6 +141,16 @@ export default function SettingsScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.menuItem}
+          onPress={() => navigation.navigate('Subscription')}>
+          <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}15` }]}>
+            <Sparkles size={20} color={Colors.primary} />
+          </View>
+          <Text style={styles.menuText}>Upgrade Plan</Text>
+          <ChevronRight size={20} color={Colors.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
           onPress={() => navigation.navigate('EditProfile')}>
           <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}15` }]}>
             <UserCog size={20} color={Colors.primary} />
@@ -200,7 +211,7 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>Post Once v1.0.0</Text>
+      <Text style={styles.version}>Post Once v{Config.APP_VERSION}</Text>
     </ScrollView>
   );
 }

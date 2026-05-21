@@ -5,7 +5,6 @@ import {
   Settings as SettingsIcon,
   Users,
   Plus,
-  MessageCircle,
 } from 'lucide-react-native';
 import { Platform } from 'react-native';
 
@@ -13,16 +12,10 @@ import HomeScreen from '../screens/home';
 import CreatePostScreen from '../screens/create-post';
 import AccountsScreen from '../screens/accounts';
 import SettingsScreen from '../screens/settings';
-import MessagesScreen from '../screens/messages';
 
 const Tab = createBottomTabNavigator();
 
-const APP_COLORS = {
-  primary: '#5341cd',
-  surface: '#fcf9f8',
-  onSurfaceVariant: '#474554',
-  outlineVariant: '#c8c4d7',
-};
+import { APP_COLORS } from '../constants/colors';
 
 export default function TabNavigator() {
   return (
@@ -73,16 +66,6 @@ export default function TabNavigator() {
           tabBarIcon: ({ color, size }) => <Users size={24} color={color} />,
         }}
       />
-      {/* <Tab.Screen
-        name="Messages"
-        component={MessagesScreen}
-        options={{
-          tabBarLabel: 'Inbox',
-          tabBarIcon: ({ color, size }) => (
-            <MessageCircle size={24} color={color} />
-          ),
-        }}
-      /> */}
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
