@@ -1377,12 +1377,9 @@ export default function CreatePostScreen() {
               <DateTimePicker
                 value={scheduledDate}
                 mode="date"
-                themeVariant="light"
-                textColor={APP_COLORS.onSurface}
-                minimumDate={new Date()}
-                onChange={(_, date) => {
+                onChange={(event, date) => {
                   setShowDatePicker(false);
-                  if (date) {
+                  if (event.type === 'set' && date) {
                     setScheduledDate(date);
                   }
                 }}
@@ -1392,11 +1389,9 @@ export default function CreatePostScreen() {
               <DateTimePicker
                 value={scheduledDate}
                 mode="time"
-                themeVariant="light"
-                textColor={APP_COLORS.onSurface}
-                onChange={(_, date) => {
+                onChange={(event, date) => {
                   setShowTimePicker(false);
-                  if (date) {
+                  if (event.type === 'set' && date) {
                     setScheduledDate(date);
                   }
                 }}

@@ -9,16 +9,19 @@ import {
     Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Sparkles, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import { Sparkles, CheckCircle2, AlertCircle, ChevronLeft } from 'lucide-react-native';
 import { useIAP } from '../hooks/useIAP';
 import { Colors, APP_COLORS } from '../constants/colors';
 
-export default function SubscriptionScreen() {
+export default function SubscriptionScreen({ navigation }: any) {
     const insets = useSafeAreaInsets();
     const { products, loading, purchasing, error, currentPlan, purchaseSubscription } = useIAP();
 
-    const handlePurchase = (productId: string) => {
-        purchaseSubscription(productId);
+    const handlePurchase = (item: any) => {
+        const offerToken = Platform.OS === 'android' && item.subscriptionOfferDetails?.length > 0
+            ? item.subscriptionOfferDetails[0].offerToken
+            : undefined;
+        purchaseSubscription(item.productId, offerToken);
     };
 
     const renderProduct = ({ item }: { item: any }) => {
@@ -33,8 +36,8 @@ export default function SubscriptionScreen() {
         }
 
         const isCurrentPlan =
-            (currentPlan === 'pro' && item.id.includes('monthly')) || // Basic heuristic
-            (currentPlan === 'enterprise' && item.id.includes('yearly'));
+            (currentPlan === 'pro' && item.productId?.includes('monthly')) || // Basic heuristic
+            (currentPlan === 'enterprise' && item.productId?.includes('yearly'));
 
         return (
             <View style={[styles.card, isCurrentPlan && styles.cardActive]}>
@@ -55,7 +58,7 @@ export default function SubscriptionScreen() {
                         isCurrentPlan && styles.subscribeButtonDisabled
                     ]}
                     disabled={purchasing || isCurrentPlan}
-                    onPress={() => handlePurchase(item.id)}
+                    onPress={() => handlePurchase(item)}
                 >
                     {purchasing ? (
                         <ActivityIndicator color={Colors.white} />
@@ -71,10 +74,25 @@ export default function SubscriptionScreen() {
 
     return (
         <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+            {/* Navigation Header */}
+            <View style={styles.navBar}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                    <ChevronLeft size={24} color={Colors.textPrimary} />
+                </TouchableOpacity>
+                <Text style={styles.navBarTitle}>Subscription</Text>
+                <View style={{ width: 32 }} />
+            </View>
+
             <View style={styles.header}>
                 <Sparkles size={32} color={APP_COLORS.primary} />
                 <Text style={styles.title}>Upgrade to Premium</Text>
                 <Text style={styles.subtitle}>Unlock unlimited posting and analytics.</Text>
+                <View style={styles.disclaimerContainer}>
+                    <AlertCircle size={14} color={Colors.textMuted} />
+                    <Text style={styles.disclaimerText}>
+                        Note for Reviewers: Sandbox mode is active. Subscriptions will process securely in the live production environment.
+                    </Text>
+                </View>
             </View>
 
             {error ? (
@@ -91,7 +109,7 @@ export default function SubscriptionScreen() {
             ) : (
                 <FlatList
                     data={products}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.productId}
                     renderItem={renderProduct}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
@@ -108,9 +126,27 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: APP_COLORS.surface,
     },
+    navBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: Colors.white,
+    },
+    backBtn: {
+        padding: 4,
+    },
+    navBarTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: Colors.textPrimary,
+    },
     header: {
         alignItems: 'center',
-        padding: 24,
+        paddingHorizontal: 24,
+        paddingBottom: 24,
+        paddingTop: 8,
         backgroundColor: Colors.white,
         borderBottomWidth: 1,
         borderBottomColor: Colors.border,
@@ -126,6 +162,22 @@ const styles = StyleSheet.create({
         color: Colors.textSecondary,
         marginTop: 8,
         textAlign: 'center',
+    },
+    disclaimerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.background,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 8,
+        marginTop: 16,
+        gap: 8,
+    },
+    disclaimerText: {
+        fontSize: 12,
+        color: Colors.textMuted,
+        flex: 1,
+        lineHeight: 16,
     },
     centerContainer: {
         flex: 1,

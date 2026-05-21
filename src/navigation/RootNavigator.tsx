@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AppDispatch, RootState } from '../store';
 import { checkAuthStatus } from '../store/actions/auth.actions';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 import LoginScreen from '../screens/login';
 import RegisterScreen from '../screens/register';
@@ -38,6 +39,8 @@ export default function RootNavigator() {
   const [isSplashDone, setIsSplashDone] = useState(false);
 
   const isAuthenticated = !!token;
+
+  usePushNotifications(isAuthenticated);
 
   useEffect(() => {
     // 1. Kick off auth check

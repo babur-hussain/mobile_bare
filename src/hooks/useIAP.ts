@@ -3,12 +3,12 @@ import { Platform, Alert } from 'react-native';
 import {
     initConnection,
     endConnection,
-    fetchProducts,
-    requestPurchase,
+    getSubscriptions,
+    requestSubscription,
     purchaseErrorListener,
     purchaseUpdatedListener,
     finishTransaction,
-    type ProductSubscription,
+    type Subscription,
     type Purchase,
     type PurchaseError,
 } from 'react-native-iap';
@@ -20,17 +20,17 @@ export const SUBSCRIPTION_SKUS = Platform.select({
 });
 
 export interface UseIAPState {
-    products: ProductSubscription[];
+    products: Subscription[];
     loading: boolean;
     purchasing: boolean;
     error: string | null;
     currentPlan: string;
-    purchaseSubscription: (productId: string) => Promise<void>;
+    purchaseSubscription: (productId: string, offerToken?: string) => Promise<void>;
     refresh: () => Promise<void>;
 }
 
 export function useIAP(): UseIAPState {
-    const [products, setProducts] = useState<ProductSubscription[]>([]);
+    const [products, setProducts] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -42,10 +42,10 @@ export function useIAP(): UseIAPState {
         try {
             await initConnection();
             const [subs, status] = await Promise.all([
-                fetchProducts({ skus: SUBSCRIPTION_SKUS, type: 'subs' }),
+                getSubscriptions({ skus: SUBSCRIPTION_SKUS }),
                 subscriptionService.getStatus(),
             ]);
-            setProducts(subs as ProductSubscription[]);
+            setProducts(subs);
             setCurrentPlan(status.plan);
         } catch (e: any) {
             setError(e?.message ?? 'Failed to load subscriptions');
@@ -91,16 +91,26 @@ export function useIAP(): UseIAPState {
     }, [loadData]);
 
     const purchaseSubscription = useCallback(
-        async (productId: string) => {
+        async (productId: string, offerToken?: string) => {
             setPurchasing(true);
             try {
-                await requestPurchase({
-                    type: 'subs',
-                    request: Platform.select({
-                        android: { skus: [productId] },
-                        ios: { sku: productId }
-                    }) as any
-                });
+                if (Platform.OS === 'android') {
+                    let actualOfferToken = offerToken;
+                    if (!actualOfferToken) {
+                        const prod = products.find(p => p.productId === productId);
+                        actualOfferToken = (prod as any)?.subscriptionOfferDetails?.[0]?.offerToken;
+                    }
+                    if (!actualOfferToken) {
+                        throw new Error('No offer token found for Android subscription');
+                    }
+                    await requestSubscription({
+                        subscriptionOffers: [{ sku: productId, offerToken: actualOfferToken }]
+                    });
+                } else {
+                    await requestSubscription({
+                        sku: productId
+                    });
+                }
                 // Outcome handled by purchaseUpdatedListener above
             } catch (e: any) {
                 if (e?.code !== 'E_USER_CANCELLED') {
@@ -110,7 +120,7 @@ export function useIAP(): UseIAPState {
                 setPurchasing(false);
             }
         },
-        [],
+        [products],
     );
 
     return {

@@ -88,14 +88,12 @@ export default function PrivacySecurityScreen({ navigation }: any) {
                                     style: 'destructive',
                                     onPress: async () => {
                                         try {
-                                            // #50: Call backend to delete all user data first
+                                            // #50: Call backend to delete all user data first (and wipe Firebase auth user via Admin SDK)
                                             await api.delete('/api/v1/auth/account');
-
-                                            const user = getAuth().currentUser;
-                                            if (user) await user.delete();
+                                            // Log out locally to clear state
                                             await dispatch(logoutUser());
                                         } catch (e: any) {
-                                            Alert.alert('Error', 'Could not delete account. Please re-login and try again.');
+                                            Alert.alert('Error', 'Could not delete account. Please check your connection and try again.');
                                         }
                                     },
                                 },

@@ -15,6 +15,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState, AppDispatch} from '../store';
 import {loginUser, googleLoginUser} from '../store/actions/auth.actions';
 import {Colors} from '../constants/colors';
+import {getAuth, sendPasswordResetEmail} from '@react-native-firebase/auth';
+import {Alert} from 'react-native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -32,6 +34,19 @@ export default function LoginScreen() {
       // Navigation handled by RootNavigator based on auth state
     } catch {
       // Error handled in store
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address in the Email field to reset your password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(getAuth(), email.trim());
+      Alert.alert('Check your Email', 'A password reset link has been sent to your email address.');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Could not send reset email. Please try again.');
     }
   };
 
@@ -80,7 +95,12 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+              <Text style={styles.label}>Password</Text>
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Enter your password"
@@ -197,6 +217,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textPrimary,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
   },
   input: {
     backgroundColor: Colors.white,

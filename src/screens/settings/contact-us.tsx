@@ -70,15 +70,6 @@ export default function ContactUsScreen({ navigation }: any) {
                         <Text style={styles.quickLabel}>Email Us</Text>
                         <Text style={styles.quickValue} numberOfLines={1}>{SUPPORT_EMAIL}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.quickCard}
-                        onPress={() => Linking.openURL('https://postingautomation.app/chat').catch(() => { })}>
-                        <View style={[styles.quickIcon, { backgroundColor: `${Colors.success}15` }]}>
-                            <MessageSquare size={22} color={Colors.success} />
-                        </View>
-                        <Text style={styles.quickLabel}>Live Chat</Text>
-                        <Text style={styles.quickValue}>Online now</Text>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Message Form */}
@@ -127,7 +118,6 @@ export default function ContactUsScreen({ navigation }: any) {
                     <Text style={styles.responseTitle}>⏱ Response Time</Text>
                     <Text style={styles.responseText}>
                         We typically respond within 24 hours on business days (Mon–Fri).
-                        For urgent issues, use the Live Chat option above.
                     </Text>
                 </View>
             </ScrollView>
