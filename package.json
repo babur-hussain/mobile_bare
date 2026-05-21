@@ -1,6 +1,6 @@
 {
   "name": "mobile_bare",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "patch-package && node -e \"const fs=require('fs'),src='node_modules/@react-native-async-storage/async-storage/ios/PrivacyInfo.xcprivacy',dst='node_modules/@react-native-async-storage/async-storage/apple/PrivacyInfo.xcprivacy';if(fs.existsSync(src)){fs.mkdirSync(require('path').dirname(dst),{recursive:true});fs.copyFileSync(src,dst);console.log('Copied AsyncStorage PrivacyInfo.xcprivacy to apple/')}else{console.warn('AsyncStorage PrivacyInfo.xcprivacy not found in ios/')};\""
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
@@ -26,6 +26,7 @@
     "react": "18.2.0",
     "react-native": "0.73.6",
     "react-native-create-thumbnail": "^2.2.0",
+    "react-native-iap": "^12.12.2",
     "react-native-image-picker": "^8.2.1",
     "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-linear-gradient": "^2.8.3",
